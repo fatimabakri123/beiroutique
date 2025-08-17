@@ -1,0 +1,197 @@
+
+
+<!-- ===== LebanonStyle Footer (HTML + CSS) ===== -->
+<!-- How to use: paste this <footer> at the end of your <body>. The <style> can go in your global CSS. -->
+
+<style>
+  :root{
+    --ls-bg:#0b0f14;           /* Primary footer background */
+    --ls-elev:#101620;         /* Elevated panels */
+    --ls-accent:#29b37d;       /* Accent color */
+    --ls-text:#e7eef6;         /* Main text color */
+    --ls-muted:#9fb0c6;        /* Muted text */
+    --ls-border:#1b2533;       /* Subtle borders */
+    --ls-ring: 0 0 0 3px rgba(41,179,125,.25);
+    --ls-radius:22px;
+  }
+
+  .ls-footer{ color:var(--ls-text); background:var(--ls-bg); position:relative; overflow:hidden; }
+  .ls-footer *{ box-sizing:border-box; }
+
+  /* Soft gradient glow */
+  .ls-footer::before{ content:""; position:absolute; inset:-30% -10% auto -10%; height:380px; background:radial-gradient(60% 60% at 20% 40%, rgba(41,179,125,.18), transparent 60%), radial-gradient(50% 50% at 85% 20%, rgba(65,105,225,.12), transparent 60%); filter:blur(20px); pointer-events:none; }
+
+  /* Wrapper */
+  .ls-wrap{ max-width:1200px; margin:0 auto; padding:48px 20px; position:relative; z-index:1; }
+
+  /* Top CTA Banner */
+  .ls-cta{ display:grid; grid-template-columns:1.2fr auto; gap:20px; align-items:center; background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)); border:1px solid var(--ls-border); border-radius:var(--ls-radius); padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.02); }
+  .ls-cta h3{ margin:0; font-size:1.2rem; letter-spacing:.2px; }
+  .ls-cta p{ margin:.4rem 0 0; color:var(--ls-muted); font-size:.95rem; }
+  .ls-cta-actions{ display:flex; gap:12px; flex-wrap:wrap; }
+  .ls-btn{ --bg:var(--ls-accent); --fg:#07120d; --bd:transparent; display:inline-flex; align-items:center; gap:.55rem; border:1px solid var(--bd); background:var(--bg); color:var(--fg); padding:12px 16px; border-radius:14px; font-weight:600; text-decoration:none; transition:.2s ease; box-shadow:0 6px 20px rgba(41,179,125,.25); }
+  .ls-btn:hover{ transform:translateY(-1px); filter:brightness(1.03); }
+  .ls-btn.alt{ --bg:transparent; --fg:var(--ls-text); --bd:var(--ls-border); box-shadow:none; }
+  .ls-btn.alt:hover{ background:rgba(255,255,255,.04); }
+
+  /* Main grid */
+  .ls-grid{ display:grid; grid-template-columns: 1.2fr repeat(3, 1fr); gap:36px; margin-top:36px; }
+  .ls-brand{ display:flex; flex-direction:column; gap:14px; }
+  .ls-logo{ display:flex; align-items:center; gap:.6rem; font-weight:800; font-size:1.25rem; letter-spacing:.3px; }
+  .ls-logo-badge{ width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--ls-accent), #4fd3a9); display:grid; place-items:center; color:#05120d; font-weight:900; }
+  .ls-tag{ color:var(--ls-muted); line-height:1.6; }
+
+  .ls-list h4{ margin:0 0 .7rem; font-size:1rem; letter-spacing:.3px; }
+  .ls-links{ list-style:none; padding:0; margin:0; display:grid; gap:.55rem; }
+  .ls-links a{ color:var(--ls-text); text-decoration:none; opacity:.9; border-radius:10px; padding:6px 8px; display:inline-flex; align-items:center; gap:.5rem; transition:.2s ease; }
+  .ls-links a .dot{ width:6px; height:6px; border-radius:999px; background:var(--ls-border); transition:.2s ease; }
+  .ls-links a:hover{ background:rgba(255,255,255,.04); transform:translateX(2px); }
+  .ls-links a:hover .dot{ background:var(--ls-accent); }
+
+  /* Newsletter */
+  .ls-news{ background:var(--ls-elev); border:1px solid var(--ls-border); border-radius:var(--ls-radius); padding:18px; display:flex; flex-direction:column; gap:10px; }
+  .ls-news p{ margin:0; color:var(--ls-muted); }
+  .ls-form{ display:flex; gap:10px; }
+  .ls-input{ flex:1; background:#0a0f15; border:1px solid var(--ls-border); color:var(--ls-text); padding:12px 14px; border-radius:12px; outline:none; }
+  .ls-input::placeholder{ color:#8296b1; }
+  .ls-input:focus{ box-shadow:var(--ls-ring); border-color:#2c8b69; }
+
+  /* Contact card */
+  .ls-contact{ display:grid; gap:10px; }
+  .ls-contact .row{ display:flex; gap:10px; align-items:center; color:var(--ls-muted); }
+  .ls-chip{ display:inline-flex; align-items:center; gap:.45rem; border:1px solid var(--ls-border); border-radius:999px; padding:6px 10px; color:var(--ls-text); background:rgba(255,255,255,.04); }
+
+  /* Bottom bar */
+  .ls-bottom{ margin-top:36px; padding-top:22px; border-top:1px solid var(--ls-border); display:flex; flex-wrap:wrap; gap:16px 24px; justify-content:space-between; align-items:center; }
+  .ls-policies{ display:flex; gap:14px; flex-wrap:wrap; }
+  .ls-policies a{ color:var(--ls-muted); text-decoration:none; font-size:.95rem; }
+
+  .ls-made{ display:flex; align-items:center; gap:.5rem; color:var(--ls-muted); }
+  .ls-made .heart{ width:10px; height:10px; border-radius:999px; background:linear-gradient(135deg,#ff5577,#ff9966); box-shadow:0 0 12px rgba(255,85,119,.6); display:inline-block; }
+
+  /* Payments */
+  .ls-pay{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .pay-badge{ border:1px solid var(--ls-border); background:var(--ls-elev); color:var(--ls-text); padding:8px 10px; border-radius:12px; font-weight:700; font-size:.85rem; letter-spacing:.3px; }
+  .pay-badge.cod{ font-weight:800; }
+
+  /* Responsiveness */
+  @media (max-width: 980px){
+    .ls-grid{ grid-template-columns: 1fr 1fr; }
+    .ls-cta{ grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px){
+    .ls-grid{ grid-template-columns: 1fr; }
+    .ls-form{ flex-direction:column; }
+    .ls-bottom{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+
+<footer class="ls-footer" aria-label="LebanonStyle footer">
+  <div class="ls-wrap">
+
+    <!-- Top CTA: For Local Businesses -->
+    <div class="ls-cta" role="region" aria-label="For local businesses">
+      <div>
+        <h3>For Local Businesses</h3>
+        <p>Join <strong>LebanonStyle</strong> and reach thousands of customers across Lebanon.</p>
+      </div>
+      <div class="ls-cta-actions">
+        <a href="#become-seller" class="ls-btn" aria-label="Become a Seller">Become a Seller</a>
+        <a href="#learn-more" class="ls-btn alt" aria-label="Learn More">Learn More</a>
+      </div>
+    </div>
+
+    <!-- Main content grid -->
+    <div class="ls-grid" role="navigation" aria-label="Footer">
+      <!-- Brand / Tagline -->
+      <section class="ls-brand">
+        <div class="ls-logo" aria-label="LebanonStyle">
+          <span class="ls-logo-badge">LS</span>
+          <span>LebanonStyle</span>
+        </div>
+        <p class="ls-tag">Lebanon's premier online fashion marketplace, connecting local shoppers with the best clothing stores across the country. Discover unique styles and support local businesses.</p>
+
+        <!-- Newsletter -->
+        <div class="ls-news" aria-label="Newsletter signup">
+          <strong>Stay Connected</strong>
+          <p>Subscribe to get special offers, free giveaways, and once‑in‑a‑lifetime deals.</p>
+          <form class="ls-form" action="#" method="post">
+            <label class="visually-hidden" for="ls-email">Enter your email</label>
+            <input class="ls-input" id="ls-email" type="email" name="email" placeholder="Enter your email" required>
+            <button class="ls-btn" type="submit">Subscribe</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Quick Links -->
+      <section class="ls-list" aria-label="Quick Links">
+        <h4>Quick Links</h4>
+        <ul class="ls-links">
+          <li><a href="/" ><span class="dot"></span> Home</a></li>
+          <li><a href="/sale"><span class="dot"></span> Sale Items</a></li>
+          <li><a href="/categories"><span class="dot"></span> Categories</a></li>
+          <li><a href="/brands"><span class="dot"></span> Brands</a></li>
+          <li><a href="/new"><span class="dot"></span> New Arrivals</a></li>
+          <li><a href="/trending"><span class="dot"></span> Trending</a></li>
+        </ul>
+      </section>
+
+      <!-- Customer Service -->
+      <section class="ls-list" aria-label="Customer Service">
+        <h4>Customer Service</h4>
+        <ul class="ls-links">
+          <li><a href="/help"><span class="dot"></span> Help Center</a></li>
+          <li><a href="/contact"><span class="dot"></span> Contact Us</a></li>
+          <li><a href="/shipping"><span class="dot"></span> Shipping Info</a></li>
+          <li><a href="/returns"><span class="dot"></span> Returns & Exchanges</a></li>
+          <li><a href="/size-guide"><span class="dot"></span> Size Guide</a></li>
+          <li><a href="/track-order"><span class="dot"></span> Track Your Order</a></li>
+        </ul>
+      </section>
+
+      <!-- Contact / Social / Payments -->
+      <section class="ls-list" aria-label="Contact details">
+        <h4>Contact</h4>
+        <div class="ls-contact">
+          <div class="row">
+            <span class="ls-chip" title="Email">📧 support@lebanonstyle.com</span>
+          </div>
+          <div class="row">
+            <span class="ls-chip" title="Phone">📞 +961 1 234 567</span>
+          </div>
+          <div class="row">
+            <span class="ls-chip" title="Location">📍 Beirut, Lebanon</span>
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <h4>Secure Payment Methods</h4>
+        <div class="ls-pay" aria-label="Payment methods">
+          <span class="pay-badge" aria-label="Visa">VISA</span>
+          <span class="pay-badge" aria-label="Mastercard">MASTERCARD</span>
+          <span class="pay-badge" aria-label="PayPal">PAYPAL</span>
+          <span class="pay-badge cod" aria-label="Cash on Delivery">CASH ON DELIVERY</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="ls-bottom">
+      <div class="ls-made">
+        <span>© 2024 LebanonStyle. All rights reserved.</span>
+        <span>•</span>
+        <span>Made with <i class="heart" aria-hidden="true"></i> in Lebanon</span>
+      </div>
+      <nav class="ls-policies" aria-label="Policies">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="/cookies">Cookie Policy</a>
+      </nav>
+    </div>
+
+  </div>
+</footer>
+
+<!-- Optional: small utility for screen readers (kept inline to avoid extra file) -->
+<style>
+  .visually-hidden{ position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
+</style>
