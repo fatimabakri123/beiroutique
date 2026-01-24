@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     { Schema::create('payment_methods', function (Blueprint $table) {
-            $table->id('payment_method_id'); // unsignedBigInteger تلقائياً
+            $table->id('payment_method_id'); 
             $table->string('method_name');
             $table->boolean('is_active')->default(true);
             $table->timestamps();

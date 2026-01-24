@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\categories;
 use Illuminate\Http\Request;
-
+use App\Models\Subcategory;
 class CategoriesController extends Controller
 {
     /**
@@ -34,10 +34,20 @@ class CategoriesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(categories $categories)
-    {
-        //
-    }
+// app/Http/Controllers/CategoryController.php
+public function showSubcategory($id)
+{
+    $subcategory = Subcategory::with('products')->findOrFail($id);
+
+  
+    $products = $subcategory->products;
+
+    return view('category.product', [
+        'subcategory' => $subcategory,
+        'products' => $products
+    ]);
+}
+
 
     /**
      * Show the form for editing the specified resource.

@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+/* ===== Order Details Page ===== */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f7f4;
+    color: #3e2a1f;
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.dashboard-container h2 {
+    margin-bottom: 25px;
+    font-size: 26px;
+    color: #8B5E3C;
+}
+
+/* Info Cards */
+.table-container {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.table-container h3 {
+    margin-bottom: 15px;
+    color: #C08A56;
+    font-size: 20px;
+    border-left: 4px solid #C08A56;
+    padding-left: 10px;
+}
+
+.table-container p {
+    margin: 8px 0;
+    font-size: 15px;
+}
+
+.table-container p strong {
+    color: #8B5E3C;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+table th, table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+table th {
+    background-color: #8B5E3C;
+    color: #fff;
+}
+
+/* Status Select Button */
+.status-select {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    min-width: 140px;
+    text-transform: capitalize;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* Status Colors */
+.status-select.pending { background-color: #C08A56; }
+.status-select.processing { background-color: #D9A066; }
+.status-select.shipped { background-color: #8B5E3C; }
+.status-select.delivered { background-color: #A67C52; }
+
+/* Buttons */
+.add-btn {
+    display: inline-block;
+    padding: 12px 22px;
+    background-color: #C08A56;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #8B5E3C;
+}
+
+/* Back button */
+.back-btn-wrapper {
+    text-align: left;
+    margin-top: 25px;
+}
+
+.order-details-page {
+    direction: ltr;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-container h2 {
+        font-size: 22px;
+    }
+}
+</style>
+
+<div class="order-details-page">
+    <div class="dashboard-container">
+
+        <h2>Order #{{ $order->order_id }}</h2>
+
+        {{-- Customer Info --}}
+        <div class="table-container">
+            <h3>Customer Info</h3>
+            <p><strong>Name:</strong> {{ $order->full_name }}</p>
+            <p><strong>Phone:</strong> {{ $order->phone }}</p>
+            @php use Illuminate\Support\Str; @endphp
+
+           <p><strong>Address:</strong></p>
+
+@php
+    $lines = explode("\n", $order->shipping_address);
+    $lat = null;
+    $lng = null;
+@endphp
+
+@foreach($lines as $line)
+    @if(Str::startsWith(trim($line), 'Location:'))
+        @php
+            $coords = str_replace('Location:', '', $line);
+            [$lat, $lng] = array_map('trim', explode(',', $coords));
+        @endphp
+    @else
+        <p>{{ $line }}</p>
+    @endif
+@endforeach
+
+@if($lat && $lng)
+    <a href="https://www.google.com/maps?q={{ $lat }},{{ $lng }}"
+       target="_blank"
+       style="color:#C08A56; font-weight:600;">
+        📍 Open Location on Google Maps
+    </a>
+@endif
+
+            <p><strong>Order Date:</strong> {{ $order->created_at->format('F j, Y, g:i a') }}</p>
+            <p><strong>Payment Method:</strong> {{ ucfirst($order->paymentMethod->method_name) }}</p>
+            <p><strong>Delivery Method:</strong> {{ ucfirst($order->deliveryMethod->method_name) }}</p>
+        </div>
+
+        {{-- Order Status --}}
+        <div class="table-container">
+            <h3>Order Status</h3>
+
+            <form action="{{ route('shop.orders.updateStatus', $order->order_id) }}" method="POST">
+                @csrf
+                @method('PUT')
+
+                <select name="order_status"
+                        id="statusSelect"
+                        class="status-select {{ $order->order_status }}">
+                    @foreach(['pending','processing','shipped','delivered'] as $status)
+                        <option value="{{ $status }}"
+                            {{ $order->order_status === $status ? 'selected' : '' }}>
+                            {{ ucfirst($status) }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <button type="submit" class="add-btn">Update Status</button>
+            </form>
+        </div>
+
+        {{-- Products --}}
+        <div class="table-container">
+            <h3>Products Bought From Your Shop</h3>
+
+            <table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Color</th>
+            <th>Size</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($items as $item)
+            <tr>
+                <td>{{ $item->product->product_name }}</td>
+                <td>{{ $item->quantity }}</td>
+                <td>{{ $item->color ?? '-' }}</td>
+                <td>{{ $item->size ?? '-' }}</td>
+                <td>${{ $item->price_at_purchase }}</td>
+                <td>${{ $item->quantity * $item->price_at_purchase }}</td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
+
+
+            <h3 style="text-align:right;margin-top:20px;">
+                Total: ${{ number_format($total, 2) }}
+            </h3>
+        </div>
+
+        {{-- Back Button --}}
+        <div class="back-btn-wrapper">
+           <a href="{{ route('shop.dashboard') }}" class="add-btn">⬅ Back</a>
+
+        </div>
+
+    </div>
+</div>
+
+{{-- JS for live status color update --}}
+<script>
+    const statusSelect = document.getElementById('statusSelect');
+
+    function updateStatusClass() {
+        statusSelect.className = 'status-select ' + statusSelect.value;
+    }
+
+    statusSelect.addEventListener('change', updateStatusClass);
+    updateStatusClass();
+</script>
+</body>
+</html>
+
+
+
+

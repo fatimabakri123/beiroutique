@@ -1,0 +1,359 @@
+/* ---------------------------------------------------
+   Root Colors (Elegant Brown Theme)
+--------------------------------------------------- */
+:root {
+    --brown-dark: #5C3A21;
+    --brown: #8B5E3C;
+    --brown-light: #D9B382;
+    --beige: #965506e4;
+    --cream: #b06112de;
+    --white: #ffffff;
+    --black: #2b2b2b;
+
+    --glass-bg: rgba(255, 248, 241, 0.45);
+    --glass-border: rgba(139, 94, 60, 0.927);
+
+    --radius: 20px;
+    --shadow: 0 8px 25px rgba(0,0,0,0.15);
+    --transition: 0.35s ease;
+}
+
+/* ---------------------------------------------------
+   Global
+--------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+    transition: var(--transition);
+}
+
+body {
+    background: linear-gradient(135deg, #f7f3ee, #f2ebe4);
+    color: var(--brown-dark);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ---------------------------------------------------
+   Layout Container
+--------------------------------------------------- */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    padding: 20px;
+    gap: 25px;
+}
+
+/* ---------------------------------------------------
+   Sidebar (Brown Glass)
+--------------------------------------------------- */
+.sidebar {
+    width: 260px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow);
+    padding: 30px 20px;
+    border-radius: var(--radius);
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--brown-dark);
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin: 18px 0;
+}
+
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--brown-dark);
+    border: 1px solid transparent;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+    background: var(--brown);
+    color: var(--white);
+    transform: translateX(6px);
+    border-color: var(--brown-light);
+}
+
+/* ---------------------------------------------------
+   Main Content (Brown Glass)
+--------------------------------------------------- */
+.main-content {
+    flex: 1;
+    background: var(--glass-bg);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--glass-border);
+    padding: 40px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+/* ---------------------------------------------------
+   Section Animation
+--------------------------------------------------- */
+.content-section {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.content-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------------------------
+   Stats Cards (Soft Brown)
+--------------------------------------------------- */
+.stats-grid {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin: 20px 0 40px;
+}
+
+.stat-card {
+    flex: 1;
+    min-width: 200px;
+    padding: 30px;
+    text-align: center;
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid #e8e0d5;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
+
+.stat-card i {
+    font-size: 2.7rem;
+    color: var(--brown);
+    margin-bottom: 8px;
+}
+
+.stat-card h3 {
+    font-size: 1.25rem;
+}
+
+.stat-card p {
+    margin-top: 4px;
+    color: #6b6b6b;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+    background: var(--brown);
+    color: var(--white);
+}
+
+.stat-card:hover i {
+    color: var(--white);
+}
+
+/* ---------------------------------------------------
+   Tables (Brown Modern)
+--------------------------------------------------- */
+.order-table {
+    width: 100%;
+    border-spacing: 0 12px;
+}
+
+.order-table th {
+    background: var(--brown);
+    color: var(--white);
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-size: 1rem;
+}
+
+.order-table td {
+    background: var(--cream);
+    padding: 16px 18px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid #e8e0d5;
+}
+
+/* ---------------------------------------------------
+   Status Tags
+--------------------------------------------------- */
+.status {
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+}
+
+.status.pending { background: #d9b382; }
+.status.completed { background: #6ecf73; }
+.status.cancelled { background: #d9624d; }
+
+/* ---------------------------------------------------
+   Profile Form
+--------------------------------------------------- */
+.profile-form {
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.profile-form input {
+    padding: 14px;
+    border-radius: var(--radius);
+    border: 1px solid #d9c9b8;
+    background: var(--beige);
+}
+
+.profile-form input:focus {
+    border-color: var(--brown);
+    background: var(--white);
+}
+
+.profile-form .btn {
+    padding: 14px;
+    border-radius: var(--radius);
+    background: var(--brown);
+    color: var(--white);
+    border: none;
+    font-size: 1.05rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.profile-form .btn:hover {
+    background: var(--brown-light);
+    color: var(--black);
+}
+
+/* ---------------------------------------------------
+   Wishlist (Brown Product Cards)
+--------------------------------------------------- */
+.wishlist-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+}
+
+.wishlist-card {
+    width: 230px;
+    background: var(--white);
+    padding: 15px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid #e8e0d5;
+}
+
+.wishlist-card img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    border-radius: var(--radius);
+}
+
+.wishlist-card h4 {
+    margin: 12px 0 6px;
+    font-size: 1.15rem;
+    color: var(--brown-dark);
+}
+
+.wishlist-card p {
+    color: #6b6b6b;
+    margin-bottom: 10px;
+}
+
+.wishlist-card .btn-sm {
+    padding: 8px 14px;
+    border-radius: 16px;
+    background: var(--brown);
+    color: white;
+    font-size: 0.85rem;
+    border: none;
+    cursor: pointer;
+}
+
+.wishlist-card .btn-sm:hover {
+    background: var(--brown-light);
+    color: var(--black);
+}
+
+/* ---------------------------------------------------
+   Responsive
+--------------------------------------------------- */
+@media (max-width: 900px) {
+    .dashboard-container { flex-direction: column; }
+    .sidebar, .main-content { border-radius: 15px; }
+    .stats-grid { flex-direction: column; }
+    .wishlist-grid { justify-content: center; }
+}
+/* ---------------------------------------------------
+   Buttons (Logout & Home)
+--------------------------------------------------- */
+.logout-btn,
+.home-btn {
+    padding: 12px 22px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s ease;
+}
+
+/* Logout Button (Dark Brown) */
+.logout-btn {
+    background: #5C3A21;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(92, 58, 33, 0.3);
+}
+
+.logout-btn:hover {
+    background: #8B5E3C;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(92, 58, 33, 0.35);
+}
+
+/* Home Button (Light Brown) */
+.home-btn {
+    background: #D9B382;
+    color: #2b2b2b;
+    margin-left: 10px;
+    box-shadow: 0 4px 15px rgba(217, 179, 130, 0.3);
+}
+
+.home-btn:hover {
+    background: #8b5e3ce3;
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(139, 94, 60, 0.35);
+}

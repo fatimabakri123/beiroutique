@@ -1,0 +1,75 @@
+/* Form Container */
+.register-form {
+  max-width: 420px;
+  margin: 50px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Labels */
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+/* Inputs & Select */
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #333;
+  background-color: #f9f9f9;
+  transition: all 0.25s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: #730b7d;
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(115,11,125,0.15);
+}
+
+/* Button */
+.form-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #730b7d, #a25ab5);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.form-btn:hover {
+  background: linear-gradient(135deg, #5c0964, #8e4b9c);
+  transform: translateY(-2px);
+}
+
+/* Error box */
+.error-box {
+  background: #ffe5e5;
+  border: 1px solid #ffb3b3;
+  border-radius: 10px;
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  color: #b30000;
+  font-size: 0.9rem;
+}
+.error-box ul {
+  margin: 0;
+  padding-left: 18px;
+}

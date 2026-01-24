@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('product_id');
             $table->unsignedBigInteger('shop_id');
             $table->unsignedBigInteger('category_id');
+            $table->unsignedBigInteger('subcategory_id')->nullable();
             $table->string('product_name');
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
@@ -29,6 +30,11 @@ return new class extends Migration
 
             $table->foreign('shop_id')->references('shop_id')->on('shops')->onDelete('cascade');
             $table->foreign('category_id')->references('category_id')->on('categories')->onDelete('cascade');
+            $table->foreign('subcategory_id')
+      ->references('subcategory_id')
+      ->on('subcategories')
+      ->onDelete('set null');
+
         });
     }
 
