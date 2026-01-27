@@ -89,160 +89,145 @@
 
     </div>
 
-    <style>
-/* Page header */
-.d-flex h3 {
-    font-weight: 700;
-    color: #2c3e50;
+   <style>
+/* ===== General Page Styling ===== */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
 }
 
-/* Add button */
-.btn-primary {
-    background: #4f46e5;
-    border: none;
+/* ===== Card Styling ===== */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    background-color: #fff;
+}
+
+/* ===== Table Styling ===== */
+.table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    font-size: 16px;
+}
+
+.table thead {
+    background-color: #0d6efd; /* nice blue */
+    color: #fff;
+    font-weight: 600;
+    border-radius: 12px 12px 0 0;
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    background-color: #ffffff;
     border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.table tbody tr:hover {
+    background-color: #e6f0ff;
+    transform: translateY(-2px);
+}
+
+/* ===== Images ===== */
+.table img {
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+/* ===== Buttons ===== */
+.btn {
+    font-size: 14px;
+    font-weight: 600;
     padding: 6px 14px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.btn-sm {
+    padding: 5px 10px;
     font-size: 13px;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
     color: #fff;
 }
 
 .btn-primary:hover {
-    background: #4338ca;
-}
-
-/* Alerts */
-.alert-success {
-    border-radius: 10px;
-    font-size: 14px;
-    padding: 8px 15px;
-}
-
-/* Card */
-.card {
-    border: none;
-    border-radius: 14px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
-
-/* Table */
-.table {
-    margin-bottom: 0;
-}
-
-.table thead th {
-    font-size: 14px;
-    font-weight: 600;
-    color: #34495e;
-    text-transform: uppercase;
-}
-
-.table tbody td {
-    font-size: 14px;
-    vertical-align: middle;
-    color: #444;
-}
-
-/* Table rows hover */
-.table tbody tr:hover {
-    background: #f9fafb;
-}
-
-/* Images */
-.table img {
-    border-radius: 8px;
-    border: 1px solid #eee;
-}
-
-/* Action buttons */
-.table td .btn {
-    font-size: 12px;
-    padding: 5px 10px;
-    border-radius: 6px;
-    border: none;
+    background-color: #0956d3;
+    border-color: #0956d3;
+    color: #fff;
 }
 
 .btn-warning {
-    background: #facc15;
-    color: #000;
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #fff;
 }
 
 .btn-warning:hover {
-    background: #eab308;
+    background-color: #e0a800;
+    border-color: #e0a800;
+    color: #fff;
 }
 
 .btn-danger {
-    background: #ef4444;
+    background-color: #dc3545;
+    border-color: #dc3545;
     color: #fff;
 }
 
 .btn-danger:hover {
-    background: #dc2626;
+    background-color: #a71d2a;
+    border-color: #a71d2a;
+    color: #fff;
 }
 
-/* Pagination */
-.pagination {
-    margin-top: 15px;
-    justify-content: center;
-    display: flex;
-    padding: 10px 0;
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
 }
 
-.page-item .page-link {
+.btn-secondary:hover {
+    background-color: #565e64;
+    border-color: #565e64;
+}
+
+/* ===== Pagination Styling ===== */
+.pagination .page-item .page-link {
+    color: #0d6efd;
     border-radius: 8px;
-    margin: 0 3px;
-    color: #4f46e5;
     border: 1px solid #ddd;
-    font-size: 13px;
-    padding: 5px 10px;
+    padding: 6px 12px;
+    margin: 0 2px;
 }
 
-.page-item.active .page-link {
-    background: #4f46e5;
-    border-color: #4f46e5;
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
     color: #fff;
+    border-color: #0d6efd;
 }
 
-.page-link:hover {
-    background: #4338ca;
-    color: #fff;
-    border-color: #4338ca;
+.pagination .page-item.disabled .page-link {
+    color: #aaa;
 }
 
-/* Responsive Table */
-@media (max-width: 768px) {
-    .table thead {
-        display: none;
-    }
-
-    .table tbody tr {
-        display: block;
-        margin-bottom: 15px;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        padding: 10px;
-    }
-
-    .table tbody td {
-        display: block;
-        text-align: right;
-        padding-left: 50%;
-        position: relative;
-    }
-
-    .table tbody td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 15px;
-        font-weight: 600;
-        color: #555;
-        text-transform: capitalize;
-    }
-
-    .table td.d-flex {
-        justify-content: flex-end;
-    }
+/* ===== Headings ===== */
+h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0d6efd;
 }
+</style>
 
-    </style>
 </div>
 @endsection

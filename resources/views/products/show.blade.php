@@ -178,6 +178,53 @@ input[type="radio"]:checked + label {
         width: 100%;
     }
 }
+/* =====================
+   SHOP INFO
+===================== */
+.shop-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff5e5;
+    border-radius: 18px;
+    padding: 12px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    font-size: 15px;
+    font-weight: 500;
+    color: #5a3d26;
+    transition: 0.3s;
+}
+
+.shop-info:hover {
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+
+.shop-name {
+    font-weight: 700;
+    color: #8b5e3c;
+}
+
+.shop-btn {
+    background: linear-gradient(135deg,#8b5e3c,#6b4f33);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.shop-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+.shop-btn:active {
+    transform: scale(0.97);
+}
+
 
 </style>
 
@@ -192,7 +239,13 @@ input[type="radio"]:checked + label {
                 ? asset('storage/' . $product->image_url)
                 : asset($product->image_url) }}"
                 alt="{{ $product->product_name }}">
+                   <span class="shop-name">{{ $product->shop->shop_name }}</span> Shop  sells this item
+<a href="{{ route('shop.products', $product->shop->shop_id) }}" class="btn shop-btn">
+    Visit Shop
+</a>
         </div>
+<!-- SHOP INFO -->
+
 
         <!-- INFO -->
         <div class="product-info">
@@ -215,6 +268,7 @@ input[type="radio"]:checked + label {
     </p>
 @else
     <p><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
+
 @endif
 
 
@@ -292,11 +346,16 @@ input[type="radio"]:checked + label {
     @if(session('error'))
         <p style="color:#c0392b; margin-top:10px;">{{ session('error') }}</p>
     @endif
+<button type="submit" class="btn primary" onclick="return checkAuthAndOptions()">
+    Add to Cart
+</button>
 
-    <button type="submit" class="btn primary">Add to Cart</button>
 </form>
 
-<button class="btn primary" onclick="location.href='{{ route('checkout.now', $product->product_id) }}'">Buy Now</button>
+<button class="btn primary" onclick="buyNowCheck()">
+    Buy Now
+</button>
+
 
 
     </div>
@@ -419,8 +478,70 @@ input[type="radio"]:checked + label {
     </div>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+   function isLoggedIn() {
+    return {{ auth()->check() ? 'true' : 'false' }};
+}
+
+function showAlert(title, text, icon = 'warning') {
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#C08A56',
+        background: '#fffaf3',
+        color: '#333',
+        customClass: {
+            popup: 'luxury-alert'
+        }
+    });
+}
+
+function checkOptions() {
+    const colorRequired = document.querySelector('input[name="selected_color"]');
+    const sizeRequired  = document.querySelector('input[name="selected_size"]');
+
+    if (colorRequired && !document.querySelector('input[name="selected_color"]:checked')) {
+        showAlert('Missing Color', 'Please choose a color first');
+        return false;
+    }
+
+    if (sizeRequired && !document.querySelector('input[name="selected_size"]:checked')) {
+        showAlert('Missing Size', 'Please choose a size first');
+        return false;
+    }
+
+    return true;
+}
+
+function checkAuthAndOptions() {
+    if (!isLoggedIn()) {
+        showAlert('Login Required', 'Please login to continue', 'info');
+        setTimeout(() => {
+            window.location.href = "{{ route('login') }}";
+        }, 1500);
+        return false;
+    }
+
+    return checkOptions();
+}
+
+function buyNowCheck() {
+    if (!isLoggedIn()) {
+        showAlert('Login Required', 'Please login to continue', 'info');
+        setTimeout(() => {
+            window.location.href = "{{ route('login') }}";
+        }, 1500);
+        return;
+    }
+
+    if (!checkOptions()) return;
+
+    window.location.href = "{{ route('checkout.now', $product->product_id) }}";
+}
     function toggleEdit(id) {
     const form = document.getElementById('edit-form-' + id);
     form.style.display = form.style.display === 'none'

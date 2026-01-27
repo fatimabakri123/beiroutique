@@ -66,7 +66,8 @@
             @endforeach
         </select>
 
-        <button type="submit" class="btn">Place Order</button>
+       <button type="button" class="btn" onclick="openConfirm()">Place Order</button>
+
     </form>
 </section>
 
@@ -169,8 +170,95 @@ textarea {
         padding: 18px;
     }
 }
+.confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.confirm-box {
+  background: #fffaf3;
+  padding: 25px 30px;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+.confirm-box h3 {
+  margin-bottom: 10px;
+  color: #6b4f33;
+}
+
+.confirm-box p {
+  font-size: 14px;
+  color: #5c4731;
+  margin-bottom: 20px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.confirm-btn {
+  background: #8b5e3c;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #e0d0bb;
+  color: #6b4f33;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: #cbb49a;
+}
+
 
 </style>
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3>Confirm Your Order</h3>
+    <p>Are you sure you want to place this order?</p>
+
+    <div class="confirm-actions">
+      <button class="confirm-btn" onclick="submitCheckout()">Yes, Place Order</button>
+      <button class="cancel-btn" onclick="closeConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
+<script>
+function openConfirm() {
+  document.getElementById('confirmOverlay').style.display = 'flex';
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').style.display = 'none';
+}
+
+function submitCheckout() {
+  document.querySelector('form').submit();
+}
+</script>
+
 </body>
 </html>
 

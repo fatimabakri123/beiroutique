@@ -1,10 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\ShopOwner;
 use App\Models\Shop;
-
+use App\Models\Chat;
 use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\categories;
@@ -97,11 +96,13 @@ $orders = \App\Models\orders::with(['customer.user', 'items'])
             ->get()
         : collect();
     // ---- END: Statistics ----
+      $shopOwnerId = auth()->id(); 
+   
 
     return view('shop_owner.dashboard', compact(
         'user', 'shopOwner', 'shops', 'shop', 'products', 'orders', 'categories', 'subcategories',   
         'totalProducts', 'totalOrders', 'totalRevenue', 'lowStock',
-        'monthlyRevenue', 'topProducts'
+        'monthlyRevenue', 'topProducts',
     ));
 }
   public function updateShop(Request $request)

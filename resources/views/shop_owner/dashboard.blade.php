@@ -1,3 +1,8 @@
+@extends('shop_owner.layout')
+
+@section('title', 'Dashboard')
+
+@section('content')
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -454,6 +459,66 @@ table th {
     box-shadow: 0 6px 14px rgba(0,0,0,0.1); /* soft shadow */
 }
 
+.loyalty-section {
+    margin-top: 40px;
+    max-width: 600px;
+}
+
+.loyalty-section h2 {
+    font-size: 1.4rem;
+    color: #8B5E3C;
+    margin-bottom: 15px;
+}
+
+/* Form layout */
+#loyaltyForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 20px;
+    align-items: center;
+}
+
+/* Labels */
+#loyaltyForm label {
+    grid-column: span 2;
+    font-size: 13px;
+    font-weight: 600;
+    color: #3e2a1f;
+}
+
+/* Inputs */
+#loyaltyForm input {
+    grid-column: span 2;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fff;
+}
+
+#loyaltyForm input:focus {
+    border-color: #C08A56;
+    outline: none;
+}
+
+/* Save button */
+#loyaltyForm button {
+    grid-column: span 2;
+    margin-top: 10px;
+    background: #C08A56;
+    color: #fff;
+    border: none;
+    padding: 11px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+#loyaltyForm button:hover {
+    background: #8B5E3C;
+    transform: translateY(-1px);
+}
 </style>
 </head>
 <body>
@@ -507,6 +572,32 @@ table th {
         <h3>{{ $lowStock }}</h3>
         <p>Low Stock</p>
     </div>
+</div>
+
+<!-- Loyalty Settings -->
+<div class="loyalty-section">
+    <h2>Loyalty Program</h2>
+
+    <form id="loyaltyForm">
+        @csrf
+        <input type="hidden" name="shop_id" value="{{ $shop->shop_id }}">
+
+        <label>Minimum Orders</label>
+        <input type="number" name="min_orders"
+               value="{{ $loyaltySetting->min_orders ?? 5 }}">
+
+        <label>Minimum Revenue ($)</label>
+        <input type="number" name="min_revenue"
+               value="{{ $loyaltySetting->min_revenue ?? 200 }}">
+
+        <label>Discount Percentage (%)</label>
+        <input type="number" name="discount_percentage"
+               value="{{ $loyaltySetting->discount_percentage ?? 10 }}">
+
+        <button type="button" onclick="saveLoyaltySettings()">
+            Save Loyalty Settings
+        </button>
+    </form>
 </div>
 
 
@@ -1043,7 +1134,34 @@ document.addEventListener("DOMContentLoaded", function() {
     showProductRows();
 });
 
+function saveLoyaltySettings() {
+let form = document.getElementById('loyaltyForm');
+let formData = new FormData(form);
+
+
+fetch("{{ route('shop.loyalty.save') }}", {
+method: "POST",
+headers: {
+"X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+},
+body: formData
+})
+.then(res => res.json())
+.then(data => {
+if (data.success) {
+alert("✅ Loyalty settings saved!");
+} else {
+alert("❌ Failed to save loyalty settings");
+}
+})
+.catch(err => {
+console.error(err);
+alert("❌ Server error");
+});
+}
+
 </script>
 
 </body>
 </html>
+@endsection

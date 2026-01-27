@@ -19,220 +19,388 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
     <style>
-     :root{
-    --bg:#f4f6fb;
-    --primary:#6366f1;
-    --primary-dark:#4f46e5;
-    --dark:#0f172a;
-    --dark-soft:#1e293b;
-    --muted:#94a3b8;
-    --card:#ffffff;
-    --radius:18px;
+    :root {
+    --bg: #f0f4ff;
+    --primary: #6366f1;
+    --primary-light: #a78bfa;
+    --secondary: #22d3ee;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #1e293b;
+    --sidebar-hover: #f1f5f9;
+    --card: #ffffff;
+    --radius: 16px;
+    --shadow: rgba(0,0,0,0.08);
 }
 
-/* ================= Base ================= */
-html,body{height:100%}
-body{
-    font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont;
-    background:linear-gradient(180deg,#f6f8ff,#eef2ff);
-    margin:0;
-    color:#0f172a;
+/* ===== Base ===== */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--sidebar-text);
 }
 
-/* ================= Sidebar ================= */
-.admin-sidebar{
-    width:260px;
-    height:100vh;
-    position:fixed;
-    left:0;
-    top:0;
-    background:linear-gradient(180deg,#0f172a,#020617);
-    padding:22px 18px;
-    overflow:auto;
-    box-shadow:20px 0 50px rgba(0,0,0,.25);
+/* ===== Sidebar ===== */
+.admin-sidebar {
+    width: 280px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 20px;
+    box-shadow: 5px 0 20px var(--shadow);
+    overflow-y: auto;
+    border-radius: 0 20px 20px 0;
 }
 
-.admin-sidebar::-webkit-scrollbar{width:4px}
-.admin-sidebar::-webkit-scrollbar-thumb{
-    background:#475569;border-radius:10px;
+.admin-sidebar::-webkit-scrollbar {
+    width: 6px;
 }
 
-.admin-sidebar .brand{
-    display:flex;
-    gap:12px;
-    align-items:center;
-    margin-bottom:30px;
+.admin-sidebar::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 10px;
 }
 
-.admin-sidebar .logo{
-    width:46px;height:46px;
-    border-radius:14px;
-    background:linear-gradient(135deg,var(--primary),#22d3ee);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#fff;
-    font-weight:800;
-    font-size:18px;
+.admin-sidebar .brand {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 30px;
 }
 
-.admin-sidebar .brand-text{
-    font-size:16px;
+.admin-sidebar .logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    font-weight: 700;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.admin-sidebar nav .nav-link{
-    color:#cbd5f5;
-    padding:12px 14px;
-    border-radius:14px;
-    margin-bottom:6px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    font-weight:500;
-    transition:.25s;
+.admin-sidebar .brand-text {
+    font-size: 16px;
+    font-weight: 700;
 }
 
-.admin-sidebar nav .nav-link i{
-    width:20px;
-    font-size:15px;
+.admin-sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.admin-sidebar nav .nav-link:hover{
-    background:#1e293b;
-    transform:translateX(4px);
-    color:#fff;
+.admin-sidebar nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    color: var(--sidebar-text);
+    font-weight: 600;
+    font-size: 15px;
+    transition: 0.25s;
 }
 
-.admin-sidebar nav .nav-link.active{
-    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
-    color:#fff;
-    box-shadow:0 10px 25px rgba(99,102,241,.45);
+.admin-sidebar nav .nav-link i {
+    width: 24px;
+    font-size: 18px;
 }
 
-/* ================= Main ================= */
-.admin-main{
-    margin-left:260px;
-    padding:28px;
-    transition:.3s;
+.admin-sidebar nav .nav-link:hover {
+    background: var(--sidebar-hover);
+    transform: translateX(4px);
 }
 
-/* ================= Topbar ================= */
-.topbar{
-    background:rgba(255,255,255,.9);
-    backdrop-filter:blur(10px);
-    border-radius:var(--radius);
-    padding:14px 18px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    box-shadow:0 20px 40px rgba(15,23,42,.08);
+.admin-sidebar nav .nav-link.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    box-shadow: 0 8px 20px var(--shadow);
 }
 
-.topbar .search-input input{
-    border-radius:14px;
-    border:1px solid #e2e8f0;
+/* Footer info */
+.admin-sidebar .mt-4 {
+    margin-top: auto;
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
 }
 
-/* ================= Cards ================= */
-.card{
-    background:var(--card);
-    border:none;
-    border-radius:var(--radius);
-    box-shadow:0 25px 60px rgba(0,0,0,.08);
-    transition:.3s;
+/* ===== Main content ===== */
+.admin-main {
+    margin-left: 280px;
+    padding: 28px;
+    transition: 0.3s;
 }
 
-.card:hover{
-    transform:translateY(-6px);
+/* ===== Topbar ===== */
+.topbar {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 20px var(--shadow);
+    margin-bottom: 20px;
 }
 
-/* ================= Stat Cards ================= */
-.stat-card{
-    border-radius:20px;
-    padding:22px;
-    display:flex;
-    align-items:center;
-    gap:18px;
-    color:#fff;
-    position:relative;
-    overflow:hidden;
+.topbar .search-input input {
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 4px 8px;
 }
 
-.stat-card::after{
-    content:'';
-    position:absolute;
-    width:140px;height:140px;
-    background:rgba(255,255,255,.15);
-    border-radius:50%;
-    right:-40px;top:-40px;
+/* ===== Cards ===== */
+.card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 12px 25px var(--shadow);
+    transition: 0.3s;
 }
 
-.stat-card i{
-    font-size:34px;
+.card:hover {
+    transform: translateY(-4px);
 }
 
-.stat-card h3{
-    margin:0;
-    font-weight:800;
+/* ===== Buttons ===== */
+.btn {
+    border-radius: 12px;
+    font-weight: 600;
 }
 
-.stat-purple{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
-.stat-blue{background:linear-gradient(135deg,#2563eb,#60a5fa)}
-.stat-green{background:linear-gradient(135deg,#16a34a,#4ade80)}
-.stat-orange{background:linear-gradient(135deg,#f97316,#fdba74)}
-
-/* ================= Tables ================= */
-.table{
-    border-collapse:separate;
-    border-spacing:0 10px;
+/* ===== Tables ===== */
+.table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
 }
 
-.table thead th{
-    border:none;
-    color:#64748b;
-    font-size:13px;
-    text-transform:uppercase;
-    letter-spacing:.05em;
+.table thead th {
+    border: none;
+    color: #64748b;
+    font-size: 13px;
+    text-transform: uppercase;
 }
 
-.table tbody tr{
-    background:#fff;
-    box-shadow:0 10px 25px rgba(0,0,0,.05);
-    transition:.25s;
+.table tbody tr {
+    background: var(--card);
+    box-shadow: 0 8px 20px var(--shadow);
+    transition: 0.25s;
 }
 
-.table tbody tr:hover{
-    transform:scale(1.01);
+.table tbody tr:hover {
+    transform: scale(1.01);
 }
 
-.table td{
-    border:none;
-    padding:16px;
+.table td {
+    border: none;
+    padding: 14px;
 }
 
-/* ================= Buttons ================= */
-.btn{
-    border-radius:12px;
-    font-weight:600;
+/* ===== Responsive ===== */
+@media(max-width:991px) {
+    .admin-sidebar { left: -300px; }
+    .admin-sidebar.show { left: 0; }
+    .admin-main { margin-left: 0; }
+}
+/* ===== products===== */
+/* ===== Product Cards ===== */
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.btn-danger{
-    background:linear-gradient(135deg,#ef4444,#dc2626);
-    border:none;
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 30px rgba(0,0,0,0.1);
 }
 
-/* ================= Sidebar Collapse ================= */
-.sidebar-collapsed .admin-sidebar{width:78px}
-.sidebar-collapsed .admin-main{margin-left:78px}
-.sidebar-collapsed .label,
-.sidebar-collapsed .brand-text{display:none}
-
-/* ================= Mobile ================= */
-@media(max-width:991px){
-    .admin-sidebar{left:-300px}
-    .admin-sidebar.show{left:0}
-    .admin-main{margin-left:0}
+/* Product Image */
+.card img {
+    border-radius: 12px;
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 12px;
+    transition: transform 0.3s;
 }
+
+.card img:hover {
+    transform: scale(1.05);
+}
+
+/* Product Details */
+.card h3 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.card p {
+    font-size: 0.95rem;
+    color: #475569;
+    margin: 4px 0;
+}
+
+.card strong {
+    color: #111827;
+}
+
+/* ===== Tables ===== */
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.table thead th {
+    background: #f0f4ff;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    border-radius: 12px 12px 0 0;
+}
+
+.table tbody tr {
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    transition: transform 0.25s, box-shadow 0.25s;
+    border-radius: 12px;
+}
+
+.table tbody tr:hover {
+    transform: scale(1.01);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+}
+
+.table td {
+    padding: 10px 12px;
+    vertical-align: middle;
+    color: #334155;
+}
+
+.table td button,
+.table td a.btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.table td button:hover,
+.table td a.btn:hover {
+    transform: scale(1.05);
+}
+
+/* ===== Buttons ===== */
+.btn-outline-primary {
+    color: #6366f1;
+    border-color: #6366f1;
+}
+
+.btn-outline-primary:hover {
+    background: #6366f1;
+    color: #fff;
+    border-color: #6366f1;
+}
+
+.btn-outline-secondary {
+    color: #475569;
+    border-color: #475569;
+}
+
+.btn-outline-secondary:hover {
+    background: #475569;
+    color: #fff;
+    border-color: #475569;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #16a34a, #4ade80);
+    border: none;
+    color: #fff;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    border: none;
+    color: #fff;
+}
+
+/* ===== Pending Products Header ===== */
+h5 {
+    color: #1e293b;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+/* ===== Filters ===== */
+form select.form-select {
+    border-radius: 12px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    border: 1px solid #e2e8f0;
+}
+
+form button {
+    border-radius: 12px;
+}
+
+/* ===== Pagination Links ===== */
+.pagination {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.pagination li a {
+    padding: 6px 10px;
+    border-radius: 12px;
+    color: #6366f1;
+    border: 1px solid #6366f1;
+    transition: 0.3s;
+}
+
+.pagination li a:hover,
+.pagination li.active span {
+    background: #6366f1;
+    color: #fff;
+    border-color: #6366f1;
+}
+
+/* ===== Responsive ===== */
+@media(max-width: 768px){
+    .table thead {
+        display: none;
+    }
+    .table tbody tr {
+        display: block;
+        margin-bottom: 16px;
+    }
+    .table tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 10px;
+    }
+}
+
+/* ===== products===== */
+/* ===== categories===== */
+
 
     </style>
 
@@ -254,9 +422,7 @@ body{
             <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="fa fa-chart-line"></i> <span class="label">Dashboard</span>
             </a>
-            <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->is('admin/users*') ? 'active' : '' }}">
-                <i class="fa fa-user"></i> <span class="label">Users</span>
-            </a>
+           
 
             <a href="{{ route('admin.customers.index') }}" class="nav-link {{ request()->is('admin/customers*') ? 'active' : '' }}">
                 <i class="fa fa-users"></i> <span class="label">Customers</span>

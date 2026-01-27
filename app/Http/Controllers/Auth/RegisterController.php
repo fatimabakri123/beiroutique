@@ -48,22 +48,32 @@ class RegisterController extends Controller
             ]);
             break;
 
-        case 'shop_owner':
-            $owner = ShopOwner::create([
-                'user_id' => $user->id,
-                'phone_number' => $request->owner_phone,
-            ]);
+       case 'shop_owner':
+    $owner = ShopOwner::create([
+        'user_id' => $user->id,
+        'phone_number' => $request->owner_phone,
+    ]);
 
-            Shop::create([
-                'shop_name' => $request->shop_name,
-                'description' => $request->description,
-                'logo_url' => $request->logo_url,
-                'owner_id' => $owner->owner_id,
-                'contact_email' => $request->contact_email,
-                'contact_phone' => $request->contact_phone,
-                'address' => $request->address,
-            ]);
-            break;
+    // رفع الصورة إذا تم اختيارها
+    $logoPath = null;
+    if ($request->hasFile('logo_url')) {
+        $file = $request->file('logo_url');
+        $filename = time() . '.' . $file->getClientOriginalExtension();
+        $file->storeAs('public/logos', $filename); // يحفظ داخل storage/app/public/logos
+        $logoPath = 'logos/' . $filename; // هذا هو المسار اللي نحطه بالـ database
+    }
+
+    Shop::create([
+        'shop_name' => $request->shop_name,
+        'description' => $request->description,
+        'logo_url' => $logoPath, // <--- هنا لازم يكون المسار
+        'owner_id' => $owner->owner_id,
+        'contact_email' => $request->contact_email,
+        'contact_phone' => $request->contact_phone,
+        'address' => $request->address,
+    ]);
+    break;
+
 
         case 'admin':
             Admin::create([

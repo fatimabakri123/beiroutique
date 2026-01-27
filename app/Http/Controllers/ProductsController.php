@@ -125,7 +125,9 @@ public function bySubcategory($id)
 }
 public function show($id)
 {
-    $product = products::with('reviews.customer')->findOrFail($id); // get product with reviews and customer info
+    $product = products::with('reviews.customer')->findOrFail($id); 
+    // get product with reviews and customer info
+    
     return view('products.show', compact('product'));
 }
 public function storeAjax(Request $request)
@@ -267,7 +269,7 @@ public function saleAll(Request $request)
 
         return response()->json([
             'success' => true,
-            'message' => "All products are now on sale with $percentage% off! Customers notified and email sent to $adminEmail"
+            'message' => "All products are now on sale with $percentage% off!"
         ]);
 
     } catch (\Exception $e) {

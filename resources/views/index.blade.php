@@ -127,62 +127,185 @@
       <img src="{{ asset('image/beiroutique2.png') }}" alt="Logo" width="50" height="50">
     </div>
 
-<form method="POST" action="{{ route('search') }}" 
-      class="search-container" role="search" enctype="multipart/form-data">
 
+<form method="POST" action="{{ route('search') }}" 
+      class="vision-search-form" id="mainSearchForm" enctype="multipart/form-data">
     @csrf
 
-    <!-- Text search -->
-    <input type="search" 
-           name="q" 
-           class="form-control me-2"
-           placeholder="Search products, categories, shops..."
-           value="{{ request('q') }}">
+    <div class="search-glass-wrapper">
+        <div class="search-prefix">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
 
-    <!-- Camera icon -->
-    <label for="imageSearch" class="camera-btn" title="Search by image">
-        <i class="fa fa-camera"></i>
-    </label>
+        <input type="search" name="q" id="textSearch"
+               class="luxury-input"
+               placeholder="Search by text or upload a photo..."
+               value="{{ request('q') }}">
 
-    <!-- Hidden file input -->
-    <input type="file" 
-           id="imageSearch" 
-           name="image"
-           accept="image/*"
-           hidden>
+        <div id="imagePreview" class="search-image-preview">
+            <img src="" id="previewImg">
+            <button type="button" class="cancel-image" onclick="clearImage()">×</button>
+            <div class="scan-line"></div> </div>
 
-    <!-- Search button -->
-    <button type="submit" class="btn btn-outline-secondary">
-        <i class="fa fa-search"></i>
-    </button>
+        <div class="search-suffix">
+            <label for="imageSearch" class="camera-trigger" title="Search by Image">
+                <i class="fa-solid fa-camera"></i>
+                <span class="tooltip">Visual Search</span>
+            </label>
+            <input type="file" id="imageSearch" name="image" accept="image/*" hidden>
+            
+            <button type="submit" class="submit-btn">Search</button>
+        </div>
+    </div>
 </form>
 
 <style>
-  .camera-btn {
-    cursor: pointer;
-    font-size: 18px;
-    color: #b68566;
-    margin-right: 8px;
+:root {
+    --gold-gradient: linear-gradient(135deg, #C5A059, #8C6C3E);
+    --glass: rgba(255, 255, 255, 0.9);
 }
 
-.camera-btn:hover {
-    color: #8b5e3c;
+.search-glass-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid #e0e0e0;
+    border-radius: 100px;
+    padding: 8px 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: all 0.4s ease;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-glass-wrapper:focus-within {
+    border-color: #C5A059;
+    box-shadow: 0 15px 40px rgba(197, 160, 89, 0.15);
+    transform: translateY(-2px);
+}
+
+.luxury-input {
+    border: none;
+    background: none;
+    outline: none;
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Image Preview & Scan Animation */
+.search-image-preview {
+    display: none;
+    position: relative;
+    width: 45px;
+    height: 45px;
+    margin-right: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #C5A059;
+}
+
+.search-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #C5A059;
+    box-shadow: 0 0 10px #C5A059;
+    animation: scanning 1.5s infinite ease-in-out;
+}
+
+@keyframes scanning {
+    0% { top: 0; }
+    50% { top: 100%; }
+    100% { top: 0; }
+}
+
+.cancel-image {
+    position: absolute;
+    top: 0; right: 0;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 0 0 0 8px;
+}
+
+/* Icons & Buttons */
+.camera-trigger {
+    cursor: pointer;
+    font-size: 20px;
+    color: #888;
+    margin-right: 15px;
+    transition: color 0.3s;
+    position: relative;
+}
+
+.camera-trigger:hover { color: #C5A059; }
+
+.submit-btn {
+    background: var(--gold-gradient);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(197, 160, 89, 0.4);
 }
 </style>
 <script>
-document.getElementById('imageSearch').addEventListener('change', function () {
-    if (this.files.length > 0) {
-        this.form.submit();
+const imageInput = document.getElementById('imageSearch');
+const previewContainer = document.getElementById('imagePreview');
+const previewImg = document.getElementById('previewImg');
+const textSearch = document.getElementById('textSearch');
+
+imageInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Update preview image
+            previewImg.src = e.target.result;
+            // Show preview box
+            previewContainer.style.display = 'block';
+            // Fade out the text search a bit to focus on the image
+            textSearch.placeholder = "Image uploaded! Analyzing...";
+            
+            // OPTIONAL: Auto-submit after 1 second of "scanning"
+            setTimeout(() => { document.getElementById('mainSearchForm').submit(); }, 1200);
+        }
+        reader.readAsDataURL(file);
     }
 });
+
+function clearImage() {
+    imageInput.value = "";
+    previewContainer.style.display = 'none';
+    textSearch.placeholder = "Search products, categories, shops...";
+}
 </script>
 
 
 
 
-</form>
 
-    </form>
+
+    
 
     <div class="nav-icons" role="navigation" aria-label="User navigation">
       @guest
@@ -218,7 +341,8 @@ document.getElementById('imageSearch').addEventListener('change', function () {
   <nav class="category-bar" role="navigation" aria-label="Category navigation">
     <ul>
       <li><a href="#categories-section">Categories</a></li>
-      <li><a href="{{ url('/sale') }}">Sale</a></li>
+     <li><a href="{{ route('sale') }}">Sale</a></li>
+
       <li><a href="{{ url('/categories/1/products') }}">Women</a></li>
       <li><a href="{{ url('/categories/2/products') }}">Men </a></li>
        <li><a href="{{ url('/categories/3/products') }}">Kids</a></li>
@@ -324,6 +448,99 @@ document.getElementById('imageSearch').addEventListener('change', function () {
     updateSlidePosition(currentIndex);
   });
 </script>
+<!--------- shops Section===-->
+<section id="shops" class="shops-section">
+  <div class="shops-banner">
+    <img src="{{ asset('image/Shops.png') }}" alt="Shops Banner" class="banner-img">
+    <button class="explore-btn" onclick="showShops()">Explore Our Shops</button>
+  </div>
+
+  <div class="shops-list" id="shopsList">
+    @foreach($shops ?? [] as $shop)
+      <a class="shop-card" href="{{ route('shop.products', $shop->shop_id) }}">
+        <img src="{{ $shop->logo_url 
+                     ? asset('storage/' . $shop->logo_url) 
+                     : asset('images/default-shop.png') }}"
+             alt="{{ $shop->shop_name }}">
+        <p>{{ $shop->shop_name }}</p>
+        <p>{{ $shop->location }}</p>
+        <p>{{ $shop->description }}</p>
+      </a>
+    @endforeach
+  </div>
+</section>
+
+         <style>
+          .shops-list {
+  display: none; /* مخفية بالبداية */
+  gap: 20px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.shops-section {
+  text-align: center;
+  margin: 50px 0;
+}
+
+.shops-banner {
+  position: relative;
+  display: inline-block;
+}
+
+.banner-img {
+  width: 600px;
+  max-height: 500px;
+  
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.explore-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #bfa36f; /* لون luxury/classic */
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-size: 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.explore-btn:hover {
+  background-color: #8c6b3e;
+}
+  
+.shops-list {
+  display: none; 
+  margin-top: 30px;
+
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.shop-item {
+  background-color: #f5f5f5;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+  font-weight: bold;
+}
+</style>
+
+
+<script>
+function showShops() {
+  const shops = document.getElementById('shopsList');
+  shops.style.display = shops.style.display === 'flex' ? 'none' : 'flex';
+}
+</script>
+
 
 <!-- ====== Categories Section ====== -->
 <section   id="categories-section" class="categories-section">

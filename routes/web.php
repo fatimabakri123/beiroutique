@@ -32,8 +32,11 @@ use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\MessageController;
 use App\Notifications\AdminMessage;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RecommendationController;
 use App\Notifications\SaleAppliedNotification;
 
 
@@ -159,7 +162,7 @@ Route::get('/shop-owner/dashboard', function () {
   return view('shop_owner.dashboard');
 })->name('shop_owner.dashboard');
 
-Route::get('/shop/{id}/edit', [ShopController::class, 'edit'])->name('shop.edit');
+//Route::get('/shop/{id}/edit', [ShopController::class, 'edit'])->name('shop.edit');
 Route::put('/shop/{id}', [ShopController::class, 'update'])->name('shop.update');
 // pick order
 // Show product order page
@@ -273,6 +276,8 @@ Route::post('products/{product}/reject', [AdminProductController::class,'reject'
     Route::get('/delivery_methods', [AdminDeliveryMethodController::class, 'index'])->name('admin.delivery_methods.index');
 
 
+
+
     // Settings
     Route::get('settings',[AdminSettingsController::class,'index'])->name('admin.settings.index');
     Route::post('settings/save',[AdminSettingsController::class,'save'])->name('admin.settings.save');
@@ -300,13 +305,7 @@ Route::post('/delivery_methods/{id}/toggle', [AdminDeliveryMethodController::cla
 
 // Notifications
 
-Route::prefix('admin')->middleware('auth')->group(function () {
-    Route::get('/notifications', [AdminNotificationController::class, 'index'])
-        ->name('admin.notifications.index');
 
-    Route::post('/notifications/send', [AdminNotificationController::class, 'send'])
-        ->name('admin.notifications.send');
-});
 ////search admin
 
 Route::get('admin/search', [\App\Http\Controllers\Admin\SearchController::class, 'index'])
@@ -420,7 +419,7 @@ Route::middleware('auth')->group(function () {
         ->name('customer.wishlist.toggle');
 });
 // web.php
-//Route::post('/search/image', [SearchController::class, 'imageSearch'])->name('search.image');
+
 /////////////////////////////////////////////////////////////////////
 Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
     ->name('reviews.destroy');
@@ -434,8 +433,8 @@ Route::get('/checkout/now/{product}', [OrdersController::class, 'show'])
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //14/1
 // routes/web.php
-Route::post('/search/image', [App\Http\Controllers\SearchController::class, 'imageSearch'])
-     ->name('image.search');
+//Route::post('/search/image', [App\Http\Controllers\SearchController::class, 'imageSearch'])
+   //  ->name('image.search');
 
 Route::post('/admin/notifications/send', 
     [AdminNotificationController::class, 'send']
@@ -513,7 +512,7 @@ Route::patch('/status-toggle/{id}', [AdminShopController::class, 'toggleStatus']
 Route::patch('/admin/shops/approve/{id}', [AdminShopController::class, 'approve'])
     ->name('admin.shops.approve');
 ////////sho onwer and admin chat
-use App\Http\Controllers\Admin\ChatController;
+//use App\Http\Controllers\Admin\ChatController;
 
 Route::prefix('admin')->middleware('auth')->group(function () {
     // Show chat interface
@@ -538,3 +537,80 @@ Route::prefix('customer')->middleware('auth')->group(function() {
         ->name('report.store');
 });
 
+use App\Http\Controllers\AiChatController;
+
+
+
+//Route::post('/ai/chat', [AiChatController::class, 'chat'])->name('ai.chat');
+
+
+Route::get('/ai', function () {
+    return view('ai.chat');
+});
+///////////////////////////26/1
+Route::middleware('auth')->group(function () {
+    // بدء الدردشة
+    Route::get('/chat/{user}', [ChatController::class, 'start'])->name('chat.start');
+
+    // إرسال الرسائل
+    Route::post('/chat/send', [MessageController::class, 'send'])->name('chat.send');
+
+    // جلب الرسائل
+    Route::get('/chat/fetch/{chat}', [MessageController::class, 'fetch'])->name('chat.fetch');
+});
+use App\Http\Controllers\ShopChatController;
+Route::middleware('auth')->group(function () {
+
+    // Shop owner dashboard: see all chats with customers
+    Route::get('/shop/chats', [ShopChatController::class, 'index'])->name('shop.chats');
+
+    // Open a chat with a customer
+    Route::get('/shop/chat/{chat}', [ShopChatController::class, 'show'])->name('shop.chat.show');
+
+    // Send message (same as before)
+    Route::post('/chat/send', [MessageController::class, 'send'])->name('chat.send');
+
+    // Fetch messages
+    Route::get('/chat/fetch/{chat}', [MessageController::class, 'fetch'])->name('chat.fetch');
+});
+
+// web.php
+
+
+Route::middleware('auth')->post('/ai-chat', [RecommendationController::class, 'chat'])->name('ai-chat');
+
+//Route::post('/search/image', [ProductSearchController::class, 'imageSearch'])->name('search.image');
+use App\Http\Controllers\SaleController;
+
+Route::get('/sale', [SaleController::class, 'index'])->name('sale');
+Route::get('/shop/dashboard', [ShopController::class, 'dashboard'])->name('shop.dashboard');
+
+
+Route::get('/shop/profile/edit', [ShopController::class, 'editProfile'])
+    ->name('shop.profile.edit');
+
+Route::post('/shop/profile/update', [ShopController::class, 'updateProfile'])
+    ->name('shop.profile.update');
+
+    Route::get('/shop-owner/statistics', [ShopController::class, 'stats'])
+    ->name('shop_owner.statistics');
+
+    // Show edit form for a product
+Route::get('/shop/products/{product}/edit', [ShopController::class, 'editProduct'])
+    ->name('shop.product.edit');
+
+// Update product stock
+Route::post('/shop/products/{product}/update-stock', [ShopController::class, 'updateProductStock'])
+    ->name('shop.product.update-stock');
+    Route::get('/shop/stats', [ShopController::class, 'stats'])->name('shop.stats');
+
+    Route::get('/shop/products/{product}/edit', [ShopController::class, 'editProduct'])
+    ->name('shop.product.edit');
+
+Route::post('/shop/products/{product}/update-stock', [ShopController::class, 'updateProductStock'])
+    ->name('shop.product.update-stock');
+
+Route::get('/shop/stats', [ShopController::class, 'stats'])->name('shop.stats');
+
+Route::post('/shop/loyalty-settings', [App\Http\Controllers\LoyaltySettingController::class, 'save'])
+    ->name('shop.loyalty.save');

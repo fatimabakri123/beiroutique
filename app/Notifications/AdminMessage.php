@@ -1,4 +1,7 @@
 <?php
+
+
+// app/Notifications/AdminMessage.php
 namespace App\Notifications;
 
 use Illuminate\Notifications\Notification;
@@ -13,7 +16,7 @@ class AdminMessage extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database']; // save in DB
     }
 
     public function toDatabase($notifiable)
@@ -24,4 +27,3 @@ class AdminMessage extends Notification
         ];
     }
 }
-

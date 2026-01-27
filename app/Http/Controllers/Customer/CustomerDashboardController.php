@@ -19,6 +19,7 @@ class CustomerDashboardController extends Controller
         $wishlist = $customer->wishlist;
         $cart = $customer->cart;
         $recentOrders = orders::where('customer_id', $customer->customer_id)->get();
+        
 
         return view('customer.dashboard', compact('user', 'customer', 'orders', 'wishlist', 'cart', 'recentOrders'));
     }

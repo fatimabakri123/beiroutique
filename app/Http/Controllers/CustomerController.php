@@ -14,6 +14,7 @@ use App\Models\review;
 use App\Models\Notification;
 use App\Models\products as Product;
 use App\Models\Shop; 
+use App\Models\User;
 
 class CustomerController extends Controller
 {
@@ -46,9 +47,9 @@ $notifications = $customer ? $customer->notifications : collect();
 $recentOrders = orders::where('customer_id', $customer->customer_id)->get();
  // null safe
 
+ $shopOwner = User::where('role', 'shop_owner')->first();
 
-
-    return view('customer.home', compact('user', 'ordersCount', 'orders', 'wishlistCount', 'notifications'));
+    return view('customer.home', compact('user', 'ordersCount', 'orders', 'wishlistCount', 'notifications','shopOwner'));
 }
 
 

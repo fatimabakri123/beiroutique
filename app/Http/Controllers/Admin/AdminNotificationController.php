@@ -1,52 +1,50 @@
 <?php
 
+// app/Http/Controllers/Admin/AdminNotificationController.php
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use App\Models\Customer;
+use App\Models\ShopOwner;
 use App\Notifications\AdminMessage;
+use Illuminate\Support\Facades\Notification;
 
 class AdminNotificationController extends Controller
 {
-    /**
-     * Show notifications form (Admin notifications only)
-     */
+    // Show notifications form
     public function index()
     {
-        // جلب آخر 50 إشعار Admin فقط
-        $notifications = DB::table('notifications')
-            ->where('type', 'App\Notifications\AdminMessage')
-            ->select('id', 'data', 'created_at')
-            ->latest()
-            ->take(50)
+        $notifications = \DB::table('notifications')
+            ->where('type', AdminMessage::class)
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('admin.notifications.index', compact('notifications'));
     }
 
-    /**
-     * Send notification
-     */
+    // Send notification
     public function send(Request $request)
     {
         $request->validate([
             'target' => 'required',
-            'title' => 'required',
-            'message' => 'required',
+            'title' => 'required|string',
+            'message' => 'required|string',
         ]);
 
-        $notification = new AdminMessage(
-            $request->title,
-            $request->message
-        );
+        $notification = new AdminMessage($request->title, $request->message);
 
         switch ($request->target) {
             case 'all':
-                Notification::send(User::all()->merge(Customer::all()), $notification);
+                Notification::send(
+                    User::all()->merge(Customer::all())->merge(ShopOwner::all()),
+                    $notification
+                );
+                break;
+
+            case 'users':
+                Notification::send(User::all(), $notification);
                 break;
 
             case 'customers':
@@ -54,44 +52,37 @@ class AdminNotificationController extends Controller
                 break;
 
             case 'shop_owners':
-                Notification::send(User::where('role', 'shop_owner')->get(), $notification);
+                Notification::send(ShopOwner::all(), $notification);
                 break;
 
             default:
-                if (str_starts_with($request->target, 'user:')) {
-                    $id = explode(':', $request->target)[1];
-                    $user = User::find($id);
-                    if ($user) $user->notify($notification);
+                // Specific user: format "user:ID", "customer:ID", "shop:ID"
+                if (str_contains($request->target, ':')) {
+                    [$role, $id] = explode(':', $request->target);
+                    $model = match($role) {
+                        'user' => User::find($id),
+                        'customer' => Customer::find($id),
+                        'shop' => ShopOwner::find($id),
+                        default => null
+                    };
+                    if ($model) $model->notify($notification);
                 }
         }
 
-        return back()->with('success', 'Notification sent successfully');
+        return back()->with('success', 'Notification sent successfully!');
     }
 
-    /**
-     * Delete a single Admin notification
-     */
+    // Delete a single notification
     public function destroy($id)
     {
-        $notification = DB::table('notifications')->where('id', $id)->first();
-
-        if ($notification && $notification->type === 'App\Notifications\AdminMessage') {
-            DB::table('notifications')->where('id', $id)->delete();
-            return back()->with('success', 'Notification deleted');
-        }
-
-        return back()->with('error', 'You can only delete admin notifications');
+        \DB::table('notifications')->where('id', $id)->delete();
+        return back()->with('success', 'Notification deleted!');
     }
 
-    /**
-     * Delete all Admin notifications
-     */
+    // Delete all notifications
     public function destroyAll()
     {
-        DB::table('notifications')
-            ->where('type', 'App\Notifications\AdminMessage')
-            ->delete();
-
-        return back()->with('success', 'All Admin notifications deleted');
+        \DB::table('notifications')->delete();
+        return back()->with('success', 'All notifications deleted!');
     }
 }

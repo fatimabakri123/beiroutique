@@ -1,66 +1,68 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use App\Models\products as Product;
 use App\Models\categories as Category;
 use App\Models\Shop;
 
 class SearchController extends Controller
 {
- public function index(Request $request)
-{
-    $q = $request->query('q');
-
-    // Search products by:
-    // 1. product name
-    // 2. category name
-    // 3. shop name
-    $products = Product::where('product_name', 'like', "%{$q}%")
-        ->orWhereHas('category', fn($cat) => $cat->where('category_name', 'like', "%{$q}%"))
-        ->orWhereHas('shop', fn($shop) => $shop->where('shop_name', 'like', "%{$q}%"))
-        ->get();
-
-    // Optional: also get matching categories and shops for filters
-    $categories = Category::where('category_name', 'like', "%{$q}%")->get();
-    $shops = Shop::where('shop_name', 'like', "%{$q}%")->get();
-
-    return view('search.result2', compact('products','categories','shops','q'));
-}
-
-
- public function search(Request $request)
+    public function search(Request $request)
 {
     $query = trim($request->q);
+    $products = collect();
 
-    // split keywords
-    $keywords = explode(' ', $query);
+    // ✅ IMAGE SEARCH ONLY
+    if ($request->hasFile('image')) {
 
-    $products = Product::where(function ($q) use ($keywords) {
-        foreach ($keywords as $word) {
-            $q->where('product_name', 'like', "%$word%")
-              ->orWhere('description', 'like', "%$word%")
-              ->orWhere('sku', 'like', "%$word%");
-        }
-    })
-    ->orWhereHas('category', function ($cat) use ($keywords) {
-        foreach ($keywords as $word) {
-            $cat->where('category_name', 'like', "%$word%");
-        }
-    })
-    ->orWhereHas('shop', function ($shop) use ($keywords) {
-        foreach ($keywords as $word) {
-            $shop->where('shop_name', 'like', "%$word%");
-        }
-    })
-    ->get();
+        try {
+            $response = Http::timeout(120)
+                ->attach(
+                    'image',
+                    fopen($request->file('image')->getRealPath(), 'r'),
+                    $request->file('image')->getClientOriginalName()
+                )
+                ->post('http://localhost:5050/search/image');
 
-    return view('search.result2', compact('products', 'query'));
+            if ($response->successful()) {
+                $productIds = $response->json()['product_ids'] ?? [];
+
+                if (!empty($productIds)) {
+                    $products = Product::whereIn('product_id', $productIds)
+                        ->orderByRaw("FIELD(product_id," . implode(',', $productIds) . ")")
+                        ->get();
+                } else {
+                    // ❌ لا نتائج مشابهة
+                    $products = collect();
+                }
+            }
+
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            $products = collect();
+        }
+
+
+        
+        return view('search.result2', compact('products'));
+    }
+
+    // ✅ TEXT SEARCH ONLY
+    if (!empty($query)) {
+        $keywords = explode(' ', $query);
+
+        $products = Product::where(function ($q) use ($keywords) {
+            foreach ($keywords as $word) {
+                $q->where('product_name', 'like', "%$word%")
+                  ->orWhere('description', 'like', "%$word%");
+            }
+        })->get();
+    }
+
+    return view('search.result2', compact('products'));
 }
 
 }
-
-
-
-
-
