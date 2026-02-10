@@ -156,7 +156,88 @@ public function products(Shop $shop)
     return view('shop.products', compact('shop', 'products'));
 }
 
-
+// Add this private method to ShopController
+private function getCustomerTypeData($shop_id)
+{
+    $dates = [];
+    $newCustomers = [];
+    $returningCustomers = [];
+    
+    // Get data for last 7 days
+    for ($i = 6; $i >= 0; $i--) {
+        $date = Carbon::now()->subDays($i)->format('Y-m-d');
+        $dates[] = Carbon::now()->subDays($i)->format('M d');
+        
+        // Get all unique customers who ordered from this shop on this specific date
+        $dayCustomers = DB::table('orders')
+            ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
+            ->join('products', 'order_items.product_id', '=', 'products.product_id')
+            ->where('products.shop_id', $shop_id)
+            ->whereDate('orders.created_at', $date)
+            ->whereNotNull('orders.customer_id') // Ensure customer_id exists
+            ->select('orders.customer_id')
+            ->distinct()
+            ->get()
+            ->pluck('customer_id')
+            ->toArray();
+        
+        $newCount = 0;
+        $returningCount = 0;
+        
+        foreach ($dayCustomers as $customerId) {
+            // Check if this customer has ordered from THIS SHOP before this date
+            $hasPreviousOrder = DB::table('orders')
+                ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
+                ->join('products', 'order_items.product_id', '=', 'products.product_id')
+                ->where('products.shop_id', $shop_id)
+                ->where('orders.customer_id', $customerId)
+                ->whereDate('orders.created_at', '<', $date)
+                ->exists();
+            
+            if ($hasPreviousOrder) {
+                $returningCount++;
+            } else {
+                $newCount++;
+            }
+        }
+        
+        $newCustomers[] = $newCount;
+        $returningCustomers[] = $returningCount;
+    }
+    
+    // Get overall totals (all time)
+    $totalCustomers = DB::table('orders')
+        ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
+        ->join('products', 'order_items.product_id', '=', 'products.product_id')
+        ->where('products.shop_id', $shop_id)
+        ->whereNotNull('orders.customer_id')
+        ->select('orders.customer_id')
+        ->distinct()
+        ->get()
+        ->count();
+    
+    // Count returning customers (ordered more than once)
+    $totalReturning = DB::table('orders')
+        ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
+        ->join('products', 'order_items.product_id', '=', 'products.product_id')
+        ->where('products.shop_id', $shop_id)
+        ->whereNotNull('orders.customer_id')
+        ->select('orders.customer_id')
+        ->groupBy('orders.customer_id')
+        ->havingRaw('COUNT(*) > 1')
+        ->count();
+    
+    $totalNew = $totalCustomers - $totalReturning;
+    
+    return [
+        'dates' => $dates,
+        'new_customers' => $newCustomers,
+        'returning_customers' => $returningCustomers,
+        'total_new' => $totalNew,
+        'total_returning' => $totalReturning,
+        'total_customers' => $totalCustomers
+    ];
+}
 
 public function stats()
 {
@@ -281,29 +362,30 @@ $cityLabels = $cityCounts->keys()->all();
 $cityData   = $cityCounts->values()->all();
 
 
-
+    $customerTypeData = $this->getCustomerTypeData($shop->shop_id);
+    
     return view('shop_owner.statistics', [
+        // ... [KEEP ALL YOUR EXISTING DATA] ...
         'shop' => $shop,
         'totalProducts' => $totalProducts,
         'totalOrders' => $totalOrders,
         'totalRevenue' => $totalRevenue,
         'lowStock' => $lowStock,
-
-'monthlyLabels' => $monthly->pluck('month_label'),
-'monthlyRevenue' => $monthly->pluck('revenue'),
-
-'topProductLabels' => $topProductLabels,
-'topProductData' => $topProductData,
-
+        'monthlyLabels' => $monthly->pluck('month_label'),
+        'monthlyRevenue' => $monthly->pluck('revenue'),
+        'topProductLabels' => $topProductLabels,
+        'topProductData' => $topProductData,
         'dailyLabels' => $daily->pluck('day')->values(),
         'dailyOrders' => $daily->pluck('orders')->values(),
         'dailyRevenue' => $daily->pluck('revenue')->values(),
         'products' => $products,
-     'cityLabels' => $cityLabels,
-'cityData' => $cityData,
-'todayRevenue' => $todayRevenue,
-'todayOrders' => $todayOrders,
-'pendingOrders' => $pendingOrders,
+        'cityLabels' => $cityLabels,
+        'cityData' => $cityData,
+        'todayRevenue' => $todayRevenue,
+        'todayOrders' => $todayOrders,
+        'pendingOrders' => $pendingOrders,
+        // ADD THIS NEW LINE:
+        'customerTypeData' => $customerTypeData
     ]);
 }
 
@@ -362,25 +444,6 @@ public function editProduct(products $product)
     // Use your new blade name: stock.blade.php
     return view('shop_owner.stock', compact('product'));
 }
-// Update stock
-public function updateProductStock(Request $request, products $product)
-{
-    $shop = auth()->user()->shopOwner->shops->first();
-
-    // Check product belongs to this shop
-    if ($product->shop_id !== $shop->shop_id) {
-        abort(403, 'Unauthorized');
-    }
-
-    $request->validate([
-        'stock_quantity' => 'required|integer|min:0'
-    ]);
-
-    $product->update([
-        'stock_quantity' => $request->stock_quantity
-    ]);
-return redirect()->route('shop_owner.statistics')->with('success', 'Stock updated!');}
-
 
 
 public function updateLoyalty(Request $request)

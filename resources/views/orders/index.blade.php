@@ -1,177 +1,297 @@
 @extends('layouts.customer')
 
 @section('content')
-<div class="order-page" style="max-width:750px; margin:30px auto; font-family:Arial, sans-serif;">
+<div class="order-page">
 
-    <h2 style="text-align:center; margin-bottom:25px; color:#C08A56; font-weight:700;">
-        Order: {{ $product->product_name }}
-    </h2>
+    <h2>Order: {{ $product->product_name }}</h2>
 
-    <div style="display:flex; justify-content:center; margin-bottom:25px;">
-        <img src="{{ Str::startsWith($product->image_url, 'storage/') ? asset($product->image_url) : asset('storage/' . $product->image_url) }}"
-             alt="{{ $product->product_name }}"
-             style="width:180px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
-    </div>
+    @php
+    $productImage = null;
 
-    <form action="{{ route('order.store', $product) }}" method="POST">
-        @csrf
+    if ($product->images && $product->images->count() > 0) {
+        $productImage = $product->images->first()->image_path;
+    } else {
+        $productImage = $product->image_url;
+    }
+@endphp
 
-        {{-- Customer Info Card --}}
-        <div style="background:#fff6f0; padding:15px 20px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h4 style="margin-bottom:15px; color:#C08A56;">👤 Customer Info</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                <div>
-                    <label style="font-weight:600;">Full Name</label>
-                    <input type="text" name="full_name" placeholder="Enter your name" required
-                           style="width:100%; padding:8px; border:1px solid #ccc; border-radius:8px; transition:0.2s;"
-                           onfocus="this.style.borderColor='#C08A56'" onblur="this.style.borderColor='#ccc'">
-                </div>
-                <div>
-                    <label style="font-weight:600;">Phone Number</label>
-                    <input type="text" name="phone" placeholder="Enter your phone" required
-                           style="width:100%; padding:8px; border:1px solid #ccc; border-radius:8px; transition:0.2s;"
-                           onfocus="this.style.borderColor='#C08A56'" onblur="this.style.borderColor='#ccc'">
-                </div>
-            </div>
-        </div>
-
-        {{-- Quantity Card --}}
-        <div style="background:#fff6f0; padding:15px 20px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h4 style="margin-bottom:15px; color:#C08A56;">📦 Quantity & Price</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                <div>
-                    <label style="font-weight:600;">Quantity</label>
-                    <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $product->stock_quantity }}" required
-                           style="width:100%; padding:8px; border:1px solid #ccc; border-radius:8px; transition:0.2s;"
-                           onfocus="this.style.borderColor='#C08A56'" onblur="this.style.borderColor='#ccc'">
-                    <small style="color:#555;">Available: {{ $product->stock_quantity }}</small>
-                </div>
-                <div>
-                    <label style="font-weight:600;">Total Price</label>
-                    <div style="padding:8px; border-radius:8px; background:#fff3e6; font-weight:600;">
-                        $<span id="total-price">{{ number_format($product->price, 2) }}</span>
-                    </div>
-                    <small style="color:#555;">Price per item: ${{ number_format($product->price,2) }}</small>
-                </div>
-            </div>
-        </div>
-
-        {{-- Options Card --}}
-        @if(!empty($product->color) || !empty($product->size))
-        <div style="background:#fff6f0; padding:15px 20px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h4 style="margin-bottom:15px; color:#C08A56;">🎨 Options</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                @if(!empty($product->color))
-                <div>
-                    <label style="font-weight:600;">Color</label>
-                    <select name="color[]" multiple style="width:100%; padding:8px; border-radius:8px; transition:0.2s;">
-                        @foreach(explode(',', $product->color) as $color)
-                            <option value="{{ trim($color) }}">{{ trim($color) }}</option>
-                        @endforeach
-                    </select>
-                    <small style="color:#555;">Hold Ctrl/Cmd to select multiple</small>
-                </div>
-                @endif
-
-                @if(!empty($product->size))
-                <div>
-                    <label style="font-weight:600;">Size</label>
-                    <select name="size[]" multiple style="width:100%; padding:8px; border-radius:8px; transition:0.2s;">
-                        @foreach(explode(',', $product->size) as $size)
-                            <option value="{{ trim($size) }}">{{ trim($size) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        {{-- Payment & Delivery Card --}}
-        <div style="background:#fff6f0; padding:15px 20px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h4 style="margin-bottom:15px; color:#C08A56;">💳 Payment & Delivery</h4>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                <div>
-                    <label style="font-weight:600;">Payment Method</label>
-                    <select name="payment_method_id" required style="width:100%; padding:8px; border-radius:8px;">
-                        <option value="">-- Select Payment --</option>
-                        @foreach($paymentMethods as $method)
-                            @if($method->is_active)
-                                <option value="{{ $method->payment_method_id }}">{{ ucfirst($method->method_name) }}</option>
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label style="font-weight:600;">Delivery Method</label>
-                    <select name="delivery_method_id" required style="width:100%; padding:8px; border-radius:8px;">
-                        <option value="">-- Select Delivery --</option>
-                        @foreach($deliveryMethods as $method)
-                            @if($method->is_active)
-                                <option value="{{ $method->delivery_method_id }}">
-                                    {{ ucfirst($method->method_name) }} - ${{ number_format($method->cost,2) }}
-                                </option>
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        {{-- Address Card --}}
-        <div style="background:#fff6f0; padding:15px 20px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h4 style="margin-bottom:15px; color:#C08A56;">🏠 Address</h4>
-            <input type="text" name="shipping_address" placeholder="Street, Apartment, etc."
-                   style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px;">
-            <input type="text" name="city" placeholder="City"
-                   style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px;">
-            <textarea name="additional_info" rows="2" placeholder="Additional details"
-                      style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;"></textarea>
-        </div>
-
-        {{-- Map Card --}}
-        <div style="background:#fff6f0; padding:15px 20px; border-radius:12px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-            <h4 style="margin-bottom:10px; color:#C08A56;">📍 Pick Your Location</h4>
-            <button type="button" id="currentLocationBtn" style="margin-bottom:10px; padding:8px 12px; border:none; border-radius:6px; background:#C08A56; color:#fff; cursor:pointer;">
-                Use My Current Location
-            </button>
-            <div id="map" style="width:100%; height:250px; border-radius:8px;"></div>
-        </div>
-
-        <input type="hidden" name="latitude" id="latitude">
-        <input type="hidden" name="longitude" id="longitude">
-        <input type="hidden" name="map_link" id="map_link">
-
-        <button type="submit" style="width:100%; padding:12px; background:#C08A56; color:#fff; border:none; border-radius:8px; font-size:16px; cursor:pointer; transition:0.3s;">
-            Place Order
-        </button>
-    </form>
+<div class="product-image-wrapper">
+    @if($productImage)
+        <img
+            src="{{ Str::startsWith($productImage, 'products/')
+                ? asset('storage/'.$productImage)
+                : asset($productImage) }}"
+            alt="{{ $product->product_name }}"
+        >
+    @endif
 </div>
 
+<form action="{{ route('order.store', $product) }}" method="POST" id="orderForm">
+    @csrf
+
+    {{-- Customer Info --}}
+    <div class="card">
+        <h4>👤 Customer Info</h4>
+        <div class="grid-2">
+            <div>
+                <label>Full Name</label>
+                <input type="text" name="full_name" placeholder="Enter your name" required>
+            </div>
+            <div>
+                <label>Phone Number</label>
+                <input type="text" name="phone" placeholder="Enter your phone" required>
+            </div>
+        </div>
+    </div>
+
+    {{-- Quantity & Price --}}
+    <div class="card">
+        <h4>📦 Quantity & Price</h4>
+        <div class="grid-2">
+            <div>
+                <label>Quantity</label>
+                <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $product->stock_quantity }}" required>
+                <small>Available: {{ $product->stock_quantity }}</small>
+                <span id="quantity-error" class="error-message"></span>
+            </div>
+            <div>
+                <label>Total Price</label>
+                <div id="loyalty-text" style="color:green; font-weight:400; font-size:0.9em;">
+                    @if($loyaltyDiscount)
+                        ({{ $loyaltyDiscount }}% loyalty discount will apply)
+                    @endif
+                </div>
+                <div class="total-price-wrapper">
+                    $<span id="total-price">0.00</span>
+                    @if($product->is_on_sale)
+                        <span style="color: #ef4444;">${{ number_format($product->discount_value, 2) }}</span>
+                    @else
+                        ${{ number_format($product->price, 2) }}
+                    @endif
+                </div>
+                <small>Price per item: ${{ number_format($product->price,2) }}</small>
+                <small id="deliveryFee"></small>
+            </div>
+        </div>
+    </div>
+
+    {{-- Options --}}
+    {{-- Colors --}}
+    @if(!empty($product->color))
+    @php
+        $colors = json_decode($product->color);
+        if(json_last_error() !== JSON_ERROR_NONE) {
+            $colors = explode(',', $product->color);
+        }
+    @endphp
+    <div>
+        <label>Color</label>
+        <select name="color[]" id="colorSelect" multiple>
+            @foreach($colors as $color)
+                <option value="{{ trim($color) }}">{{ trim($color) }}</option>
+            @endforeach
+        </select>
+        <small>Hold Ctrl/Cmd to select multiple</small>
+    </div>
+    @endif
+
+    {{-- Sizes --}}
+    @if(!empty($product->size))
+    @php
+        $sizes = json_decode($product->size);
+        if(json_last_error() !== JSON_ERROR_NONE) {
+            $sizes = explode(',', $product->size);
+        }
+    @endphp
+    <div>
+        <label>Size</label>
+        <select name="size[]" id="sizeSelect" multiple>
+            @foreach($sizes as $size)
+                <option value="{{ trim($size) }}">{{ trim($size) }}</option>
+            @endforeach
+        </select>
+    </div>
+    @endif
+
+    {{-- Payment & Delivery --}}
+    <div class="card">
+        <h4>💳 Payment & Delivery</h4>
+        <div class="grid-2">
+            <div>
+                <label>Payment Method</label>
+                <select name="payment_method_id" id="paymentSelect" required>
+                    <option value="">-- Select Payment --</option>
+                    @foreach($paymentMethods as $method)
+                        @if($method->is_active)
+                            <option value="{{ $method->payment_method_id }}">{{ ucfirst($method->method_name) }}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label>Delivery Method</label>
+                <select name="delivery_method_id" id="deliverySelect" required>
+                    <option value="">-- Select Delivery --</option>
+                    @foreach($deliveryMethods as $method)
+                        @if($method->is_active)
+                            <option 
+                                value="{{ $method->delivery_method_id }}"
+                                data-cost="{{ $method->cost }}"
+                                data-name="{{ strtolower($method->method_name) }}"
+                            >
+                                {{ ucfirst($method->method_name) }} - ${{ number_format($method->cost,2) }}
+                            </option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div id="stripeCardWrapper">
+            <label>Credit Card Details</label>
+            <div id="card-element"></div>
+            <div id="card-errors" role="alert"></div>
+        </div>
+    </div>
+
+    {{-- Address --}}
+    <div class="card">
+        <h4>🏠 Address</h4>
+        <input type="text" name="shipping_address" placeholder="Street, Apartment, etc.">
+        <input type="text" name="city" placeholder="City">
+        <textarea name="additional_info" rows="2" placeholder="Additional details"></textarea>
+    </div>
+
+    {{-- Map --}}
+    <div class="card">
+        <h4>📍 Pick Your Location</h4>
+        <button type="button" id="currentLocationBtn">Use My Current Location</button>
+        <div id="map"></div>
+    </div>
+
+    <input type="hidden" name="latitude" id="latitude">
+    <input type="hidden" name="longitude" id="longitude">
+    <input type="hidden" name="map_link" id="map_link">
+
+    <button type="submit">Place Order</button>
+</form>
+</div>
+
+<!-- Leaflet & Stripe -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://js.stripe.com/v3/"></script>
 
 <script>
-    // Total price & quantity validation
+document.addEventListener('DOMContentLoaded', function() {
     const quantityInput = document.getElementById('quantity');
     const totalPriceSpan = document.getElementById('total-price');
-    const pricePerItem = {{ $product->price }};
-    const maxStock = {{ $product->stock_quantity }};
+    const pricePerItem = parseFloat(@json($product->price));
+    const maxStock = parseInt(@json($product->stock_quantity));
+    const paymentSelect = document.getElementById('paymentSelect');
+    const deliverySelect = document.getElementById('deliverySelect');
+    const deliveryFeeSpan = document.createElement('small');
+    deliveryFeeSpan.classList.add('delivery-fee');
+    totalPriceSpan.parentNode.appendChild(deliveryFeeSpan);
+    const loyaltyText = document.getElementById('loyalty-text');
+    const loyaltyDiscount = parseFloat(@json($loyaltyDiscount ?? 0));
+    const form = document.getElementById('orderForm');
+    const stripeWrapper = document.getElementById('stripeCardWrapper');
+
     quantityInput.setAttribute('max', maxStock);
 
-    quantityInput.addEventListener('input', function() {
-        let quantity = parseInt(this.value) || 1;
-        if(quantity > maxStock){ alert(`Only ${maxStock} available.`); this.value = maxStock; quantity = maxStock; }
-        else if(quantity < 1){ this.value = 1; quantity = 1; }
-        totalPriceSpan.textContent = (quantity * pricePerItem).toFixed(2);
-    });
+    function sanitizeQuantity() {
+        let qty = parseInt(quantityInput.value) || 1;
+        if(qty < 1) qty = 1;
+        if(qty > maxStock) qty = maxStock;
+        quantityInput.value = qty;
+        return qty;
+    }
 
-    // Map init
-    const map = L.map('map').setView([33.8938, 35.5018], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-    let marker = L.marker([33.8938, 35.5018], { draggable:true }).addTo(map);
+    function updateTotal() {
+        const quantity = sanitizeQuantity();
+        let basePrice = pricePerItem;
+        @if($product->is_on_sale)
+            basePrice = parseFloat(@json($product->discount_value));
+        @endif
+
+        let total = quantity * basePrice;
+
+        // Loyalty discount
+        if(loyaltyDiscount > 0) {
+            const discountAmount = total * (loyaltyDiscount / 100);
+            total -= discountAmount;
+            loyaltyText.textContent = `-${loyaltyDiscount}% Loyalty Discount (-$${discountAmount.toFixed(2)})`;
+        } else {
+            loyaltyText.textContent = '';
+        }
+
+        // Delivery cost
+        const selectedDelivery = deliverySelect.selectedOptions[0];
+        if(selectedDelivery){
+            const cost = parseFloat(selectedDelivery.dataset.cost || 0);
+            total += cost;
+            deliveryFeeSpan.textContent = `+ $${cost.toFixed(2)} delivery`;
+        } else {
+            deliveryFeeSpan.textContent = '';
+        }
+
+        // Disable Pickup if Cash on Delivery
+        const selectedPayment = paymentSelect.selectedOptions[0]?.text.toLowerCase() || '';
+        for(let i=0;i<deliverySelect.options.length;i++){
+            const opt = deliverySelect.options[i];
+            const name = opt.dataset.name || '';
+            if(selectedPayment.includes('cash on delivery') && name.includes('pickup')){
+                opt.disabled = true;
+                if(deliverySelect.selectedIndex === i){
+                    deliverySelect.selectedIndex = 0;
+                }
+            } else { opt.disabled = false; }
+        }
+
+        totalPriceSpan.textContent = total.toFixed(2);
+
+        // Show Stripe if credit card
+        stripeWrapper.style.display = selectedPayment.includes('credit card') ? 'block' : 'none';
+    }
+
+    quantityInput.addEventListener('input', updateTotal);
+    paymentSelect.addEventListener('change', updateTotal);
+    deliverySelect.addEventListener('change', updateTotal);
+    updateTotal();
+
+    // Stripe
+    if(stripeWrapper){
+        const stripe = Stripe('{{ config("services.stripe.key") }}');
+        const elements = stripe.elements();
+        const card = elements.create('card',{hidePostalCode:true});
+        card.mount('#card-element');
+
+        form.addEventListener('submit', async function(e){
+            const selectedPayment = paymentSelect.selectedOptions[0]?.text.toLowerCase() || '';
+            if(selectedPayment.includes('credit card')){
+                e.preventDefault();
+                const {error, paymentMethod} = await stripe.createPaymentMethod({type:'card',card:card});
+                if(error){
+                    document.getElementById('card-errors').textContent = error.message;
+                } else {
+                    const input = document.createElement('input');
+                    input.type='hidden';
+                    input.name='stripe_payment_method_id';
+                    input.value=paymentMethod.id;
+                    form.appendChild(input);
+                    form.submit();
+                }
+            }
+        });
+    }
+
+    // Map
+    const map = L.map('map').setView([33.8938,35.5018],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+    const marker = L.marker([33.8938,35.5018],{draggable:true}).addTo(map);
 
     function updateLatLng(lat,lng){
         document.getElementById('latitude').value = lat;
@@ -180,82 +300,153 @@
     }
 
     marker.on('dragend', e => updateLatLng(e.target.getLatLng().lat, e.target.getLatLng().lng));
-    map.on('click', e => { marker.setLatLng(e.latlng); updateLatLng(e.latlng.lat, e.latlng.lng); });
-    updateLatLng(33.8938, 35.5018);
+    map.on('click', e => { marker.setLatLng(e.latlng); updateLatLng(e.latlng.lat,e.latlng.lng); });
+    updateLatLng(33.8938,35.5018);
 
     document.getElementById('currentLocationBtn').addEventListener('click', function(){
         if(navigator.geolocation){
             navigator.geolocation.getCurrentPosition(pos=>{
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
+                const lat=pos.coords.latitude;
+                const lng=pos.coords.longitude;
                 marker.setLatLng([lat,lng]);
                 map.setView([lat,lng],16);
                 updateLatLng(lat,lng);
-            }, err=>{ alert('Cannot get your location'); });
+            },()=>{ alert('Cannot get your location'); });
         } else { alert('Geolocation not supported'); }
     });
 
-    L.Control.geocoder({ defaultMarkGeocode:true, placeholder:'Search address...'})
-        .on('markgeocode', function(e){ const latlng=e.geocode.center; marker.setLatLng(latlng); map.setView(latlng,16); updateLatLng(latlng.lat,latlng.lng); })
-        .addTo(map);
-        // Payment & Delivery logic
-const paymentSelect = document.querySelector('select[name="payment_method_id"]');
-const deliverySelect = document.querySelector('select[name="delivery_method_id"]');
-
-// إضافة عنصر لعرض رسوم التوصيل
-let deliveryFeeSpan = document.createElement('small');
-deliveryFeeSpan.style.color = '#C08A56';
-deliveryFeeSpan.style.display = 'block';
-deliveryFeeSpan.style.marginTop = '5px';
-totalPriceSpan.parentNode.appendChild(deliveryFeeSpan);
-
-paymentSelect.addEventListener('change', function() {
-    const selectedPayment = paymentSelect.options[paymentSelect.selectedIndex].text.toLowerCase();
-    let originalQuantity = parseInt(quantityInput.value) || 1;
-    let total = originalQuantity * pricePerItem;
-
-    if(selectedPayment.includes('cash on delivery')) {
-        // Increase $5 on total
-        total += 5;
-        totalPriceSpan.textContent = total.toFixed(2);
-        deliveryFeeSpan.textContent = '+ $5 Delivery Fee';
-
-        // Disable other delivery options except Free Pickup
-        for(let i=0; i<deliverySelect.options.length; i++){
-            const optionText = deliverySelect.options[i].text.toLowerCase();
-            if(!optionText.includes('free pickup')) {
-                deliverySelect.options[i].disabled = true;
-            } else {
-                deliverySelect.selectedIndex = i; // auto-select Free Pickup
-            }
-        }
-    } else {
-        // Re-enable all delivery options
-        for(let i=0; i<deliverySelect.options.length; i++){
-            deliverySelect.options[i].disabled = false;
-        }
-        // Reset total price
-        totalPriceSpan.textContent = (originalQuantity * pricePerItem).toFixed(2);
-        deliveryFeeSpan.textContent = '';
-    }
+    L.Control.geocoder({defaultMarkGeocode:true,placeholder:'Search address...'})
+        .on('markgeocode', function(e){
+            const latlng = e.geocode.center;
+            marker.setLatLng(latlng);
+            map.setView(latlng,16);
+            updateLatLng(latlng.lat,latlng.lng);
+        }).addTo(map);
 });
-
-// Update total price if quantity changes and Cash on Delivery is selected
-quantityInput.addEventListener('input', function() {
-    let quantity = parseInt(this.value) || 1;
-    if(quantity > maxStock){ alert(`Only ${maxStock} available.`); this.value = maxStock; quantity = maxStock; }
-    else if(quantity < 1){ this.value = 1; quantity = 1; }
-
-    let selectedPayment = paymentSelect.options[paymentSelect.selectedIndex].text.toLowerCase();
-    let total = quantity * pricePerItem;
-    if(selectedPayment.includes('cash on delivery')) {
-        total += 5;
-        deliveryFeeSpan.textContent = '+ $5 Delivery Fee';
-    } else {
-        deliveryFeeSpan.textContent = '';
-    }
-    totalPriceSpan.textContent = total.toFixed(2);
-});
-
 </script>
+<style>
+
+
+.order-page {
+  max-width: 750px;
+  margin: 30px auto;
+  font-family: Arial, sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+}
+
+.order-page h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: var(--order-heading);
+  font-weight: 700;
+}
+
+.product-image-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.product-image-wrapper img {
+  width: 180px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.card {
+  background: var(--order-bg-card);
+  padding: 15px 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.card h4 {
+  margin-bottom: 15px;
+  color: var(--order-heading);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--order-input-border);
+  transition: 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--order-border-focus);
+  outline: none;
+}
+
+.total-price-wrapper {
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--order-price-bg);
+  font-weight: 600;
+}
+
+#deliveryFee {
+  color: var(--order-heading);
+  display: block;
+  margin-top: 5px;
+}
+
+#currentLocationBtn,
+button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background:  linear-gradient(135deg,#8f3f9beb,#1f7bb8eb,#5b2a86);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#currentLocationBtn:hover,
+button[type="submit"]:hover {
+  background:  linear-gradient(135deg,#8f3f9beb,#1f7bb8eb,#5b2a86);
+}
+
+#stripeCardWrapper {
+  display: none;
+  margin-top: 15px;
+}
+
+#card-element {
+  padding: 10px;
+  border: 1px solid var(--order-input-border);
+  border-radius: 8px;
+}
+
+#card-errors {
+  color: red;
+  margin-top: 5px;
+}
+
+#map {
+  width: 100%;
+  height: 250px;
+  border-radius: 8px;
+}
+.error-message {
+    color: #ff4d4f;
+    font-size: 0.875rem;
+    margin-top: 5px;
+    display: block;
+    transition: opacity 0.3s ease;
+}
+
+
+</style>
+
 @endsection

@@ -6,12 +6,21 @@ use Illuminate\Http\Request;
 
 class AdminShopController extends Controller {
     public function index(){
-        $shops = Shop::with('owner')->withCount('products')->paginate(20);
+        $shops = Shop::with('owner')->withCount('products')->paginate(5);
         return view('admin.shops.index', compact('shops'));
     }
-    public function show(Shop $shop){
-        return view('admin.shops.show', ['shop'=>$shop->load('products','owner')]);
-    }
+  public function show(Shop $shop)
+{
+    // Eager load owner.user
+    $shop->load('owner.user');
+
+    // Paginate products (5 per page)
+    $products = $shop->products()->with(['category','subcategory'])->paginate(5);
+
+    return view('admin.shops.show', compact('shop', 'products'));
+}
+
+
     public function approve(Shop $shop){
         $shop->is_active = true;
         $shop->save();

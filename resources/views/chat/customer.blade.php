@@ -1,53 +1,72 @@
-<h3>Live Chat</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div style="max-width:600px; margin:30px auto; font-family:sans-serif;">
+    <h3>Chat with {{ $otherUser->name }}</h3>
 
-<div id="chat-box" style="height:300px; overflow-y:scroll; border:1px solid #ccc; padding:10px;"></div>
+<div id="chat-box" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+    @foreach($chat->messages as $message)
+        <div style="margin:5px 0;">
+            <b>{{ $message->sender->name }}:</b> {{ $message->message }}
+        </div>
+    @endforeach
+</div>
 
-<input type="text" id="message" placeholder="Type message..." style="width:70%;">
-<button id="send">Send</button>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <form id="chatForm">
+        @csrf
+        <input type="hidden" name="conversation_id" value="{{ $chat->id }}">
+        <input type="text" name="message" placeholder="Type message..." required style="width:80%; padding:5px;">
+        <button type="submit" style="padding:5px 10px;">Send</button>
+    </form>
+</div>
+
+<!-- Pusher & Laravel Echo -->
+<script src="https://js.pusher.com/8.2/pusher.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo/dist/echo.iife.js"></script>
 
 <script>
-// CSRF setup
-$.ajaxSetup({
-    headers: {
-        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-    }
-});
+    // إعداد Pusher و Echo
+    Pusher.logToConsole = true;
 
-let chatId = {{ $chat->id }};
+    window.Echo = new Echo({
+        broadcaster: 'pusher',
+        key: '{{ env("PUSHER_APP_KEY") }}',
+        cluster: '{{ env("PUSHER_APP_CLUSTER") }}',
+        forceTLS: true
+    });
 
-// تحميل الرسائل
-function loadMessages() {
-    $.get('{{ url("/chat/fetch") }}/' + chatId, function(data) {
-        $('#chat-box').html('');
-        data.forEach(msg => {
-            let sender = msg.sender_id === {{ auth()->id() }} ? 'You' : 'Owner';
-            let align = msg.sender_id === {{ auth()->id() }} ? 'right' : 'left';
-            $('#chat-box').append('<p style="text-align:' + align + ';"><strong>' + sender + ':</strong> ' + msg.message + '</p>');
+    // إرسال الرسالة
+    document.getElementById('chatForm').addEventListener('submit', function(e){
+        e.preventDefault();
+
+        fetch("{{ route('messages.send') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: new FormData(this)
+        }).then(res => this.reset());
+    });
+
+    // استقبال الرسائل بشكل مباشر
+    Echo.private('chat.{{ $chat->id }}')
+        .listen('MessageSent', (e) => {
+            let box = document.getElementById('chat-box');
+            box.innerHTML += `
+                <div style="margin:6px 0;">
+                    <b>${e.message.sender_name}:</b> ${e.message.message}
+                </div>
+            `;
+            box.scrollTop = box.scrollHeight; 
         });
-        $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
-    });
-}
-
-// إرسال رسالة
-$('#send').click(function () {
-    let message = $('#message').val();
-    if(message.trim() === '') return;
-
-    $.post('{{ route("chat.send") }}', { chat_id: chatId, message: message })
-    .done(function(data) {
-        $('#message').val('');
-        loadMessages();
-    })
-    .fail(function(xhr) {
-        console.log(xhr.status);
-        console.log(xhr.responseText);
-        alert('Error sending message! Check console.');
-    });
-});
-
-// تحديث الرسائل كل ثانيتين
-setInterval(loadMessages, 2000);
-loadMessages();
 </script>
+
+</body>
+</html>
+

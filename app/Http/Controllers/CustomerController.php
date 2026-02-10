@@ -70,16 +70,16 @@ return view('customer.profile', compact('ordersCount', 'deliveredCount', 'pendin
         return view('customer.profile', compact('user'));
     }
 
- public function updateProfile(Request $request)
+public function updateProfile(Request $request)
 {
     $user = auth()->user();
-    $customer = $user->customer; // get related customer
+    $customer = $user->customer ?? $user->customer()->create([]);
 
     // 1️⃣ Validate input
     $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-        'phone' => 'nullable|string|max:20',
+        'phone_number' => 'nullable|string|max:20',
         'address' => 'nullable|string|max:255',
         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
@@ -87,12 +87,10 @@ return view('customer.profile', compact('ordersCount', 'deliveredCount', 'pendin
     // 2️⃣ Update user info
     $user->update($request->only(['name', 'email']));
 
-    // 3️⃣ Update customer info if exists
-    if ($customer) {
-        $customer->phone_number = $request->phone_number;
-        $customer->address = $request->address;
-        $customer->save();
-    }
+    // 3️⃣ Update customer info
+    $customer->phone_number = $request->phone_number;
+    $customer->address = $request->address;
+    $customer->save();
 
     // 4️⃣ Handle profile image
     if ($request->hasFile('image')) {
@@ -108,6 +106,7 @@ return view('customer.profile', compact('ordersCount', 'deliveredCount', 'pendin
 
 
     // Orders
+// Orders
   public function orders(Request $request)
 {
     $user = Auth::user();
@@ -136,7 +135,6 @@ return view('customer.profile', compact('ordersCount', 'deliveredCount', 'pendin
 
     return view('customer.orders', compact('orders', 'shops', 'statuses'));
 }
-
     // Cart
 public function cart(Request $request)
 {
@@ -176,11 +174,15 @@ public function cart(Request $request)
         });
     }
 
-    $cartItems = $query->get();
+    // Paginate the results (5 per page) and keep filters in query string
+    $cartItems = $query->paginate(5)->withQueryString();
+
+    // Get all shops for filter dropdown
     $shops = Shop::all();
 
     return view('customer.cart', compact('cartItems', 'shops'));
 }
+
 
 
 

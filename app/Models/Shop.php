@@ -12,5 +12,9 @@ class Shop extends Model
     public function owner() { return $this->belongsTo(ShopOwner::class,'owner_id'); }
     public function products() { return $this->hasMany(products::class,'shop_id','shop_id')
     ; }
-   
+    
+public function loyalty()
+{
+return $this->hasOne(LoyaltySetting::class, 'shop_id', 'shop_id');
+}
 }

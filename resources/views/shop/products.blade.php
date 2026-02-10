@@ -51,14 +51,37 @@
         <div class="products-grid">
             @forelse($products as $product)
                 <div class="product-card reveal">
-                    <div class="image-box">
-                        <a href="{{ route('product.show', $product->product_id) }}">
-                            <img src="{{ Str::startsWith($product->image_url, 'products/') ? asset('storage/' . $product->image_url) : asset($product->image_url) }}" alt="{{ $product->product_name }}">
-                        </a>
-                        @if($product->is_on_sale)
-                            <div class="sale-tag">Limited Offer</div>
-                        @endif
-                    </div>
+             <div class="image-box">
+
+    @php
+        $images = $product->images && $product->images->count()
+            ? $product->images
+            : collect([(object)['image_path' => $product->image_url]]);
+    @endphp
+
+    <div class="shop-slider" data-index="0">
+        @foreach($images as $img)
+            <a href="{{ route('product.show', $product->product_id) }}">
+                <img
+                    src="{{ Str::startsWith($img->image_path, 'products/')
+                        ? asset('storage/' . $img->image_path)
+                        : asset($img->image_path) }}"
+                    class="shop-slider-img"
+                    alt="{{ $product->product_name }}">
+            </a>
+        @endforeach
+
+        @if($images->count() > 1)
+            <button class="slider-arrow prev">❮</button>
+            <button class="slider-arrow next">❯</button>
+        @endif
+    </div>
+
+    @if($product->is_on_sale)
+        <div class="sale-tag">Limited Offer</div>
+    @endif
+</div>
+
                     
                     <div class="product-details">
     <h4>{{ $product->product_name }}</h4>
@@ -89,9 +112,9 @@
 
 <style>
 :root {
-    --brand: #C5A059; /* Modern Gold */
-    --text-dark: #2D241E;
-    --text-light: #756E66;
+    --brand: #5b2a86; /* Modern Gold */
+    --text-dark:#1f7bb8eb;
+    --text-light: #8f3f9beb;
     --bg-main: #FFFFFF;
     --bg-soft: #F9F7F5;
     --glass: rgba(255, 255, 255, 0.7);
@@ -149,7 +172,7 @@ body {
 .shop-title span { color: var(--brand); font-style: italic; }
 
 .hero-description {
-    font-size: 18px; color: var(--text-light); max-width: 650px; margin: 0 auto 40px; line-height: 1.7;
+    font-size: 20px; color: var(--text-light); max-width: 650px; margin: 0 auto 40px; line-height: 1.7;
 }
 
 /* Contact Bar */
@@ -174,7 +197,7 @@ body {
 
 /* Main Button */
 .main-cta {
-    background: var(--text-dark); color: #fff; border: none; padding: 22px 50px;
+   background: linear-gradient(135deg, #a080bc, #5b93c7); color: #fff; border: none; padding: 22px 50px;
     border-radius: 100px; font-size: 16px; font-weight: 700; cursor: pointer;
     position: relative; overflow: hidden;
 }
@@ -252,10 +275,53 @@ body {
 }
 
 .view-item-btn:hover { 
-    background: var(--text-dark); 
+     background: linear-gradient(135deg, #a080bc, #5b93c7); 
     color: #fff; 
     border-color: var(--text-dark); 
 }
+
+/* SHOP PRODUCT IMAGE SLIDER */
+.shop-slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.shop-slider-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.shop-slider-img.active {
+    display: block;
+}
+
+/* ARROWS */
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.9);
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.slider-arrow.prev { left: 10px; }
+.slider-arrow.next { right: 10px; }
+
+.slider-arrow:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
 </style>
 
 <script>
@@ -276,6 +342,36 @@ const observer = new IntersectionObserver((entries) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+});
+
+document.querySelectorAll('.shop-slider').forEach(slider => {
+    const images = slider.querySelectorAll('.shop-slider-img');
+    if (!images.length) return;
+
+    let index = 0;
+    images[index].classList.add('active');
+
+    const prev = slider.querySelector('.prev');
+    const next = slider.querySelector('.next');
+
+    function show(i) {
+        images.forEach(img => img.classList.remove('active'));
+        images[i].classList.add('active');
+    }
+
+    prev?.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        index = (index - 1 + images.length) % images.length;
+        show(index);
+    });
+
+    next?.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        index = (index + 1) % images.length;
+        show(index);
+    });
 });
 </script>
 

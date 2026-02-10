@@ -24,8 +24,29 @@ class Customer extends Model
     {
         return $this->morphMany(\Illuminate\Notifications\DatabaseNotification::class, 'notifiable');
     }
-    public function reports() {
+
+    public function isLoyal($shopId)
+{
+$loyalty = \App\Models\LoyaltySetting::where('shop_id', $shopId)->first();
+
+
+if (!$loyalty) return false;
+
+
+$orders = $this->orders()
+->whereHas('items', function($q) use ($shopId) {
+$q->where('shop_id', $shopId);
+});
+
+
+$totalOrders = $orders->count();
+$totalRevenue = $orders->sum(\DB::raw('order_items.quantity * order_items.price_at_purchase'));
+
+
+return $totalOrders >= $loyalty->min_orders && $totalRevenue >= $loyalty->min_revenue;
+
+}
+public function reports() {
     return $this->hasMany(ReportIssue::class);
 }
-
 }

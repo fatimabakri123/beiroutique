@@ -26,7 +26,7 @@ class AdminOrderController extends Controller {
         $ordersQuery->where('order_status', $status);
     }
 
-    $orders = $ordersQuery->paginate(5)->appends($request->all()); // Keep filters in pagination links
+    $orders = $ordersQuery->paginate(8)->appends($request->all()); // Keep filters in pagination links
 
     return view('admin.orders.index', compact('orders'));
 }

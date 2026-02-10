@@ -153,14 +153,16 @@
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.12);
 }
-
 .card img {
-    width: 100%;
+    width: 150px;        
     height: 150px;
     object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    margin: 10px auto;  
+    display: block;
+    background: #f3f4f6;
 }
+
 
 .card h6 {
     font-size: 25px;

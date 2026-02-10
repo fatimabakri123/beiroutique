@@ -3,223 +3,223 @@
 @section('content')
 
 <style>
-/* WRAPPER */
+/* ===== PROFILE PAGE SAFE CSS (won't break layout) ===== */
+
+.profile-page {
+  width: 100%;
+  min-height: 100%;
+  background: #f5f6fb;
+}
+
 .profile-wrapper {
-    max-width: 1100px;
-    margin: 30px auto;
-    padding: 20px;
-    font-family: "Poppins", sans-serif;
+  width: 100%;
+  padding: 20px;
 }
 
-/* HEADER CARD */
+/* ===== HEADER ===== */
 .profile-header {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    background: #fff;
-    padding: 25px;
-    border-radius: 18px;
-    box-shadow: 0 8px 26px rgba(0,0,0,0.05);
-    margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
 }
 
-/* AVATAR STYLE */
 .avatar-box {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    background: #f7ede3;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 55px;
-    color: #C08A56;
-    position: relative;
-    overflow: hidden;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e9d5ff, #dbeafe);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+  color: #5b2d8b;
+  position: relative;
+  overflow: hidden;
 }
 
-/* if image exists */
 .avatar-box img {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    object-fit: cover;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
-/* upload button small */
 .upload-btn {
-    position: absolute;
-    bottom: -4px;
-    right: -4px;
-    width: 35px;
-    height: 35px;
-    background: #C08A56;
-    border-radius: 50%;
-    color: white;
-    font-size: 22px;
-    text-align: center;
-    line-height: 33px;
-    cursor: pointer;
-}
-.upload-btn input {
-    display: none;
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, #7c4dff, #4f8cff);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+  line-height: 34px;
+  cursor: pointer;
 }
 
-/* MAIN GRID */
+.upload-btn input { display: none; }
+
+/* ===== GRID ===== */
 .profile-container {
-    display: grid;
-    grid-template-columns: 33% 33% 33%;
-    gap: 20px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.8fr;
+  gap: 18px;
 }
 
-/* BOXES */
 .profile-section {
-    background: #fff;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+  background: #fff;
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
 .profile-section h3 {
-    color: #7d4008ff;
-    font-size: 18px;
-    margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #5b2d8b;
 }
 
-/* INPUTS */
+/* ===== INPUTS ===== */
+.profile-section label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
 .profile-section input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    font-size: 14px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  margin: 4px 0 10px;
+  font-size: 13px;
 }
 
-/* BUTTON */
 .profile-section button {
-    width: 100%;
-    background: #874405da;
-    color: #fff;
-    padding: 11px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    transition: 0.3s;
-}
-.profile-section button:hover {
-    background: #a07046;
+  width: 100%;
+  background: linear-gradient(135deg, #7c4dff, #4f8cff);
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-/* ORDERS */
 .orders-box {
-    background: #f3eeeaff;
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid #eee;
+  background: linear-gradient(135deg, #f3e8ff, #eef2ff);
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
 }
 
-/* MOBILE */
-@media(max-width: 900px) {
-    .profile-container {
-        grid-template-columns: 1fr;
-    }
+.orders-box a {
+  display: inline-block;
+  margin-top: 8px;
+  color: #5b2d8b;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .profile-container {
+    grid-template-columns: 1fr;
+  }
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
 }
 </style>
 
+<div class="profile-page">
 <div class="profile-wrapper">
 
-    {{-- HEADER --}}
-    <div class="profile-header">
-
-        <div class="avatar-box">
-            @php
-                $profilePath = 'uploads/profile/user_' . auth()->id() . '.jpg';
-            @endphp
-
-            @if(auth()->user()->profile_image) 
-    <img id="profilePreview" src="{{ asset('storage/' . auth()->user()->profile_image) }}" 
-         alt="{{ auth()->user()->name }}">
-@else
-
-              
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-            @endif
-
-            <label class="upload-btn">
-                +
-                <input type="file" id="imageInput" name="image" accept="image/*">
-            </label>
-        </div>
-
-        <div>
-            <h2 style="margin: 0; color:#3e2a1f;">{{ auth()->user()->name }}</h2>
-            <p style="margin: 5px 0; color:#777;">{{ auth()->user()->email }}</p>
-        </div>
-
+  <!-- HEADER -->
+  <div class="profile-header">
+    <div class="avatar-box">
+      @if(auth()->user()->profile_image)
+        <img src="{{ asset('storage/' . auth()->user()->profile_image) }}">
+      @else
+        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+      @endif
+      <label class="upload-btn">+
+        <input type="file">
+      </label>
     </div>
 
-    {{-- MAIN GRID --}}
-    <div class="profile-container">
+    <div>
+      <h2>{{ auth()->user()->name }}</h2>
+      <p>{{ auth()->user()->email }}</p>
+    </div>
+  </div>
 
-        {{-- EDIT PROFILE --}}
-        <div class="profile-section">
-            <h3>Edit Profile</h3>
+  <!-- GRID -->
+  <div class="profile-container">
 
-            <form action="{{ route('customer.updateProfile') }}" method="POST" enctype="multipart/form-data">
-                @csrf
+    <!-- EDIT PROFILE -->
+    <div class="profile-section">
+      <h3>Edit Profile</h3>
+      <form method="POST" action="{{ route('customer.updateProfile') }}">
+        @csrf
+        <label>Name</label>
+        <input type="text" name="name" value="{{ auth()->user()->name }}">
 
-                <label>Name</label>
-                <input type="text" name="name" value="{{ auth()->user()->name }}" required>
+        <label>Email</label>
+        <input type="email" name="email" value="{{ auth()->user()->email }}">
 
-                <label>Email</label>
-                <input type="email" name="email" value="{{ auth()->user()->email }}" required>
+        <label>Phone</label>
+        <input type="text" name="phone_number"
+               value="{{ old('phone_number', auth()->user()->customer?->phone_number ?? '') }}">
 
-                <label>Phone</label>
-                <input type="text" name="phone_number" value="{{ auth()->user()->customer->phone_number ?? '' }}">
+        <label>Address</label>
+        <input type="text" name="address"
+               value="{{ old('address', auth()->user()->customer?->address ?? '') }}">
 
-                <label>Address</label>
-                <input type="text" name="address" value="{{ auth()->user()->customer->address ?? '' }}">
-
-                <button type="submit">Save Changes</button>
-            </form>
-        </div>
-
-        {{-- CHANGE PASSWORD --}}
-        <div class="profile-section">
-            <h3>Change Password</h3>
-
-            <form action="{{ route('customer.updatePassword') }}" method="POST">
-                @csrf
-
-                <label>Current Password</label>
-                <input type="password" name="current_password" required>
-
-                <label>New Password</label>
-                <input type="password" name="new_password" required>
-
-                <label>Confirm Password</label>
-                <input type="password" name="new_password_confirmation" required>
-
-                <button type="submit">Update Password</button>
-            </form>
-        </div>
-
-        {{-- ORDER SUMMARY --}}
-        <div class="profile-section">
-            <h3>Your Orders</h3>
-
-            <div class="orders-box">
-                <p><b>Total Orders:</b> {{ $ordersCount ?? 0 }}</p>
-                <p><b>Delivered:</b> {{ $deliveredCount ?? 0 }}</p>
-                <p><b>Pending:</b> {{ $pendingCount ?? 0 }}</p>
-
-                <a href="{{ route('customer.orders') }}" style="color:#C08A56;font-weight:600;">View All Orders →</a>
-            </div>
-        </div>
-
+        <button>Save Changes</button>
+      </form>
     </div>
 
+    <!-- PASSWORD -->
+    <div class="profile-section">
+      <h3>Change Password</h3>
+      <form method="POST" action="{{ route('customer.updatePassword') }}">
+        @csrf
+        <label>Current Password</label>
+        <input type="password" name="current_password">
+
+        <label>New Password</label>
+        <input type="password" name="new_password">
+
+        <label>Confirm Password</label>
+        <input type="password" name="new_password_confirmation">
+
+        <button>Update Password</button>
+      </form>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="profile-section">
+      <h3>Your Orders</h3>
+      <div class="orders-box">
+        <p><b>Total Orders:</b> {{ $ordersCount ?? 0 }}</p>
+        <p><b>Delivered:</b> {{ $deliveredCount ?? 0 }}</p>
+        <p><b>Pending:</b> {{ $pendingCount ?? 0 }}</p>
+        <a href="{{ route('customer.orders') }}">View All Orders →</a>
+      </div>
+    </div>
+
+  </div>
+</div>
 </div>
 
 @endsection

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,11 +7,25 @@
 </head>
 <body>
     <style>
-/* ===== Order Details Page ===== */
+:root {
+   --purple-dark: #5b2a86;
+   --purple-soft: #1f7bb8eb;
+   --blue-soft: #8f3f9beb;
+
+   --bg-light: #fdfcff;
+   --white: #ffffff;
+
+   --text-dark: #1e1b4b;
+   --text-muted: #6b7280;
+
+   --border-soft: rgba(226,232,240,0.8);
+   --shadow-soft: 0 18px 40px rgba(91, 42, 134, 0.18);
+}
+
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f9f7f4;
-    color: #3e2a1f;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
     margin: 0;
     padding: 0;
 }
@@ -23,36 +36,29 @@ body {
     padding: 0 20px;
 }
 
-.dashboard-container h2 {
-    margin-bottom: 25px;
-    font-size: 26px;
-    color: #8B5E3C;
-}
-
-/* Info Cards */
 .table-container {
-    background: #ffffff;
+    background: var(--white);
     padding: 25px;
     border-radius: 12px;
     margin-bottom: 30px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow-soft);
 }
 
 .table-container h3 {
     margin-bottom: 15px;
-    color: #C08A56;
+    color: var(--purple-dark);
     font-size: 20px;
-    border-left: 4px solid #C08A56;
+    border-left: 4px solid var(--purple-dark);
     padding-left: 10px;
 }
 
 .table-container p {
     margin: 8px 0;
-    font-size: 15px;
+    font-size: 18px;
 }
 
 .table-container p strong {
-    color: #8B5E3C;
+    color: var(--purple-dark);
 }
 
 /* Table */
@@ -64,16 +70,17 @@ table {
 
 table th, table td {
     padding: 12px;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 18px;
 }
 
 table th {
-    background-color: #8B5E3C;
-    color: #fff;
+    background-color: var(--purple-dark);
+    color: var(--white);
+    text-align: left;
+    border-radius: 4px;
 }
 
-/* Status Select Button */
 .status-select {
     padding: 8px 14px;
     border-radius: 8px;
@@ -83,50 +90,31 @@ table th {
     color: #fff;
     min-width: 140px;
     text-transform: capitalize;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+    font-size: 16px;
 }
 
-/* Status Colors */
-.status-select.pending { background-color: #C08A56; }
-.status-select.processing { background-color: #D9A066; }
-.status-select.shipped { background-color: #8B5E3C; }
+.status-select.pending { background-color: var(--purple-dark); }
+.status-select.processing { background-color: var(--purple-soft); }
+.status-select.shipped { background-color: var(--blue-soft); }
 .status-select.delivered { background-color: #A67C52; }
+.status-select.cancelled { background-color: #452dcd; }
 
-/* Buttons */
 .add-btn {
     display: inline-block;
     padding: 12px 22px;
-    background-color: #C08A56;
-    color: #fff;
+    background-color: var(--purple-dark);
+    color: var(--white);
     border-radius: 8px;
     text-decoration: none;
     font-weight: 500;
     border: none;
     cursor: pointer;
     transition: 0.3s;
+    font-size: 16px;
 }
 
 .add-btn:hover {
-    background-color: #8B5E3C;
-}
-
-/* Back button */
-.back-btn-wrapper {
-    text-align: left;
-    margin-top: 25px;
-}
-
-.order-details-page {
-    direction: ltr;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .dashboard-container h2 {
-        font-size: 22px;
-    }
+    background-color: var(--purple-soft);
 }
 </style>
 
@@ -185,7 +173,7 @@ table th {
                 <select name="order_status"
                         id="statusSelect"
                         class="status-select {{ $order->order_status }}">
-                    @foreach(['pending','processing','shipped','delivered'] as $status)
+                    @foreach(['pending','processing','shipped','delivered','cancelled'] as $status)
                         <option value="{{ $status }}"
                             {{ $order->order_status === $status ? 'selected' : '' }}>
                             {{ ucfirst($status) }}
@@ -254,7 +242,3 @@ table th {
 </script>
 </body>
 </html>
-
-
-
-

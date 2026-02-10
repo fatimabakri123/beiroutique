@@ -3,525 +3,1515 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <title>Shop Owner Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <style>
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f9f7f4;
-    color: #3e2a1f;
-    margin: 0;
-    padding: 0;
-}
-.navbar-main {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #8B5E3C;
-    color: #fff;
-    padding: 10px 20px;
-}
-.navbar-main .logo {
-    font-weight: bold;
-    font-size: 1.2rem;
-}
-.navbar-main a {
-    color: #fff;
-    text-decoration: none;
-}
-.dashboard-container {
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 0 20px;
-}
-.shop-info {
-    background: #fff2e6;
-    padding: 20px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 30px;
-}
-.shop-info img {
-    height: 80px;
-    border-radius: 50%;
-    margin-right: 20px;
-}
-.shop-info .details {
-    flex: 1;
-}
-.shop-info .details h2 {
-    margin: 0 0 5px 0;
-}
-.stats-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-.stat-card {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-    transition: transform 0.3s;
-}
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-.stat-card h3 {
-    margin: 0;
-    font-size: 1.8rem;
-    color: #C08A56;
-}
-.stat-card p {
-    margin: 5px 0 0 0;
-    font-weight: 500;
-    color: #8B5E3C;
-}
-.table-container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-    overflow-x: auto;
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-table th, table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
-}
-table th {
-    background-color: #8B5E3C;
-    color: #fff;
-}
-.add-btn {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 10px 20px;
-    background-color: #C08A56;
-    color: #fff;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: 500;
-}
-.add-btn:hover {
-    background-color: #8B5E3C;
+/* ===============================
+   THEME VARIABLES
+================================ */
+/* ===============================
+   THEME
+================================ */
+:root {
+  --primary: #5b2a86;
+  --secondary: #1f7bb8eb;
+  --accent: #8f3f9beb;
+
+  --bg-light: #f5f7fb;
+  --white: #ffffff;
+
+  --text-dark: #1e1b4b;
+  --text-muted: #6b7280;
+
+  --border-soft: rgba(226,232,240,0.8);
+  --shadow-soft: 0 12px 30px rgba(91, 42, 134, 0.15);
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
+/* ===============================
+   BASE
+================================ */
+body {
+  font-family: "Poppins", sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  margin: 0;
+}
+
+/* ===============================
+   NAVBAR
+================================ */
+.navbar-main {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===============================
+   MAIN CONTAINER
+================================ */
+.dashboard-container {
+  width: 100%;
+  max-width: 100%; /* no limit */
+  margin: 0;       /* remove centering */
+  padding: 20px;   /* keep some padding from edges */
+  box-sizing: border-box; /* include padding in width */
+}
+
+/* ===============================
+   SHOP INFO
+================================ */
+.shop-info {
+    background: #fff;                  /* clean professional background */
+    padding: 35px 40px;                /* taller card */
+    border-radius: 16px;
+    display: flex;
     align-items: center;
+    gap: 35px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+    flex-wrap: wrap;                    /* responsive wrapping */
+    position: relative;                 /* keeps edit button in flow */
+    margin-bottom: 35px;               /* space below so stats cards are visible */
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.shop-info:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+}
+
+.shop-info img {
+    width: 130px;                       /* bigger logo */
+    height: 130px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.shop-info .details {
+    flex: 1;
+    min-width: 0;                       /* allows text ellipsis in flex */
+}
+
+.shop-info .details h2 {
+    font-size: 2.2rem;                  /* bigger shop name */
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.shop-info .details p {
+    font-size: 1.1rem;                  /* larger description */
+    margin: 5px 0;
+    color: #555;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edit-shop-btn {
+    position: relative;                 /* inside card flow */
+    background-color: #6a2fb0;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;                 /* bigger button */
+    border-radius: 10px;
+    font-size: 1rem;                    /* larger text */
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: fit-content;
+}
+
+.edit-shop-btn:hover {
+    background-color: #8f3f9b;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 700px) {
+    .shop-info {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 25px;
+        gap: 20px;
+    }
+
+    .edit-shop-btn {
+        align-self: flex-end;
+    }
+
+    .shop-info img {
+        width: 110px;
+        height: 110px;
+    }
+
+    .shop-info .details h2 {
+        font-size: 1.8rem;
+    }
+
+    .shop-info .details p {
+        font-size: 1rem;
+    }
+}
+
+.edit-shop-btn {
+    position: relative;          /* keeps it in card flow */
+    background-color: #6a2fb0;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: fit-content;
+}
+
+.edit-shop-btn:hover {
+    background-color: #8f3f9b;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 700px) {
+    .shop-info {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+        gap: 15px;
+    }
+
+    .edit-shop-btn {
+        align-self: flex-end;
+    }
+
+    .shop-info img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .shop-info .details h2 {
+        font-size: 1.6rem;
+    }
+
+    .shop-info .details p {
+        font-size: 0.95rem;
+    }
+}
+/* ===============================
+   STATS
+================================ */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  width: 100%; /* add this */
+}
+
+.table-container {
+  width: 100%; /* add this */
+}
+
+.stat-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+}
+
+.stat-card h3 {
+  font-size: 2.5rem; /* bigger number */
+  color: var(--secondary);
+  margin-bottom: 10px; /* more spacing */
+  font-weight: 700; /* bolder */
+}
+
+.stat-card p {
+  font-size: 1.25rem; /* bigger label */
+  color: #555;         /* softer color */
+  font-weight: 500;    /* semi-bold */
+  margin: 0;           /* optional cleanup */
+}
+
+.stat-card {
+  background: #fff;
+  padding: 30px 25px; /* more padding */
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+/* ===============================
+   TABLES
+================================ */
+.table-container {
+  background: #fff;
+  padding: 25px;
+  border-radius: 14px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-soft);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: var(--primary);
+  color: #fff;
+  padding: 14px;
+  text-align: left;
+}
+
+td {
+  padding: 14px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+/* ===============================
+   BUTTONS
+================================ */
+button,
+.add-btn {
+  background: linear-gradient(135deg, var(--secondary), var(--accent));
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+button:hover,
+.add-btn:hover {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   FORMS
+================================ */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  margin-bottom: 15px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(31,123,184,0.2);
+  outline: none;
+}
+
+/* ===============================
+   MODALS
+================================ */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
 }
 
 .modal-content {
-    background: #fff;
-    padding: 20px;
-    width: 350px;
-    border-radius: 10px;
-    animation: fade 0.3s ease;
-}
-
-.close {
-    float: right;
-    font-size: 24px;
-    cursor: pointer;
+  background: #fff;
+  padding: 30px;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 520px;
+  animation: fade 0.3s ease;
 }
 
 @keyframes fade {
-    from {transform: scale(0.8); opacity: 0;}
-    to   {transform: scale(1); opacity: 1;}
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ===============================
+   VIEW MORE BUTTON
+================================ */
+.view-more-products {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--secondary);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+.view-more-products:hover {
+  background: var(--secondary);
+  color: #fff;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 768px) {
+  .shop-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* FIX MODAL CLOSE BUTTON */
+.modal-content {
+  position: relative; /* REQUIRED */
+}
+
+/* Close (X) button */
+.close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #555;
+  cursor: pointer;
+  background: #f3f4f6;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  z-index: 10;
+}
+
+.close:hover {
+  background: var(--secondary);
+  color: white;
+  transform: scale(1.05);
+}
+
+.shop-info {
+    position: relative; /* so the button can be absolutely positioned */
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+}
+
+.edit-shop-btn {
+    position: absolute;   /* position inside the card */
+    top: 20px;            /* distance from top of card */
+    right: 20px;          /* distance from right of card */
+    background-color: #C08A56;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 10;          /* ensures it’s above other elements */
+}
+
+.edit-shop-btn:hover {
+    background-color: #8B5E3C;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+.edit-shop-btn:active {
+    transform: scale(0.97);
+}
+.table-container {
+    margin-bottom: 40px;
+}
+
+.hidden-section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-section {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.section-header .toggle-icon {
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.section-content {
+    padding: 20px 24px;
+    display: none; /* Hidden by default */
+    background: #f9f9f9;
+}
+
+.section-content form input {
+    margin-bottom: 15px;
+}
+
+.dashboard-section {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.section-header {
+    width: 100%;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    border-radius: 0;
+}
+
+.section-header:hover {
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
+}
+
+.section-header .toggle-icon {
+    transition: transform 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.section-content {
+    padding: 20px 24px;
+    display: none; /* Hidden by default */
+    background: #f9f9f9;
+    border-top: 1px solid #eee;
+}
+
+.section-content form input {
+    margin-bottom: 15px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* Put All Products on Sale button spacing */
+.sale-all-btn {
+    margin-top: 15px; /* adds space above the button */
+    margin-bottom: 20px; /* optional: adds space below before the table */
+}
+
+.add-btn {
+    margin-top: 10px; /* smaller space from table */
+}
+
+.view-more-products {
+    display: inline-flex;          /* keep icon and text aligned */
+    align-items: center;
+    gap: 6px;                      /* space between text and icon */
+    padding: 8px 16px;             /* nicer clickable area */
+    border-radius: 8px;            /* rounded corners */
+    background: #fff;               /* white background */
+    color: var(--secondary);        /* matches your theme */
+    text-decoration: none;          /* remove underline */
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* subtle shadow */
+    transition: 0.3s;
+}
+
+.view-more-products:hover {
+    background: var(--secondary);
+    color: #fff;                   /* invert text on hover */
+    transform: translateY(-2px);   /* small lift effect */
+    text-decoration: none;         /* ensure no underline on hover */
+}
+
+.dashboard-section.loyalty {
+    margin-top: 30px; /* adds space from the stats cards */
+}
+
+.navbar-main {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    padding: 20px 40px; /* taller and wider */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* subtle shadow for depth */
+}
+
+.navbar-main .logo {
+    font-size: 1.6rem;   /* bigger and more visible */
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+input[type="checkbox"] {
+    width: auto !important;
+    display: inline-block !important;
+    margin: 0;
+}
+.status-pending {
+    color: #856404;
+    background-color: #fff3cd;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-delivered {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-cancelled {
+    color: #721c24;
+    background-color: #f8d7da;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+
+.status-shipped {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+}
+.status-processing {
+    color: #0c1ccd;
+    background-color: #d1ecf1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+}
+.status-cancelled {
+    color: #cd0c0c;
+    background-color: #d1ecf1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.image-slider {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.slider-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 14px;
+}
+
+.slider-btn.left {
+    left: 4px;
+}
+
+.slider-btn.right {
+    right: 4px;
+}
+/* ===============================
+   PAGINATION STYLE
+================================ */
+/* ===============================
+   PAGINATION STYLE (TEXT)
+================================ */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.pagination li {
+    list-style: none;
+}
+
+.pagination li a,
+.pagination li span {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #5b2a86;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pagination li a:hover {
+    background: #5b2a86;
+    color: #fff;
+}
+
+.pagination .active span {
+    background: #5b2a86;
+    color: #fff;
+    border-color: #5b2a86;
+}
+
+.pagination .disabled span {
+    opacity: 0.4;
+}
+
+.pagination li a {
+    font-size: 14px !important;
+}
+
+.pagination li a::before,
+.pagination li a::after {
+    content: none !important;
+}
+
+
+/* Modal common styles */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 400px;
+  animation: fade 0.3s ease;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 24px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #555;
+  background: #f3f4f6;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close:hover {
+  background: #8f3f9b;
+  color: white;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.modal-content button {
+  margin-top: 15px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  background-color: #6a2fb0;
+  color: #fff;
+  cursor: pointer;
+
+}
+
+.modal-content button:hover {
+  background-color: #8f3f9b;
+}
+
+/* Button */
+.loyalty-btn {
+    background-color: var(--purple-dark);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+/* Modal background */
+.modal {
+    display: none; /* hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
 }
 
 /* Modal content */
 .modal-content {
-    background: #fff;
-    padding: 20px;
-    width: 500px; /* wider to fit grid */
-    max-width: 90%; /* responsive on small screens */
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 25px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+/* Close button */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+
+.shop-actions {
+    display: flex;
+    flex-direction: column; /* stack buttons vertically */
+    gap: 12px;              /* space between buttons */
+    margin-top: 15px;       /* optional: spacing from shop details */
+}
+
+.edit-shop-btn {
+    position: relative;     /* remove absolute positioning */
+    width: fit-content;     /* keep button width to content */
+    background-color: #C08A56;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;     /* slightly bigger for visual consistency */
     border-radius: 10px;
-    animation: fade 0.3s ease;
-    box-sizing: border-box;
-    max-height: 90vh; /* keep it inside viewport */
-    overflow-y: auto; /* scroll if content is too tall */
-}
-
-/* Modal Form Grid */
-#productForm {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* two columns */
-    gap: 15px;
-}
-
-/* Make certain fields span both columns (full width) */
-#productForm textarea,
-#productForm select,
-#productForm input[name="product_name"],
-#productForm input[type="file"],
-#productForm button {
-    grid-column: span 2;
-}
-
-/* Inputs and textarea styling */
-#productForm input,
-#productForm select,
-#productForm textarea {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    background: #fff;
-    color: #3e2a1f;
-    box-sizing: border-box;
-    width: 100%; /* important to stay inside grid */
-}
-
-/* Focus effect */
-#productForm input:focus,
-#productForm select:focus,
-#productForm textarea:focus {
-    border-color: #C08A56;
-    outline: none;
-}
-
-/* Submit button styling */
-#productForm button {
-    background-color: #C08A56;
-    color: #fff;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.3s;
-    grid-column: span 2;
-}
-
-#productForm button:hover {
-    background-color: #8B5E3C;
-}
-
-.action-btn {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: 0.3s;
-    margin-right: 5px;
-}
-
-/* Edit button */
-.edit-btn {
-    background-color: #C08A56;
-    color: #fff;
-}
-
-.edit-btn:hover {
-    background-color: #8B5E3C;
-    transform: scale(1.05);
-}
-
-/* Delete button */
-.delete-btn {
-    background-color: #E74C3C;
-    color: #fff;
-}
-
-.delete-btn:hover {
-    background-color: #c0392b;
-    transform: scale(1.05);
-}
-
-}
-
-/* Edit Profile Button */
-.edit-profile-btn {
-    background-color: #4e73df; /* blue */
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: 0.25s ease;
-    text-decoration: none;
-    display: inline-block;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-.edit-profile-btn:hover {
-    background-color: #2e59d9;
+.edit-shop-btn:hover {
+    background-color: #8B5E3C;
     transform: translateY(-2px);
     box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
-.edit-profile-btn:active {
-    transform: scale(0.97);
+.shop-actions {
+    display: flex;
+    flex-direction: column; /* stack buttons vertically */
+    gap: 12px;              /* space between buttons */
+    margin-top: 15px;       /* optional: spacing from shop details */
 }
 
-/* Modal styling (for edit shop) */
-#editShopModal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-}
-
-#editShopModal .modal-content {
-    background: #fff;
-    padding: 25px;
-    width: 500px;
-    max-width: 90%;
+.edit-shop-btn {
+    position: relative;     /* remove absolute positioning */
+    width: fit-content;     /* keep button width to content */
+    background-color: #C08A56;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;     /* slightly bigger for visual consistency */
     border-radius: 10px;
-    animation: fade 0.3s ease;
-    box-sizing: border-box;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-#editShopForm input, 
-#editShopForm button {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    width: 100%;
-    margin-bottom: 10px;
-    font-size: 0.95rem;
-}
-
-#editShopForm button {
-    background-color: #4e73df;
-    color: #fff;
-    border: none;
-    cursor: pointer;
     font-weight: 600;
-    transition: 0.25s ease;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-#editShopForm button:hover {
-    background-color: #2e59d9;
+.edit-shop-btn:hover {
+    background-color: #8B5E3C;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
-/* Edit Shop Modal button matches theme */
-#editShopForm button {
-    background-color: #C08A56;  /* brown/orange theme */
+.shop-info {
+    display: flex;
+    justify-content: space-between;  /* details left, buttons right */
+    align-items: center;             /* vertical centering */
+    padding: 20px 30px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+    gap: 20px;
+}
+
+.shop-details {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.details-text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.shop-actions {
+    display: flex;
+    flex-direction: column;         /* stack buttons vertically */
+    justify-content: center;        /* vertical center in parent */
+    gap: 12px;                      /* space between buttons */
+}
+
+.shop-btn {
+    min-width: 160px;               /* same width for both */
+    padding: 12px 20px;
+    background-color: #5b2a86;      /* same color for all */
     color: #fff;
     border: none;
-    border-radius: 8px;
-    padding: 12px;
-    font-weight: 500;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
     cursor: pointer;
-    transition: background 0.3s;
-    width: 100%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
 }
 
-#editShopForm button:hover {
-    background-color: #8B5E3C;  /* darker brown on hover */
+.shop-btn:hover {
+    background-color: #8B5E3C;
+    transform: translateY(-2px);
+}
+
+.shop-actions {
+    display: flex;
+    flex-direction: column;        /* stack buttons vertically */
+    justify-content: center;       /* vertical center in parent */
+    gap: 12px;                     /* space between buttons */
+}
+
+.shop-btn {
+    width: 230px;                  /* slightly smaller width */
+    padding: 16px 20px;            /* taller height */
+    font-size: 1.1rem;             /* bigger text */
+    font-weight: 600;
+    background: linear-gradient(90deg, #5b2a86, #8f3f9b); /* match your existing gradient */
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.shop-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Bigger products table */
+#productsTable th {
+    font-size: 1.3rem;
+    padding: 20px;
+}
+
+#productsTable td {
+    font-size: 1.05rem;
+    padding: 18px;
+}
+
+.image-slider {
+    position: relative;
+    width: 160px;
+    height: 160px;
+}
+
+.slider-image {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+#productsTable tr {
+    vertical-align: middle;
+}
+#productsTable button {
+    font-size: 1rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+
+#productsTable strong {
+    font-size: 1.2rem;
+}
+
+/* Make numbers bigger in products table */
+#productsTable td {
+    font-size: 1.1rem;
+}
+
+#productsTable td strong {
+    font-size: 1.25rem;   /* main price bigger */
+    font-weight: 700;
+}
+
+/* Price styling */
+#productsTable td strong {
+    font-size: 1.4rem;
+    
+}
+/* Stock quantity */
+#productsTable td:nth-child(3) {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* On Sale Badge */
+.sale-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 20px;
+    text-align: center;
+}
+
+/* Green for ON SALE */
+.sale-badge.yes {
+    background: #e6fff2;
+    color: #00a65a;
+    border: 2px solid #00a65a;
+}
+
+/* Gray for NO SALE */
+.sale-badge.no {
+    background: #f2f2f2;
+    color: #666;
+    border: 2px solid #ccc;
+}
+
+/* Make On Sale toggle bigger */
+.sale-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;   /* Bigger text */
+    font-weight: 600;
+}
+
+/* Make checkbox bigger */
+.sale-toggle input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+#productsTable td button {
+    font-size: 1.1rem;     /* bigger text */
+    padding: 8px 12px;     /* bigger size */
+    border-radius: 6px;    /* soft corners */
+}
+
+#product-section h2 {
+    font-size: 2rem;         /* bigger text */
+    font-weight: 700;        /* bold */
+    margin-bottom: 20px;     /* space below */
+    color: var(--primary);   /* theme color */
 }
 
 .sale-all-btn {
-    margin-bottom: 25px;
-    align-self: flex-start;
-}
-
-#viewMoreOrders {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #C08A56; /* your dashboard theme */
-    color: #fff;
+    font-size: 1.1rem;       /* bigger text */
+    padding: 12px 22px;      /* bigger clickable area */
+    border-radius: 10px;     /* nice rounded corners */
     font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    text-decoration: none;
-    text-align: center;
-    margin-top: 15px;
+    margin-bottom: 25px;     /* space from table */
+}
+#product-section {
+    margin-top: 40px;  /* space between stats cards and table */
 }
 
-#viewMoreOrders:hover {
-    background-color: #8B5E3C; /* slightly darker on hover */
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-}
-
-#viewMoreOrders:active {
-    transform: scale(0.97);
+/* Buttons / Links in Product Header */
+.view-more-products,
+.add-btn {
+    font-size: 1.2rem;         /* bigger text */
+    padding: 10px 18px;        /* bigger clickable area */
+    font-weight: 600;
+    border-radius: 8px;        /* slightly rounded */
+    text-decoration: none;     /* remove underline from link */
+    display: flex;
+    align-items: center;
+    gap: 6px;                  /* space between text and icon */
+    transition: all 0.2s ease;
 }
 
 .add-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 25px;
-    background-color: #C08A56; /* your dashboard theme */
-    color: #fff;
-    font-weight: 600;
-    font-size: 15px;
-    border: none;
-    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    text-decoration: none;
-    gap: 8px; /* spacing between icon and text */
+    background-color: var(--primary-color, #5b2a86); /* optional color */
+    color: white;
+    border: none;
 }
 
 .add-btn:hover {
-    background-color: #8B5E3C; /* slightly darker on hover */
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-}
-
-.add-btn:active {
-    transform: scale(0.97);
-}
-
-.view-more-products {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;               /* slightly smaller gap between text and icon */
-    padding: 8px 16px;       /* smaller padding */
-    font-weight: 600;
-    font-size: 0.85rem;      /* smaller text */
-    color: #C08A56;          /* dashboard accent color */
-    background: #fff;        /* card-like feel */
-    border-radius: 6px;      /* slightly smaller radius */
-    box-shadow: 0 2px 6px rgba(192,138,86,0.2); /* subtle colored shadow */
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    border: none;            /* remove default button border */
+    transform: scale(1.05);
 }
 
 .view-more-products:hover {
-    color: #fff;
-    background-color: #C08A56;
-    box-shadow: 0 4px 10px rgba(192,138,86,0.25); /* softer hover shadow */
-    transform: translateY(-1px); /* smaller hover lift */
+    transform: scale(1.05);
 }
 
-.view-more-products i {
-    transition: transform 0.3s;
-    font-size: 0.8rem;        /* smaller arrow */
+//* ===============================
+   ORDERS TABLE BIGGER & BOLDER
+================================ */
+#ordersTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.1rem;         /* bigger font */
 }
 
-.view-more-products:hover i {
-    transform: translateX(4px); /* smaller arrow move */
+#ordersTable th,
+#ordersTable td {
+    padding: 18px 20px;        /* bigger cells */
+    font-size: 1.15rem;        /* slightly bigger text */
 }
 
-/* Sale button styling */
-#saleForm button {
-    background-color: #C08A56; /* brown/orange theme */
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.3s;
-    width: 100%; /* full width */
+#ordersTable th {
+    font-weight: 700;           /* bolder headers */
+    font-size: 1.25rem;         /* bigger header text */
+    color: #fff;                /* white text */
+    background: var(--primary); /* same theme color as products table headers */
+    text-align: left;
 }
 
-#saleForm button:hover {
-    background-color: #8B5E3C; /* darker brown on hover */
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.1); /* soft shadow */
+#ordersTable td {
+    font-weight: 600;           /* make table content bolder */
+    color: #1e1b4b;             /* dark color, like products table */
 }
 
-.loyalty-section {
-    margin-top: 40px;
-    max-width: 600px;
+#ordersTable tr {
+    vertical-align: middle;     /* keep cells centered */
 }
 
-.loyalty-section h2 {
-    font-size: 1.4rem;
-    color: #8B5E3C;
-    margin-bottom: 15px;
+/* Status badges stay same colors but bolder text */
+.status-pending,
+.status-delivered,
+.status-cancelled,
+.status-shipped,
+.status-processing {
+    font-weight: 700;           /* bolder text */
+    padding: 6px 10px;          /* slightly bigger badge */
+    border-radius: 8px;         /* softer corners */
+    font-size: 1.05rem;         /* slightly bigger */
 }
 
-/* Form layout */
-#loyaltyForm {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px 20px;
+/* View More Orders button bigger like products table */
+#viewMoreOrders {
+    font-size: 1.2rem;          /* bigger text */
+    padding: 12px 22px;         /* bigger clickable area */
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+
+/* Navbar logo and text bigger */
+.navbar-main .logo {
+    font-size: 2rem;        /* bigger text */
+    font-weight: 700;       /* bolder */
+    letter-spacing: 1px;    /* subtle spacing */
+}
+
+/* Logout link bigger and more clickable */
+.navbar-main a {
+    font-size: 1.25rem;     /* bigger link text */
+    font-weight: 600;       /* semi-bold */
+    color: #fff;            /* keep white */
+    text-decoration: none;
+    margin-left: 10px;      /* spacing from icon */
+}
+
+.navbar-main a:hover {
+    text-decoration: underline;
+}
+
+/* Logout icon bigger */
+.navbar-main .fa-sign-out {
+    font-size: 1.3rem;      /* bigger icon */
+    margin-right: 5px;
+    vertical-align: middle; /* aligns with text */
+}
+
+/* Recent Orders title */
+.table-container h2 {
+    font-size: 2rem;      /* bigger title */
+    font-weight: 700;     /* bold */
+    margin-bottom: 20px;  /* space below the title */
+    color: var(--primary); /* match your theme color like products table */
+}
+
+/* Modal background (centered) */
+.modal {
+    display: none; /* hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
     align-items: center;
 }
 
-/* Labels */
-#loyaltyForm label {
-    grid-column: span 2;
-    font-size: 13px;
-    font-weight: 600;
-    color: #3e2a1f;
+/* Modal content: bigger */
+.modal-content {
+    background-color: #fff;
+    margin: 0 auto;
+    padding: 35px 50px;        /* bigger padding */
+    border-radius: 14px;
+    width: 600px;              /* wider modal */
+    max-width: 90%;            /* responsive for smaller screens */
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    position: relative;
+    font-size: 1.15rem;        /* slightly bigger text */
 }
 
-/* Inputs */
-#loyaltyForm input {
-    grid-column: span 2;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    background: #fff;
+/* Modal heading */
+.modal-content h2 {
+    font-size: 2rem;           /* bigger heading */
+    margin-bottom: 25px;
+    color: var(--purple-dark);
+    text-align: center;
 }
 
-#loyaltyForm input:focus {
-    border-color: #C08A56;
-    outline: none;
+/* Modal inputs */
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+    padding: 14px 16px;
+    font-size: 1.15rem;       /* slightly bigger */
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+    margin-bottom: 20px;
 }
 
-/* Save button */
-#loyaltyForm button {
-    grid-column: span 2;
-    margin-top: 10px;
-    background: #C08A56;
-    color: #fff;
-    border: none;
-    padding: 11px;
-    border-radius: 6px;
+/* Modal buttons */
+.modal-content button {
+    padding: 14px 30px;
+    font-size: 1.25rem;        /* bigger button text */
+    border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
-    transition: 0.25s;
+    transition: all 0.3s ease;
 }
 
-#loyaltyForm button:hover {
-    background: #8B5E3C;
-    transform: translateY(-1px);
+.modal-content button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
+
+/* Close button */
+.close-btn {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 1.5rem;          /* bigger close button */
+    cursor: pointer;
+    background: #f3f4f6;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.close-btn:hover {
+    background-color: var(--purple-soft);
+    color: white;
+    transform: scale(1.05);
+}
+/* Modal background (hidden by default) */
+.modal {
+    display: none; /* keep hidden until triggered */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+
+    justify-content: center;  /* center content */
+    align-items: center;      /* vertical center */
+}
+
+/* Modal content */
+.modal-content {
+    background-color: #fff;
+    padding: 35px 50px;
+    border-radius: 14px;
+    width: 600px;
+    max-width: 90%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    position: relative;
+    font-size: 1.15rem;
+}
+
+/* Modal background */
+.modal {
+    display: none;              /* hidden by default */
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+
+    justify-content: center;    /* horizontal center */
+    align-items: center;        /* vertical center */
+}
+
+/* When modal is active */
+.modal.show {
+    display: flex;
+}
+
+/* Modal box */
+.modal-content {
+    background: #fff;
+    padding: 35px 45px;
+    border-radius: 14px;
+    width: 600px;
+    max-width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    position: relative;
+
+    /* ❌ REMOVE ANY margin: 10% auto */
+}
+
+/* Image slider buttons - match dashboard exactly */
+.image-slider .slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9) !important; /* Force white background */
+    color: #333 !important; /* Force dark text */
+    border: none;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    margin: 0 !important; /* Remove button margin */
+}
+
+.image-slider .slider-btn:hover {
+    background: white !important; /* solid white on hover */
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    color: #333 !important;
+}
+
+.slider-btn.left { left: 8px; }
+.slider-btn.right { right: 8px; }
+
+.low-stock-row {
+    background-color: #ffebee !important; /* Light red background */
+    border-left: 4px solid #f44336 !important; /* Red border on left */
+}
+
+.low-stock-row:hover {
+    background-color: #ffcdd2 !important; /* Darker red on hover */
+}
+
+/* Add these styles to your CSS */
+.low-stock-row td {
+    font-weight: 600;
+}
+
+.low-stock-row td:first-child {
+    position: relative;
+}
+
+
+/* Make stock quantity cell stand out more */
+.low-stock-row td:nth-child(3) {
+    color: #d32f2f;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Consistent button styles for all dashboard buttons */
+.shop-btn, 
+.view-more-products,
+.add-btn,
+.sale-all-btn,
+.modal-content button,
+.edit-shop-btn {
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
+    color: #fff;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(91, 42, 134, 0.2);
+}
+
+.shop-btn:hover,
+.view-more-products:hover,
+.add-btn:hover,
+.sale-all-btn:hover,
+.modal-content button:hover,
+.edit-shop-btn:hover {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(91, 42, 134, 0.3);
+}
+
+.shop-btn:active,
+.view-more-products:active,
+.add-btn:active,
+.sale-all-btn:active,
+.modal-content button:active,
+.edit-shop-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(91, 42, 134, 0.2);
+}
+
+/* Specific adjustments for each button type */
+.shop-btn {
+    min-width: 200px;
+    height: 52px;
+    font-size: 1.15rem;
+}
+
+.view-more-products {
+    padding: 10px 18px;
+}
+
+.add-btn {
+    padding: 10px 18px;
+}
+
+.sale-all-btn {
+    margin-top: 15px;
+    margin-bottom: 25px;
+}
+
+/* Modal buttons */
+.modal-content button {
+    padding: 14px 30px;
+    font-size: 1.25rem;
+    border-radius: 10px;
+    width: 100%;
+    margin-top: 15px;
+}
+
+
 </style>
-</head>
-<body>
+
      @php use Illuminate\Support\Str; @endphp
 
 <!-- Navbar -->
@@ -538,22 +1528,26 @@ table th {
 </nav>
 
 <div class="dashboard-container">
-
     <!-- Shop Info -->
-    <div class="shop-info">
-      <img id="shopLogo" src="{{ $shop->logo_url ? asset('storage/' . $shop->logo_url) : asset('image/default.jpg') }}" alt="Shop Logo">
+<div class="shop-info">
+    <img id="shopLogo" src="{{ $shop->logo_url ? asset('storage/' . $shop->logo_url) : asset('image/default.jpg') }}" alt="Shop Logo">
 
-
-        <div class="details">
-            <h2 id="shopName">{{ $shop->shop_name ?? 'Your Shop Name' }}</h2>
-            <p id="shopDescription">{{ $shop->description ?? 'Your shop description goes here' }}</p>
-            <p>Email: <span id="shopEmail">{{ $shop->contact_email ?? 'contact@example.com' }}</span> | Phone: <span id="shopPhone">{{ $shop->contact_phone ?? 'N/A' }}</span></p>
-        </div>
-       <a href="#" class="add-btn" onclick="openEditShop()">Edit Shop</a>
-
-
+    <div class="details">
+        <h2 id="shopName">{{ $shop->shop_name ?? 'Your Shop Name' }}</h2>
+        <p id="shopDescription">{{ $shop->description ?? 'Your shop description goes here' }}</p>
+        <p>Email: <span id="shopEmail">{{ $shop->contact_email ?? 'contact@example.com' }}</span> | Phone: <span id="shopPhone">{{ $shop->contact_phone ?? 'N/A' }}</span></p>
     </div>
+        <div class="shop-actions">
+    <button class="shop-btn" onclick="openEditShop()">
+       </i>✏️ Edit Shop
+    </button>
+    <button class="shop-btn" onclick="openLoyaltyModal()">
+        </i>⭐ Loyalty Program
+    </button>
+</div>
 
+</div>
+    
     <!-- Stats Cards -->
     <div class="stats-cards">
     <div class="stat-card">
@@ -574,38 +1568,32 @@ table th {
     </div>
 </div>
 
-<!-- Loyalty Settings -->
-<div class="loyalty-section">
-    <h2>Loyalty Program</h2>
 
-    <form id="loyaltyForm">
-        @csrf
-        <input type="hidden" name="shop_id" value="{{ $shop->shop_id }}">
-
-        <label>Minimum Orders</label>
-        <input type="number" name="min_orders"
-               value="{{ $loyaltySetting->min_orders ?? 5 }}">
-
-        <label>Minimum Revenue ($)</label>
-        <input type="number" name="min_revenue"
-               value="{{ $loyaltySetting->min_revenue ?? 200 }}">
-
-        <label>Discount Percentage (%)</label>
-        <input type="number" name="discount_percentage"
-               value="{{ $loyaltySetting->discount_percentage ?? 10 }}">
-
-        <button type="button" onclick="saveLoyaltySettings()">
-            Save Loyalty Settings
-        </button>
-    </form>
+<!-- Loyalty Modal -->
+<div id="loyaltyModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeLoyaltyModal()">&times;</span>
+        <h2>Loyalty Program Settings</h2>
+        <form id="loyaltyForm">
+            @csrf
+            <input type="hidden" name="shop_id" value="{{ $shop->shop_id }}">
+            <label>Minimum Orders</label>
+            <input type="number" name="min_orders" value="{{ $loyaltySetting->min_orders ?? 5 }}">
+            <label>Minimum Revenue ($)</label>
+            <input type="number" name="min_revenue" value="{{ $loyaltySetting->min_revenue ?? 200 }}">
+            <label>Discount Percentage (%)</label>
+            <input type="number" name="discount_percentage" value="{{ $loyaltySetting->discount_percentage ?? 10 }}">
+            <button type="button" onclick="saveLoyaltySettings()">Save</button>
+        </form>
+    </div>
 </div>
 
-
+    
    <!-- Products Table -->
-<div class="table-container">
+<div class="table-container" id="product-section">
     <h2>Your Products</h2>
 
-<button onclick="openSaleAllModal()" class="add-btn sale-all-btn">💲 Put All Products on Sale</button>
+    <button onclick="openSaleAllModal()" class="add-btn sale-all-btn">💲 Put All Products on Sale</button>
 
     <table id="productsTable">
         <thead>
@@ -617,66 +1605,152 @@ table th {
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="productsBody">
             @foreach($products as $product)
-           
+                 <tr class="{{ $product->stock_quantity < 5 ? 'low-stock-row' : '' }}">
+                    <td>
+                        <div class="image-slider" data-index="0">
+                            @if($product->images->count() > 0)
+                                @foreach($product->images as $image)
+                                    <img src="{{ asset('storage/'.$image->image_path) }}" class="slider-image" style="display:none;">
+                                @endforeach
+                                @if($product->images->count() > 1)
+                                    <button class="slider-btn left" onclick="prevImage(this)">❮</button>
+                                    <button class="slider-btn right" onclick="nextImage(this)">❯</button>
+                                @endif
+                            @else
+                                <img src="{{ asset('image/default.jpg') }}"  style="width:160px;height:160px;object-fit:cover;border-radius:12px;">
+                            @endif
+                        </div>
+                        <div>
+                            <strong>{{ $product->product_name }}</strong><br>
+                            <small>{{ $product->shop->shop_name ?? 'Brand' }}</small>
+                        </div>
+                    </td>
 
-            <tr>
-                <td>
-                    
-                  @if(Str::startsWith($product->image_url, 'products/'))
-    <img src="{{ asset('storage/' . $product->image_url) }}" 
-         style="width:120px; height:120px; object-fit:cover;">
-@else
-    <img src="{{ asset($product->image_url) }}" 
-         style="width:120px; height:120px; object-fit:cover;">
-@endif
+                    <td>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <strong>${{ $product->price }}</strong>
+                            @if($product->is_on_sale)
+                                <span style="color:red; font-size:1.2rem; font-weight:600;">Sale: ${{ $product->discount_value }}</span>
+                            @endif
+                        </div>
+                    </td>
 
-                    <div>
-                        <strong>{{ $product->product_name }}</strong><br>
-                        <small>{{ $product->shop->shop_name ?? 'Brand' }}</small>
-                    </div>
-                </td>
-                <td>
-                    ${{ $product->price }}
-                    @if($product->is_on_sale)
-                        <div style="color:red;">Sale: ${{ $product->discount_value }}</div>
-                    @endif
-                </td>
-                <td>{{ $product->stock_quantity }} units</td>
-                <td>
-                    <input 
-    type="checkbox" 
-    {{ $product->is_on_sale ? 'checked' : '' }}
-    onchange="toggleSale({{ $product->product_id }}, this.checked)">
-On Sale
+                    <td>{{ $product->stock_quantity }} units</td>
 
-                </td>
-                <td>
-                    <button onclick="editProduct({{ $product->product_id }})">✏️</button>
-                    <button onclick="deleteProduct({{ $product->product_id }})">🗑️</button>
-                    <button class="action-btn" onclick="openSaleProduct({{ $product->product_id }})">💲 Sale</button>
-                    
+                    <td>
+                        <label class="sale-toggle">
+                            <input type="checkbox" {{ $product->is_on_sale ? 'checked' : '' }} onchange="toggleSale({{ $product->product_id }}, this.checked)">
+                            <span>On Sale</span>
+                        </label>
+                    </td>
 
-                </td>
-            </tr>
+                    <td>
+                        <button onclick="editProduct({{ $product->product_id }})">✏️</button>
+                        <button onclick="deleteProduct({{ $product->product_id }})">🗑️</button>
+                        <button onclick="openSaleProduct({{ $product->product_id }})">💲 Sale</button>
+                        <button onclick="openEditStock({{ $product->product_id }}, {{ $product->stock_quantity }})">📦 Edit Stock</button>
+
+                    </td>
+                </tr>
             @endforeach
         </tbody>
     </table>
-<a href="{{ route('shop.products.all') }}" class="view-more-products">
-    View More Products <i class="fa fa-arrow-right"></i>
-</a>
 
-
-
-    
+   
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <a href="{{ route('shop.products.all') }}" class="view-more-products">
+            View More Products <i class="fa fa-arrow-right"></i>
+        </a>
+        <button onclick="openAddProduct()" class="add-btn">
+            <i class="fa fa-plus"></i> Add New Product
+        </button>
+    </div>
 </div>
 
-    <button onclick="openAddProduct()" class="add-btn">
-    <i class="fa fa-plus"></i> Add New Product
-</button>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
 
+
+$(document).ready(function() {
+    initSliders();
+});
+
+
+$(document).on('click', '.ajax-link', function(e){
+    e.preventDefault();
+    var url = $(this).attr('href');
+
+    $.ajax({
+        url: url,
+        type: 'GET',
+        success: function(response){
+           
+            $('#productsBody').html($(response).find('#productsBody').html());
+            $('#pagination-links').html($(response).find('#pagination-links').html());
+
+          
+            initSliders();
+
+     
+            $('#product-section')[0].scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+});
+</script>
+
+
+<!-- Recent Orders Table -->
+<div class="table-container">
+    <h2>Recent Orders</h2>
+    <table id="ordersTable">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($orders as $order)
+            <tr onclick="window.location='{{ route('shop.orders.show', ['order' => $order->order_id, 'return_to' => 'dashboard']) }}'"
+                style="cursor:pointer;">
+                <td>{{ $order->order_id }}</td>
+                <td>{{ $order->customer_name ?? 'N/A' }}</td>
+                <td>${{ number_format($order->total_amount, 2) }}</td>
+              <td>
+    @php
+        $statusClass = match(strtolower($order->order_status)) {
+            'pending' => 'status-pending',
+            'delivered' => 'status-delivered',
+            'cancelled' => 'status-cancelled',
+            'shipped' => 'status-shipped',
+            'processing' => 'status-processing',
+             'cancelled' => 'status-cancelled',
+            default => ''
+        };
+    @endphp
+
+    <span class="{{ $statusClass }}">{{ $order->order_status }}</span>
+</td>
+
+
+            </tr>
+            @empty
+            <tr>
+                <td colspan="4">No orders found.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+    <button id="viewMoreOrders" class="view-more-products" style="display:none;">
+        View More Orders <i class="fa fa-arrow-right"></i>
+    </button>
 </div>
+
+</div> <!-- End of dashboard-container -->
 
 <!-- Add Product Modal -->
 <div id="productModal" class="modal">
@@ -696,62 +1770,20 @@ On Sale
                 @endforeach
             </select>
             <select name="subcategory_id" id="subcategory_id">
-    <option value="">Select Subcategory</option>
-    @foreach($subcategories as $sub)
-        <option value="{{ $sub->subcategory_id }}" data-category="{{ $sub->category_id }}">
-            {{ $sub->subcategory_name }}
-        </option>
-    @endforeach
-</select>
-
+                <option value="">Select Subcategory</option>
+                @foreach($subcategories as $sub)
+                    <option value="{{ $sub->subcategory_id }}" data-category="{{ $sub->category_id }}">
+                        {{ $sub->subcategory_name }}
+                    </option>
+                @endforeach
+            </select>
             <input type="text" name="sku" id="sku" placeholder="SKU">
             <input type="text" name="size" id="size" placeholder="Sizes (comma-separated)">
             <input type="text" name="color" id="color" placeholder="Colors (comma-separated)">
-            <input type="file" name="image_url" id="image_url">
+            <input type="file" name="images[]" multiple accept="image/*">
             <button type="button" onclick="saveProduct()">Save</button>
         </form>
     </div>
-</div>
-
-
-    <!-- Recent Orders Table -->
-    <div class="table-container">
-        <h2>Recent Orders</h2>
-        <table id="ordersTable">
-
-           <thead>
-    <tr>
-        <th>Order ID</th>
-        <th>Customer</th>
-        <th>Amount</th>
-        <th>Status</th>
-    </tr>
-</thead>
-
-           <tbody>
-@forelse($orders as $order)
-<tr onclick="window.location='{{ route('shop.orders.show', $order->order_id) }}'"
-    style="cursor:pointer;">
-
-    <td>{{ $order->order_id }}</td>
-    <td>{{ $order->customer_name ?? 'N/A' }}</td>
-    <td>${{ number_format($order->total_amount, 2) }}</td>
-    <td>{{ $order->order_status }}</td>
-</tr>
-@empty
-<tr>
-    <td colspan="4">No orders found.</td>
-</tr>
-@endforelse
-</tbody>
-
-        </table>
-       <button id="viewMoreOrders" class="view-more-products" style="display:none;">
-    View More Orders <i class="fa fa-arrow-right"></i>
-</button>
-
-    </div>
-
 </div>
 
 <!-- Edit Shop Modal -->
@@ -772,6 +1804,7 @@ On Sale
     </div>
 </div>
 
+<!-- Sale Modal -->
 <div id="saleModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeSaleModal()">&times;</span>
@@ -800,368 +1833,428 @@ On Sale
 </div>
 
 
-
+<!-- Edit Stock Modal -->
+<div id="editStockModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditStock()">&times;</span>
+        <h2>Edit Stock</h2>
+        <form id="editStockForm">
+            @csrf
+            <input type="hidden" name="product_id" id="editStockProductId">
+            <label for="editStockQuantity">Stock Quantity</label>
+            <input type="number" name="stock_quantity" id="editStockQuantity" min="0">
+            <button type="button" onclick="saveStock()">Update Stock</button>
+        </form>
+    </div>
+</div>
 
 
 <script>
+    // Your JavaScript code here (keep it as is)
     let allSubcategories = @json($subcategories);
 
-function openAddProduct(){
-    document.getElementById('modalTitle').innerText = "Add Product";
-    document.getElementById('productForm').reset();
-    document.getElementById('productModal').style.display = 'flex';
-}
-
-function editProduct(id){
-    fetch(`/products/${id}/edit`)
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById('modalTitle').innerText = "Edit Product";
-        document.getElementById('product_id').value = data.product.product_id;
-        document.getElementById('product_name').value = data.product.product_name;
-        document.getElementById('description').value = data.product.description;
-        document.getElementById('price').value = data.product.price;
-        document.getElementById('stock_quantity').value = data.product.stock_quantity;
-        document.getElementById('category_id').value = data.product.category_id;
-        document.getElementById('subcategory_id').value = data.product.subcategory_id;
-        document.getElementById('category_id').dispatchEvent(new Event('change'));
-        document.getElementById('sku').value = data.product.sku;
-        document.getElementById('size').value = data.product.size;
-        document.getElementById('color').value = data.product.color;
+    function openAddProduct(){
+        document.getElementById('modalTitle').innerText = "Add Product";
+        document.getElementById('productForm').reset();
         document.getElementById('productModal').style.display = 'flex';
-    });
-}
-
-function closeProductModal(){
-    document.getElementById('productModal').style.display = 'none';
-}
-
-function saveProduct() {
-    let form = document.getElementById('productForm');
-    let formData = new FormData(form);
-
-    let productId = document.getElementById('product_id').value;
-
-    let url = productId
-        ? `/products/${productId}/update-ajax`
-        : "{{ route('products.storeAjax') }}";
-
-    fetch(url, {
-        method: "POST",
-        body: formData,
-        headers: { 
-            "X-CSRF-TOKEN": document.querySelector('input[name=_token]').value
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success){
-            location.reload();
-        } else {
-            alert("Error saving product.");
-        }
-    });
-}
-
-
-function deleteProduct(id){
-    if(!confirm("Are you sure you want to delete this product?")) return;
-
-    let url = "{{ route('products.destroyAjax', ':id') }}";
-    url = url.replace(':id', id);
-
-    fetch(url, {
-        method: "DELETE",
-        headers: {
-            "X-CSRF-TOKEN": document.querySelector('input[name=_token]').value,
-            "Accept": "application/json"
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success){
-            alert(data.message);
-            location.reload();
-        } else {
-            alert(data.message);
-        }
-    })
-    .catch(err => console.error(err));
-}
-
-function openEditShop() {
-    document.getElementById('editShopModal').style.display = 'flex';
-}
-function closeEditShop() {
-    document.getElementById('editShopModal').style.display = 'none';
-}
-
-function saveShop() {
-    let form = document.getElementById('editShopForm');
-    let formData = new FormData(form);
- 
-
-    fetch("{{ route('shop.update') }}", {
-        method: "POST",
-        body: formData,
-    
-        headers: {
-            "X-CSRF-TOKEN": document.querySelector('input[name=_token]').value
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert("Error updating shop.");
-        }
-    });
-}
-
-
-function openSaleProduct(id){
-    document.getElementById("sale_product_id").value = id;
-    document.getElementById("sale_discount_value").value = "";
-    document.getElementById("saleModal").style.display = "flex";
-}
-
-function closeSaleModal(){
-    document.getElementById("saleModal").style.display = "none";
-}
-
-function saveSale(){
-    let formData = new FormData(document.getElementById('saleForm'));
-
-    fetch("{{ route('shop.applySale') }}", {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-CSRF-TOKEN": document.querySelector('input[name=_token]').value
-        }
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.message);
-        if (data.success) location.reload();
-    })
-    .catch(err => alert('Server error'));
-}
-
-
-function openSaleAllModal() {
-    document.getElementById('saleAllModal').style.display = 'flex';
-}
-
-function closeSaleAllModal() {
-    document.getElementById('saleAllModal').style.display = 'none';
-}
-function applySaleAll(){
-
-    let percent = document.getElementById('discount_percentage').value;
-
-    if (percent <= 0 || percent > 100) {
-        alert("Enter a valid percentage.");
-        return;
     }
 
-    fetch("{{ route('products.saleAll') }}", {
-        method: "POST",
-        headers: {
-            "X-CSRF-TOKEN": document
-                .querySelector('meta[name="csrf-token"]')
-                .getAttribute('content'),
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            discount_percentage: percent
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.message);
-        if (data.success) location.reload();
-    })
-    .catch(err => {
-        console.error(err);
-        alert('Request failed');
-    });
-}
+    function editProduct(id){
+        fetch(`/products/${id}/edit`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('modalTitle').innerText = "Edit Product";
+            document.getElementById('product_id').value = data.product.product_id;
+            document.getElementById('product_name').value = data.product.product_name;
+            document.getElementById('description').value = data.product.description;
+            document.getElementById('price').value = data.product.price;
+            document.getElementById('stock_quantity').value = data.product.stock_quantity;
+            document.getElementById('category_id').value = data.product.category_id;
+            document.getElementById('subcategory_id').value = data.product.subcategory_id;
+            document.getElementById('category_id').dispatchEvent(new Event('change'));
+            document.getElementById('sku').value = data.product.sku;
+            document.getElementById('size').value = data.product.size;
+            document.getElementById('color').value = data.product.color;
+            document.getElementById('productModal').style.display = 'flex';
+        });
+    }
 
-function toggleSale(productId, isOnSale){
+    function closeProductModal(){
+        document.getElementById('productModal').style.display = 'none';
+    }
 
-    fetch("{{ route('shop.toggleSale') }}", {
-        method: "POST",
-        headers: {
-            "X-CSRF-TOKEN": document
-                .querySelector('meta[name="csrf-token"]')
-                .getAttribute('content'),
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify({
-            product_id: productId,
-            is_on_sale: isOnSale ? 1 : 0
+    function saveProduct() {
+        let form = document.getElementById('productForm');
+        let formData = new FormData(form);
+
+        let productId = document.getElementById('product_id').value;
+
+        let url = productId
+            ? `/products/${productId}/update-ajax`
+            : "{{ route('products.storeAjax') }}";
+
+        fetch(url, {
+            method: "POST",
+            body: formData,
+            headers: { 
+                "X-CSRF-TOKEN": document.querySelector('input[name=_token]').value
+            }
         })
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log(data);   // <-- IMPORTANT
-        if(!data.success){
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                location.reload();
+            } else {
+                alert("Error saving product.");
+            }
+        });
+    }
+
+    function deleteProduct(id){
+        if(!confirm("Are you sure you want to delete this product?")) return;
+
+        let url = "{{ route('products.destroyAjax', ':id') }}";
+        url = url.replace(':id', id);
+
+        fetch(url, {
+            method: "DELETE",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('input[name=_token]').value,
+                "Accept": "application/json"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function openEditShop() {
+        document.getElementById('editShopModal').style.display = 'flex';
+    }
+    
+    function closeEditShop() {
+        document.getElementById('editShopModal').style.display = 'none';
+    }
+
+    function saveShop() {
+        let form = document.getElementById('editShopForm');
+        let formData = new FormData(form);
+
+        fetch("{{ route('shop.update') }}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('input[name=_token]').value
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert("Error updating shop.");
+            }
+        });
+    }
+
+    function openSaleProduct(id){
+        document.getElementById("sale_product_id").value = id;
+        document.getElementById("sale_discount_value").value = "";
+        document.getElementById("saleModal").style.display = "flex";
+    }
+
+    function closeSaleModal(){
+        document.getElementById("saleModal").style.display = "none";
+    }
+
+    function saveSale(){
+        let formData = new FormData(document.getElementById('saleForm'));
+
+        fetch("{{ route('shop.applySale') }}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('input[name=_token]').value
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
             alert(data.message);
-            location.reload();
-        } else {
-            location.reload();
+            if (data.success) location.reload();
+        })
+        .catch(err => alert('Server error'));
+    }
+
+    function openSaleAllModal() {
+        document.getElementById('saleAllModal').style.display = 'flex';
+    }
+
+    function closeSaleAllModal() {
+        document.getElementById('saleAllModal').style.display = 'none';
+    }
+    
+    function applySaleAll(){
+        let percent = document.getElementById('discount_percentage').value;
+
+        if (percent <= 0 || percent > 100) {
+            alert("Enter a valid percentage.");
+            return;
         }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Toggle failed");
+
+        fetch("{{ route('products.saleAll') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute('content'),
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                discount_percentage: percent
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if (data.success) location.reload();
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Request failed');
+        });
+    }
+
+    function toggleSale(productId, isOnSale){
+        fetch("{{ route('shop.toggleSale') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute('content'),
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                is_on_sale: isOnSale ? 1 : 0
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            if(!data.success){
+                alert(data.message);
+                location.reload();
+            } else {
+                location.reload();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Toggle failed");
+        });
+    }
+
+    document.getElementById('category_id').addEventListener('change', function() {
+        let selected = this.value;
+        let subSelect = document.getElementById('subcategory_id');
+        let options = subSelect.querySelectorAll('option');
+
+        subSelect.value = "";
+
+        options.forEach(opt => {
+            if (!opt.dataset.category) return;
+
+            if (opt.dataset.category === selected) {
+                opt.style.display = "block";
+            } else {
+                opt.style.display = "none";
+            }
+        });
     });
-}
 
-document.getElementById('category_id').addEventListener('change', function() {
-    let selected = this.value;
-    let subSelect = document.getElementById('subcategory_id');
-    let options = subSelect.querySelectorAll('option');
+    document.getElementById('category_id').addEventListener('change', function () {
+        let categoryId = this.value;
+        let subSelect = document.getElementById('subcategory_id');
 
-    subSelect.value = "";
+        subSelect.innerHTML = '<option value="">Select Subcategory</option>';
 
-    options.forEach(opt => {
-        if (!opt.dataset.category) return;
+        allSubcategories.forEach(sub => {
+            if (sub.category_id == categoryId) {
+                let option = document.createElement('option');
+                option.value = sub.subcategory_id;
+                option.textContent = sub.subcategory_name;
+                subSelect.appendChild(option);
+            }
+        });
+    });
 
-        if (opt.dataset.category === selected) {
-            opt.style.display = "block";
-        } else {
-            opt.style.display = "none";
+    document.addEventListener("DOMContentLoaded", function() {
+        const table = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
+        const rows = Array.from(table.getElementsByTagName('tr'));
+        const viewMoreBtn = document.getElementById('viewMoreOrders');
+
+        const rowsPerPage = 4;
+        let currentPage = 1;
+
+        function showRows() {
+            const totalRows = rows.length;
+            const end = currentPage * rowsPerPage;
+
+            rows.forEach((row, index) => {
+                row.style.display = index < end ? '' : 'none';
+            });
+
+            viewMoreBtn.style.display = end >= totalRows ? 'none' : 'inline-block';
         }
-    });
-});
 
-document.getElementById('category_id').addEventListener('change', function () {
-    let categoryId = this.value;
-    let subSelect = document.getElementById('subcategory_id');
-
-    subSelect.innerHTML = '<option value="">Select Subcategory</option>';
-
-    allSubcategories.forEach(sub => {
-        if (sub.category_id == categoryId) {
-            let option = document.createElement('option');
-            option.value = sub.subcategory_id;
-            option.textContent = sub.subcategory_name;
-            subSelect.appendChild(option);
-        }
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    const table = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
-    const rows = Array.from(table.getElementsByTagName('tr'));
-    const viewMoreBtn = document.getElementById('viewMoreOrders');
-
-    const rowsPerPage = 4;
-    let currentPage = 1;
-
-    function showRows() {
-        const totalRows = rows.length;
-        const end = currentPage * rowsPerPage;
-
-        rows.forEach((row, index) => {
-            row.style.display = index < end ? '' : 'none';
+        viewMoreBtn.addEventListener('click', function() {
+            currentPage++;
+            showRows();
         });
 
-        viewMoreBtn.style.display = end >= totalRows ? 'none' : 'inline-block';
-    }
-
-    viewMoreBtn.addEventListener('click', function() {
-        currentPage++;
+        // Initial display
         showRows();
     });
 
-    // Initial display
-    showRows();
-});
+    function saveLoyaltySettings() {
+        let form = document.getElementById('loyaltyForm');
+        let formData = new FormData(form);
 
-document.addEventListener("DOMContentLoaded", function() {
-    // Products table pagination
-    const prodTable = document.getElementById('productsTable').getElementsByTagName('tbody')[0];
-    const prodRows = Array.from(prodTable.getElementsByTagName('tr'));
-    const viewMoreProdBtn = document.getElementById('viewMoreProducts');
-
-    const productsPerPage = 3; // Number of products to show initially
-    let currentProductPage = 1;
-
-    function showProductRows() {
-        const end = currentProductPage * productsPerPage;
-
-        prodRows.forEach((row, index) => {
-            row.style.display = index < end ? '' : 'none';
+        fetch("{{ route('shop.loyalty.save') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("✅ Loyalty settings saved!");
+            } else {
+                alert("❌ Failed to save loyalty settings");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("❌ Server error");
         });
-
-        viewMoreProdBtn.style.display = end >= prodRows.length ? 'none' : 'inline-block';
     }
 
-    viewMoreProdBtn.addEventListener('click', function() {
-        currentProductPage++;
-        showProductRows();
-    });
+    function toggleSection(id) {
+        const section = document.getElementById(id);
+        const button = section.previousElementSibling;
+        const icon = button.querySelector('.toggle-icon');
 
-    // Initial display
-    showProductRows();
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    const prodRows = document.querySelectorAll('#productsTable tbody tr');
-    const viewMoreBtn = document.querySelector('.view-more-products');
-
-    const productsPerPage = 3; // show 3 initially
-    let currentPage = 1;
-
-    function showProductRows() {
-        const end = currentPage * productsPerPage;
-        prodRows.forEach((row, index) => {
-            row.style.display = index < end ? '' : 'none';
-        });
-        viewMoreBtn.style.display = end >= prodRows.length ? 'none' : 'inline-block';
+        if (section.style.display === "none" || section.style.display === "") {
+            section.style.display = "block";
+            icon.style.transform = "rotate(180deg)";
+        } else {
+            section.style.display = "none";
+            icon.style.transform = "rotate(0deg)";
+        }
     }
 
-    viewMoreBtn.addEventListener('click', function() {
-        currentPage++;
-        showProductRows();
+    document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".image-slider").forEach(slider => {
+        const images = slider.querySelectorAll(".slider-image");
+        if (images.length > 0) {
+            images[0].style.display = "block";
+        }
     });
-
-    // initial display
-    showProductRows();
 });
 
-function saveLoyaltySettings() {
-let form = document.getElementById('loyaltyForm');
-let formData = new FormData(form);
+function nextImage(btn) {
+    const slider = btn.closest('.image-slider');
+    const images = slider.querySelectorAll('.slider-image');
+    let index = parseInt(slider.dataset.index);
+
+    images[index].style.display = "none";
+    index = (index + 1) % images.length;
+    images[index].style.display = "block";
+
+    slider.dataset.index = index;
+}
+
+function prevImage(btn) {
+    const slider = btn.closest('.image-slider');
+    const images = slider.querySelectorAll('.slider-image');
+    let index = parseInt(slider.dataset.index);
+
+    images[index].style.display = "none";
+    index = (index - 1 + images.length) % images.length;
+    images[index].style.display = "block";
+
+    slider.dataset.index = index;
+}
 
 
-fetch("{{ route('shop.loyalty.save') }}", {
-method: "POST",
-headers: {
-"X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-},
-body: formData
-})
-.then(res => res.json())
-.then(data => {
-if (data.success) {
-alert("✅ Loyalty settings saved!");
-} else {
-alert("❌ Failed to save loyalty settings");
+function openEditStock(productId, stockQty) {
+    document.getElementById('editStockProductId').value = productId;
+    document.getElementById('editStockQuantity').value = stockQty;
+    document.getElementById('editStockModal').style.display = 'flex';
 }
-})
-.catch(err => {
-console.error(err);
-alert("❌ Server error");
-});
+
+function closeEditStock() {
+    document.getElementById('editStockModal').style.display = 'none';
 }
+
+function saveStock() {
+    let productId = document.getElementById('editStockProductId').value;
+    let stockQty = document.getElementById('editStockQuantity').value;
+    let token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    fetch(`/shop/product/${productId}/update-stock`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ stock_quantity: stockQty })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("Server error");
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Stock updated successfully!');
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Something went wrong updating stock.");
+    });
+}
+
+function openLoyaltyModal() {
+    document.getElementById('loyaltyModal').style.display = 'block';
+}
+
+function closeLoyaltyModal() {
+    document.getElementById('loyaltyModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('loyaltyModal');
+    if (event.target === modal) modal.style.display = 'none';
+}
+
 
 </script>
 
-</body>
-</html>
 @endsection

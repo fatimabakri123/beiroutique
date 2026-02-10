@@ -1,53 +1,150 @@
 @extends('layouts.customer')
 
 @section('content')
-<section id="notifications" class="content-section active">
-  <h2 style="font-size:28px; color:#8B5E3C; margin-bottom:25px;">🔔 Notifications</h2>
+<section id="notifications" class="content-section active notif-page">
+
+  <!-- Back Button -->
+  <div class="back-btn-wrapper">
+   
+  </div>
+
+  <h2 class="notif-title">🔔 Notifications</h2>
 
   @if($notifications->count() > 0)
-  <ul class="notification-list">
-   @foreach($notifications as $note)
-    <a href="{{ $note->data['url'] ?? '#' }}" class="notification-link">
-      <li class="notification-item {{ $note->read_at ? '' : 'unread' }}">
-        
-        {{-- IMAGE OR ICON --}}
-        @if(($note->data['type'] ?? '') === 'product' && isset($note->data['image']))
-            <div class="notif-img">
-                <img src="{{ asset('storage/' . $note->data['image']) }}" alt="Product">
+    <ul class="notification-list">
+      @foreach($notifications as $note)
+        <a href="{{ $note->data['url'] ?? '#' }}" class="notification-link">
+          <li class="notification-item {{ $note->read_at ? '' : 'unread' }}">
+
+            {{-- IMAGE OR ICON --}}
+            @if(($note->data['type'] ?? '') === 'product')
+
+  @php
+    $images = collect($note->data['images'] ?? []);
+
+    if ($images->isEmpty() && isset($note->data['image'])) {
+        $images = collect([$note->data['image']]);
+    }
+  @endphp
+
+  <div class="notif-slider">
+ @foreach($images as $img)
+    @php
+        // if $img is an array (sometimes happens if JSON stored incorrectly), take the first element
+        if (is_array($img)) {
+            $img = $img[0] ?? null;
+        }
+    @endphp
+
+    @if($img)
+        <img
+            src="{{ Str::startsWith($img, 'storage/')
+                  ? asset($img)
+                  : asset('storage/' . $img) }}"
+            class="notif-slide"
+            alt="Product">
+    @endif
+@endforeach
+
+
+    @if($images->count() > 1)
+      <button class="notif-arrow prev">❮</button>
+      <button class="notif-arrow next">❯</button>
+    @endif
+  </div>
+
+@else
+  <div class="notif-icon">🔥</div>
+@endif
+
+
+            {{-- CONTENT --}}
+            <div class="notif-content">
+              <h4>{{ $note->data['title'] ?? 'No Title' }}</h4>
+              <p>{{ $note->data['message'] ?? 'No Message' }}</p>
+              <small>{{ $note->created_at->diffForHumans() }}</small>
             </div>
-        @else
-            <div class="notif-icon">🔥</div>
-        @endif
 
-        {{-- CONTENT --}}
-        <div class="notif-content">
-            <h4>{{ $note->data['title'] }}</h4>
-            <p>{{ $note->data['message'] }}</p>
-            <small>{{ $note->created_at->diffForHumans() }}</small>
-        </div>
-
-      </li>
-    </a>
-   @endforeach
-  </ul>
+          </li>
+        </a>
+      @endforeach
+    </ul>
   @else
     <p class="no-notifs">No notifications available.</p>
   @endif
+
 </section>
 
 <style>
-/* ===== NOTIFICATIONS STYLES ENHANCED ===== */
-body {
-    background: #f4f4f7;
-    font-family: 'Poppins', sans-serif;
+/* ===== PAGE CARD ===== */
+.notif-page {
+  background: linear-gradient(135deg, #fdfcff, #f6f0ff);
+  padding: 10px 40px 30px; 
+  border-radius: 24px;
+  box-shadow: inset 0 0 0 1px rgba(124,77,255,0.08);
+  min-height: 100vh;
 }
 
+
+/* ===== BACK BUTTON ===== */
+.back-btn-wrapper {
+  margin-bottom: 25px;
+}
+
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 10px 18px;
+  background: linear-gradient(135deg, var(--purple-soft), var(--blue-soft));
+  color: #fff;
+  font-weight: 600;
+  font-size:20px;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 8px 25px rgba(124,77,255,0.25);
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(96,165,250,0.35);
+  color: #fff;
+}
+/* ===== TITLE ===== */
+.notif-title {
+  text-align: center;
+  font-size: 28px;
+  
+  color: var(--purple-dark, #5b2a86);
+  font-weight: 600;
+}
+
+/* ===== LIST ===== */
 .notification-list {
   list-style: none;
   padding: 0;
-  margin-top: 20px;
+  margin: 0 auto;
+  max-height: 500px;
+  overflow-y: auto;
+  width: 95%;
+  max-width: 1100px;
 }
 
+/* Scrollbar */
+.notification-list::-webkit-scrollbar {
+  width: 8px;
+}
+.notification-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg,#8f3f9beb,#1f7bb8eb,#5b2a86);
+  border-radius: 10px;
+}
+.notification-list::-webkit-scrollbar-track {
+  background: #f4f4f7;
+}
+
+/* ===== ITEM ===== */
 .notification-link {
   text-decoration: none;
   color: inherit;
@@ -57,13 +154,14 @@ body {
   display: flex;
   align-items: center;
   gap: 18px;
-  background: #fff;
+
   border-radius: 18px;
   padding: 18px 22px;
   margin-bottom: 16px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
   transition: 0.4s ease;
   border-left: 5px solid transparent;
+  color: #fff;
 }
 
 .notification-item:hover {
@@ -72,58 +170,53 @@ body {
 }
 
 .notification-item.unread {
-  border-left: 6px solid #C08A56;
-  background: linear-gradient(120deg,#fff7f0,#fff2e6);
+  border-left: 6px solid #4f8cff;
+ background: linear-gradient(135deg, #a080bc, #5b93c7); 
 }
 
+/* ===== IMAGE / ICON ===== */
 .notif-img img {
   width: 70px;
   height: 70px;
   object-fit: cover;
   border-radius: 14px;
-  border: 2px solid #f0e6dc;
-  transition: 0.3s ease;
-}
-
-.notif-img img:hover {
-  transform: scale(1.05);
+  border: 2px solid #fff;
 }
 
 .notif-icon {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg,#ff7a18,#ffb347);
+  background: linear-gradient(135deg,#8f3f9beb,#1f7bb8eb,#5b2a86);
   color: white;
   font-size: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 0.3s ease;
 }
 
-.notif-icon:hover {
-  transform: scale(1.1) rotate(-5deg);
-}
+/* ===== CONTENT ===== */
+.notif-content { flex: 1; }
 
 .notif-content h4 {
   font-size: 17px;
   margin-bottom: 6px;
-  color: #8B5E3C;
+  color: #fff;
   font-weight: 600;
 }
 
 .notif-content p {
   font-size: 15px;
-  color: #555;
+  color: #f3e8ff;
   margin-bottom: 4px;
 }
 
 .notif-content small {
-  font-size: 13px;
-  color: #999;
+  font-size: 16px;
+  color: #e9d7f5;
 }
 
+/* ===== EMPTY ===== */
 .no-notifs {
   font-size: 16px;
   color: #aaa;
@@ -131,25 +224,104 @@ body {
   margin-top: 30px;
 }
 
-/* Scroll bar for notifications if many */
-.notification-list {
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 5px;
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px) {
+  .notification-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .notif-img img, .notif-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
 }
 
-.notification-list::-webkit-scrollbar {
-  width: 8px;
+/* ===== NOTIFICATION IMAGE SLIDER ===== */
+.notif-slider {
+  position: relative;
+  width: 70px;
+  height: 70px;
 }
 
-.notification-list::-webkit-scrollbar-thumb {
-  background: #c08a56;
-  border-radius: 10px;
+.notif-slide {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 2px solid #fff;
+  display: none;
 }
 
-.notification-list::-webkit-scrollbar-track {
-  background: #f0e6dc;
-  border-radius: 10px;
+
+.notif-slide:first-child {
+  display: block;
 }
+
+.notif-slide.active {
+  display: block;
+}
+
+/* arrows */
+.notif-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.9);
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.notif-arrow.prev { left: -8px; }
+.notif-arrow.next { right: -8px; }
+
+.notif-arrow:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.notif-slider').forEach(slider => {
+    const slides = slider.querySelectorAll('.notif-slide');
+    if (!slides.length) return;
+
+    let index = 0;
+    slides[index].classList.add('active');
+
+    const prev = slider.querySelector('.prev');
+    const next = slider.querySelector('.next');
+
+    function show(i) {
+      slides.forEach(s => s.classList.remove('active'));
+      slides[i].classList.add('active');
+    }
+
+    prev?.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      index = (index - 1 + slides.length) % slides.length;
+      show(index);
+    });
+
+    next?.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      index = (index + slides.length) % slides.length;
+      show(index);
+    });
+  });
+});
+</script>
+
+
 @endsection

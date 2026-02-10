@@ -5,55 +5,84 @@
 
 <style>
 :root {
-    --primary: #4e73df;
-    --bg: #f8f9fc;
-    --card: #ffffff;
-    --text: #2e2f33;
-    --muted: #858796;
-    --success: #1cc88a;
-    --shadow: 0 10px 25px rgba(0,0,0,0.08);
+    --primary: #7b2fae;
+    --bg: #f4f6fa;
+    --card: #fff;
+    --text: #2c3e50;
+    --muted: #7f8c8d;
+    --shadow: 0 6px 18px rgba(124,77,255,0.08);
+    --shadow-hover: 0 10px 25px rgba(124,77,255,0.15);
 }
 
+/* ===== WRAPPER ===== */
 .order-wrapper {
     max-width: 900px;
-    margin: auto;
+    margin: 30px auto;
+    padding: 0 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
+/* ===== ORDER CARD ===== */
 .order-card {
     background: var(--card);
     border-radius: 16px;
-    padding: 25px;
+    padding: 20px 25px;
     box-shadow: var(--shadow);
-    margin-bottom: 30px;
+    transition: all 0.3s ease;
 }
 
+.order-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* ===== HEADER ===== */
 .order-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .order-header h3 {
     margin: 0;
+    font-size: 20px;
+    font-weight: 700;
     color: var(--primary);
-    font-size:25px;
-   
 }
 
 .badge {
-    padding: 6px 14px;
+    padding: 4px 12px;
     border-radius: 20px;
     font-size: 13px;
     font-weight: 600;
-    background: var(--primary);
+    text-transform: capitalize;
     color: #fff;
+    min-width: 80px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.badge.pending { background: #f6c23e; }
+.badge.processing { background: #36b9cc; }
+.badge.delivered { background: #1cc88a; }
+.badge.cancelled { background: #e74a3b; }
+.badge.shipped { background: #4e73df; }
+
+/* ===== ORDER INFO ===== */
+.order-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin-bottom: 10px;
 }
 
 .order-info p {
-    margin: 6px 0;
+    margin: 0;
+    font-size: 18px;
     color: var(--text);
-    font-size:20px
 }
 
 .order-info span {
@@ -61,90 +90,81 @@
     font-weight: 500;
 }
 
-/* ===== ITEMS ===== */
+/* ===== ITEMS GRID ===== */
 .items-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
 }
 
 .item-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
     background: var(--bg);
-    border-radius: 14px;
-    padding: 15px;
+    border-radius: 12px;
     box-shadow: var(--shadow);
-    transition: 0.3s;
+    transition: all 0.3s ease;
 }
 
 .item-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
 
 .item-card img {
-    width: 100%;
-    height: 160px;
+    width: 100px;
+    height: 100px;
     object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 10px;
+    border-radius: 8px;
 }
 
 .item-card h5 {
-    margin: 6px 0;
-    font-size: 20px;
-    color: var(--text);
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary);
 }
 
 .item-card p {
-    margin: 4px 0;
-    font-size: 18px;
+    margin: 0;
+    font-size: 16px;
     color: var(--muted);
 }
 
 .item-card .price {
-    margin-top: 8px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--primary);
 }
 
 /* ===== TOTAL ===== */
 .order-total {
-    margin-top: 25px;
-    padding: 15px;
-    background: linear-gradient(135deg, var(--primary), #6f86ff);
+    margin-top: 15px;
+    padding: 12px;
+    background: linear-gradient(135deg, #7b2fae, #a64dd1);
     color: #fff;
-    border-radius: 14px;
-    font-size: 18px;
+    border-radius: 16px;
+    font-size: 16px;
     font-weight: 700;
     text-align: center;
-}
-/* ===== STATUS COLORS ===== */
-.badge.pending {
-    background: #f6c23e; /* yellow */
-    color: #fff;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
 }
 
-.badge.processing {
-    background: #36b9cc; /* cyan */
-    color: #fff;
+.order-total:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
 }
 
-.badge.delivered {
-    background: #36a079; /* green */
-    color: #fff;
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+    .item-card { flex-direction: column; align-items: flex-start; }
+    .item-card img { width: 100%; height: 120px; }
 }
-
-.badge.cancelled {
-    background: #e74a3b; /* red */
-    color: #fff;
-}
-
-.badge.shipped {
-    background: #4e73df; /* blue */
-    color: #fff;
-}
-
 </style>
+
 
 <div class="order-wrapper">
 
@@ -172,29 +192,89 @@
     <div class="order-card">
         <h4>Order Items</h4>
 
-        <div class="items-grid">
-            @foreach($order->items as $it)
-                <div class="item-card">
-                    <img src="{{ asset('storage/' . $it->product->image_url) }}"
-                         alt="{{ $it->product->product_name }}">
+       <div class="items-grid">
+    @foreach($order->items as $it)
+        @php
+            $images = collect();
 
-                    <h5>{{ $it->product->product_name }}</h5>
+            if ($it->product->images && $it->product->images->count()) {
+                $images = $it->product->images;
+            } elseif (!empty($it->product->image_url)) {
+                $images = collect([(object)['image_path' => $it->product->image_url]]);
+            }
+        @endphp
 
-                    <p>Shop: {{ $it->product->shop->shop_name }}</p>
-                    <p>Quantity: {{ $it->quantity }}</p>
-                    <p>Unit Price: ${{ $it->price_at_purchase }}</p>
+        <div class="item-card">
+            <div class="item-image">
+                @if($images->count())
+                    <img
+                        src="{{ Str::startsWith($images->first()->image_path,'products/')
+                                ? asset('storage/'.$images->first()->image_path)
+                                : asset($images->first()->image_path) }}"
+                        alt="{{ $it->product->product_name }}">
+                @else
+                    <img src="{{ asset('images/no-image.png') }}" alt="No image">
+                @endif
+            </div>
 
-                    <div class="price">
-                        Subtotal: ${{ $it->quantity * $it->price_at_purchase }}
-                    </div>
+            <div class="item-details">
+                <h5>{{ $it->product->product_name }}</h5>
+                <p>Shop: {{ $it->product->shop->shop_name }}</p>
+                <p>Quantity: {{ $it->quantity }}</p>
+                <p>Unit Price: ${{ $it->price_at_purchase }}</p>
+                <div class="price">
+                    Subtotal: ${{ $it->quantity * $it->price_at_purchase }}
                 </div>
-            @endforeach
+            </div>
         </div>
+    @endforeach
+</div>
 
-        <div class="order-total">
-            Total Order: ${{ number_format($order->total_amount, 2) }}
-        </div>
-    </div>
+<style>
+.item-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+.item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.item-card .item-image img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.item-card .item-details h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary);
+}
+.item-card .item-details p {
+    margin: 2px 0;
+    font-size: 14px;
+    color: var(--muted);
+}
+.item-card .item-details .price {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+@media(max-width:768px){
+    .item-card { flex-direction: column; align-items: flex-start; }
+    .item-card .item-image img { width: 100%; height: 120px; }
+}
+</style>
+
 
 </div>
 

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Message extends Model
 {
-    protected $table = 'message'; // اسم جدول الرسائل
+    protected $table = 'messages'; // اسم جدول الرسائل
 
     protected $fillable = [
         'chat_id',

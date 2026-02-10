@@ -3,29 +3,51 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\AIClassifierService;
-use App\Services\ProductAIService;
-use App\Services\OrderAIService;
-use App\Services\GeneralAIService;
+use Illuminate\Support\Facades\Http;
 
-class AiChatController extends Controller
+class AIChatController extends Controller
 {
-    public function chat(Request $request)
-{
-    $question = $request->question;
+    // Function to handle FAQ question
+    public function faq(Request $request)
+    {
+        // Validate request
+        $request->validate([
+            'question' => 'required|string|max:1000',
+        ]);
 
-    $data = app(AIClassifierService::class)->classify($question);
+        $question = $request->input('question');
 
-    switch ($data['intent']) {
-        case 'product_search':
-            return app(ProductAIService::class)->handle($data);
+        try {
+            // DeepSeek API endpoint
+            $apiUrl = 'https://api.deepseek.com/v1/chat/completions'; // Replace if your host is different
+            $apiKey = env('DEEPSEEK_API_KEY'); // Store your key in .env
 
-        case 'order_status':
-             $orderId = $data['order_id'] ?? null;
-            return app(OrderAIService::class)->handle();
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+            ])->post($apiUrl, [
+                'model' => 'deepseek-chat', // The model name
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are a helpful assistant for website FAQs.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $question,
+                    ],
+                ],
+            ]);
 
-        default:
-            return app(GeneralAIService::class)->handle($question);
+            if ($response->successful()) {
+                $answer = $response['choices'][0]['message']['content'] ?? 'No answer available.';
+                return response()->json(['answer' => $answer]);
+            } else {
+                return response()->json(['answer' => 'Failed to get answer.'], 500);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json(['answer' => 'Error: ' . $e->getMessage()], 500);
+        }
     }
-}
 }

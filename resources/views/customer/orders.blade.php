@@ -2,6 +2,29 @@
 
 @section('content')
 <div class="order-page">
+    <div class="back-btn-wrapper">
+        <style>
+            .back-btn-wrapper { margin-bottom: 25px; }
+            .back-btn {
+                display: inline-flex;
+                align-items: center;
+                padding: 10px 18px;
+                background: linear-gradient(135deg, var(--purple-soft), var(--blue-soft));
+                color: #fff;
+                font-weight: 600;
+                font-size:20px;
+                border-radius: 12px;
+                text-decoration: none;
+                box-shadow: 0 8px 25px rgba(124,77,255,0.25);
+                transition: all 0.3s ease;
+            }
+            .back-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 30px rgba(96,165,250,0.35);
+                color: #fff;
+            }
+        </style>
+    </div>
 
     {{-- ================= FILTERS ================= --}}
     <form method="GET" class="filters-form">
@@ -36,18 +59,15 @@
     @forelse($orders as $order)
 
         @php
-            $firstItem = $order->items->first();
-            $shopName = $firstItem && $firstItem->product && $firstItem->product->shop
-                ? $firstItem->product->shop->shop_name
-                : 'N/A';
+            $deliveryCost = $order->deliveryMethod->cost ?? 0;
+            $itemCount = $order->items->count() ?: 1; // prevent division by zero
         @endphp
 
         <div class="order-card">
-
             {{-- Header --}}
             <div class="order-header">
                 <div>
-                    <h2>{{ $shopName }}</h2>
+                    <h2>{{ $order->items->first()?->product->shop->shop_name ?? 'N/A' }}</h2>
                     <span class="order-date">
                         Order #{{ $order->order_id }} • {{ $order->created_at->format('d M Y') }}
                     </span>
@@ -60,81 +80,95 @@
 
             {{-- Table --}}
             <div class="order-table-wrapper">
-                <table class="order-table">
+                <table class="order-table vertical">
                     <thead>
                         <tr>
                             <th>Product</th>
                             <th>Image</th>
                             <th>Qty</th>
-                            <th>Price</th>
+                            <th>Price + Delivery</th>
                             <th>Total</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($order->items as $item)
-                        <tr>
-                            <td class="product-name">
-                                {{ $item->product?->product_name ?? 'Product Deleted' }}
-                            </td>
+                            @php
+                                $originalPrice = $item->product->price ?? 0;
+                                $finalPrice = ($item->product->is_on_sale ?? false)
+                                    ? $item->product->discount_value
+                                    : $originalPrice;
 
-                            <td>
-                                @if($item->product?->image_url)
-                                    <img class="table-img"
-                                         src="{{ Str::startsWith($item->product->image_url, 'products/')
-                                            ? asset('storage/' . $item->product->image_url)
-                                            : asset($item->product->image_url) }}">
-                                @endif
-                            </td>
+                                // Safely share delivery per item
+                                $deliveryShare = $deliveryCost > 0 ? $deliveryCost / $itemCount : 0;
+                                $totalPerItem = ($finalPrice + $deliveryShare) * $item->quantity;
 
-                            <td>{{ $item->quantity }}</td>
+                                // Product image
+                                $productImage = null;
+                                if ($item->product) {
+                                    if ($item->product->images()->exists()) {
+                                        $productImage = $item->product->images()->first()->image_path;
+                                    } else {
+                                        $productImage = $item->product->image_url;
+                                    }
+                                }
+                            @endphp
 
-                            {{-- PRICE --}}
-                            <td>
-                                @php
-                                    $originalPrice = $item->product->price;
-                                    $finalPrice = $item->product->is_on_sale
-                                        ? $item->product->discount_value
-                                        : $originalPrice;
-                                @endphp
+                            <tr>
+                                <td data-label="Product">{{ $item->product?->product_name ?? 'Product Deleted' }}</td>
 
-                                @if($item->product->is_on_sale)
-                                    <span class="sale-price">
-                                        ${{ number_format($finalPrice, 2) }}
-                                    </span>
-                                    <br>
-                                    <small class="old-price">
-                                        ${{ number_format($originalPrice, 2) }}
-                                    </small>
-                                @else
-                                    <span class="normal-price">
-                                        ${{ number_format($originalPrice, 2) }}
-                                    </span>
-                                @endif
-                            </td>
+                                <td data-label="Image">
+                                    @if($productImage)
+                                        <img class="table-img" 
+                                             src="{{ Str::startsWith($productImage, 'products/') ? asset('storage/'.$productImage) : asset($productImage) }}">
+                                    @endif
+                                </td>
 
-                            {{-- TOTAL --}}
-                            <td class="total-cell">
-                                ${{ number_format($finalPrice * $item->quantity, 2) }}
-                            </td>
+                                <td data-label="Qty">{{ $item->quantity }}</td>
 
-                            {{-- ACTION --}}
-                            <td>
-                                @if($order->order_status === 'Delivered' && $item->product)
-                                    <a href="{{ route('reports.create', [$order->order_id, $item->product->product_id]) }}"
-                                       class="report-btn">
-                                        Add Report
-                                    </a>
-                                @else
-                                    —
-                                @endif
-                            </td>
-                        </tr>
+                                <td data-label="Price + Delivery">
+                                    ${{ number_format($finalPrice + $deliveryShare, 2) }}
+                                </td>
+
+                                <td data-label="Total" class="total-cell">
+                                    ${{ number_format($totalPerItem, 2) }}
+                                </td>
+
+                                <td data-label="Action">
+                                    @if($order->order_status === 'Delivered' && $item->product)
+                                        <a href="{{ route('reports.create', [$order->order_id, $item->product->product_id]) }}"
+                                           class="report-btn">Add Report</a>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                            </tr>
                         @endforeach
+
+                        {{-- Grand Total --}}
+                        @php
+                            $itemsTotal = $order->items->sum(function($i) {
+                                $price = ($i->product->is_on_sale ?? false)
+                                    ? $i->product->discount_value
+                                    : ($i->product->price ?? 0);
+                                return $price * $i->quantity;
+                            });
+                            $grandTotal = $itemsTotal + $deliveryCost;
+                        @endphp
+
+                        <tr>
+                            <td colspan="4" style="text-align:right; font-weight:bold;">Delivery Cost:</td>
+                            <td colspan="2" style="font-weight:bold;">${{ number_format($deliveryCost,2) }}</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="4" style="text-align:right; font-weight:bold;">Grand Total:</td>
+                            <td colspan="2" style="font-weight:bold; color:#8f3f9b;">${{ number_format($grandTotal,2) }}</td>
+                        </tr>
+
                     </tbody>
                 </table>
             </div>
-
         </div>
 
     @empty
@@ -150,222 +184,34 @@
 
 {{-- ================= STYLES ================= --}}
 <style>
-/* --- BASE SETUP --- */
-:root {
-    --primary-color: #b68566; /* Elegant Bronze */
-    --text-dark: #2c3e50;
-    --text-muted: #f1e9e5;
-    --bg-light: #74421c;
-    --white: #ffffff;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-}
-
-body {
-    background-color: var(--bg-light);
-    color: var(--text-dark);
-}
-
-.order-page {
-    max-width: 1200px;
-    margin: 50px auto;
-    padding: 0 20px;
-    font-family: 'Inter', -apple-system, sans-serif;
-}
-
-/* --- FILTERS SECTION --- */
-.filters-form {
-    display: flex;
-    align-items: flex-end;
-    gap: 20px;
-    background: var(--white);
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: var(--shadow);
-    margin-bottom: 40px;
-}
-
-.filters-form div {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.filters-form label {
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color:  #9a6f52;
-    margin-bottom: 8px;
-}
-
-.filters-form select {
-    padding: 12px;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 14px;
-    background: #fff;
-    transition: border 0.3s;
-}
-
-.filters-form select:focus {
-    border-color: var(--primary-color);
-    outline: none;
-}
-
-.filters-form button {
-    background: var(--primary-color);
-    color: white;
-    padding: 12px 30px;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-}
-
-.filters-form button:hover {
-    background: #9a6f52;
-    transform: translateY(-2px);
-}
-
-/* --- ORDER CARDS --- */
-.order-card {
-    background: var(--white);
-    border-radius: 20px;
-    padding: 30px;
-    margin-bottom: 30px;
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(0,0,0,0.02);
-}
-
-.order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #f0f0f0;
-    margin-bottom: 25px;
-}
-
-.order-header h2 {
-    font-size: 1.4rem;
-    margin: 0;
-    color: var(--text-dark);
-}
-
-.order-date {
-    display: block;
-    font-size: 0.9rem;
-    color: #9a6f52 ;
-    margin-top: 5px;
-}
-
-/* --- STATUS BADGES --- */
-.status-badge {
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-delivered { background: #e6f9ed; color: #1db459; }
-.status-pending { background: #fff8e6; color: #f1c40f; }
-.status-cancelled { background: #ffebee; color: #e74c3c; }
-
-/* --- TABLE STYLING --- */
-.order-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 10px;
-}
-
-.order-table th {
-    text-align: left;
-    padding: 10px 15px;
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-}
-
-.order-table td {
-    padding: 15px;
-    background: #fdfdfd;
-    vertical-align: middle;
-}
-
-.order-table tr td:first-child { border-radius: 10px 0 0 10px; }
-.order-table tr td:last-child { border-radius: 0 10px 10px 0; }
-
-.product-name {
-    font-weight: 600;
-    max-width: 250px;
-}
-
-.table-img {
-    width: 65px;
-    height: 65px;
-    border-radius: 12px;
-    object-fit: cover;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-/* --- PRICING --- */
-.sale-price {
-    font-weight: 700;
-    color: var(--text-dark);
-}
-
-.old-price {
-    text-decoration: line-through;
-    color: #bdc3c7;
-    font-size: 0.8rem;
-}
-
-.total-cell {
-    font-weight: 800;
-    color: var(--primary-color);
-    font-size: 1.1rem;
-}
-
-/* --- ACTIONS --- */
-.report-btn {
-    background: transparent;
-    color: #e74c3c;
-    border: 1px solid #e74c3c;
-    padding: 6px 15px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.report-btn:hover {
-    background: #e74c3c;
-    color: #fff;
-}
-
-/* --- PAGINATION --- */
-.pagination-wrapper {
-    margin-top: 40px;
-    display: flex;
-    justify-content: center;
-}
-
-/* --- MOBILE RESPONSIVE --- */
-@media (max-width: 768px) {
-    .filters-form {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .order-header {
-        flex-direction: column;
-        gap: 15px;
-    }
-}
+    html, body { max-width: 100%; overflow-x: hidden; }
+    .order-page { width: 100%; max-width: 100%; margin: 0 auto; font-family: 'Poppins', sans-serif; color: var(--text-dark); padding: 30px 40px; min-height: 100vh; background: linear-gradient(135deg, #fdfcff, #f6f0ff); border-radius: 24px; box-shadow: inset 0 0 0 1px rgba(124,77,255,0.08); }
+    .filters-form { display: flex; gap: 20px; background: linear-gradient(135deg, #ffffff, #faf5ff); padding: 28px; border-radius: 20px; box-shadow: 0 18px 40px rgba(124,77,255,0.15); margin-bottom: 45px; border: 1px solid rgba(124,77,255,0.1); }
+    .filters-form div { flex:1; display:flex; flex-direction: column; }
+    .filters-form label { font-size: 13px; font-weight: 600; color: var(--purple-dark); margin-bottom: 6px; }
+    .filters-form select { padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; }
+    .filters-form select:focus { outline:none; border-color: var(--purple-dark); }
+    .filters-form button { background: linear-gradient(135deg, #7b2fae, #8f3f9b); color: #fff; border: none; padding: 12px 32px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease; }
+    .filters-form button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(124,77,255,0.25); }
+    .order-card { background: var(--white); border-radius: 22px; padding: 30px; margin-bottom: 40px; box-shadow: 0 20px 45px rgba(124,77,255,0.15); border: 1px solid rgba(124,77,255,0.08); }
+    .order-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; padding-bottom: 18px; margin-bottom: 22px; }
+    .order-header h2 { margin:0; font-size:20px; font-weight:700; color:#7b2fae; }
+    .order-date { font-size:15px; color:#6b7280; }
+    .status-badge { padding: 8px 18px; border-radius:999px; font-size:16px; font-weight:700; text-transform: uppercase; }
+    .status-delivered { background:#f1eaff; color:#7b2fae; }
+    .status-pending { background:#fcefff; color:#a35fd1; }
+    .status-cancelled { background:#fee2e2; color:#dc2626; }
+    .order-table { width:100%; border-collapse: separate; border-spacing:0 12px; }
+    .order-table th { font-size:16px; color:#6b7280; text-transform:uppercase; padding:8px 14px; }
+    .order-table td { background: #ffffff; padding: 16px; border-top: 1px solid #eee; border-bottom: 1px solid #eee; text-align: center; vertical-align: middle; }
+    .order-table tr td:first-child { border-radius:12px 0 0 12px; }
+    .order-table tr td:last-child { border-radius:0 12px 12px 0; }
+    .table-img { width:60px; height:60px; border-radius:12px; object-fit:cover; box-shadow:0 6px 14px rgba(0,0,0,0.1); }
+    .total-cell { font-weight:800; font-size:16px; color:#8f3f9b; }
+    .report-btn { padding:8px 16px; border-radius:10px; font-size:12px; font-weight:600; border:1px solid #7b2fae; color:#7b2fae; text-decoration:none; transition: all 0.25s ease; }
+    .report-btn:hover { background:#7b2fae; color:#fff; }
+    .pagination-wrapper { margin-top:40px; display:flex; justify-content:center; }
+    @media (max-width: 768px) { .filters-form { flex-direction: column; } .order-header { flex-direction: column; align-items:flex-start; gap:10px; } }
+    .order-table-wrapper { width: 100%; overflow-x: auto; display:flex; flex-direction: column; gap:18px; }
 </style>
 @endsection

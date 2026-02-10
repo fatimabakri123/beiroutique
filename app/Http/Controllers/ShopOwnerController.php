@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\ShopOwner;
 use App\Models\Shop;
-use App\Models\Chat;
+
 use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\categories;
@@ -14,6 +15,7 @@ use App\Notifications\NewProductNotification;
 use App\Notifications\SaleAppliedNotification;
 use Illuminate\Support\Facades\Notification;
 use App\Models\Subcategory;
+use App\Notifications\OrderStatusChanged;
 
 
 class ShopOwnerController extends Controller
@@ -30,7 +32,12 @@ class ShopOwnerController extends Controller
     $shop = $shops->first(); // first shop for dashboard stats
 
     // Get products for the first shop
-    $products = $shop ? $shop->products : collect();
+   $products = $shop
+    ? $shop->products()->with('images')->latest()->paginate(5)
+    : collect();
+    $allProducts = $shop ? $shop->products : collect();
+
+
 
     // Get all order items related to this shop's products
     $shopProductIds = $products->pluck('product_id');
@@ -46,7 +53,8 @@ $orderIds = $orderItems->pluck('order_id')->unique();
 
 $orderIds = $orderItems->pluck('order_id')->unique();
 
-$shopProductIds = $products->pluck('product_id');
+$shopProductIds = $allProducts->pluck('product_id');
+
 
 $orders = \App\Models\orders::with(['customer.user', 'items'])
     ->whereHas('items', function($q) use ($shopProductIds) {
@@ -70,12 +78,14 @@ $orders = \App\Models\orders::with(['customer.user', 'items'])
 
 
     // ---- START: Statistics ----
-    $totalProducts = $products->count();
+   $totalProducts = $allProducts->count();
+
+
     $totalOrders = $orders->count();
     $totalRevenue = $orderItems->sum(function($item) {
         return $item->quantity * $item->price_at_purchase;
     });
-    $lowStock = $products->where('stock_quantity', '<=', 5)->count();
+   $lowStock = $allProducts->where('stock_quantity', '<=', 5)->count();
 
     // Monthly revenue for charts
     $monthlyRevenue = $shopProductIds->isNotEmpty()
@@ -96,13 +106,11 @@ $orders = \App\Models\orders::with(['customer.user', 'items'])
             ->get()
         : collect();
     // ---- END: Statistics ----
-      $shopOwnerId = auth()->id(); 
-   
 
     return view('shop_owner.dashboard', compact(
         'user', 'shopOwner', 'shops', 'shop', 'products', 'orders', 'categories', 'subcategories',   
         'totalProducts', 'totalOrders', 'totalRevenue', 'lowStock',
-        'monthlyRevenue', 'topProducts',
+        'monthlyRevenue', 'topProducts'
     ));
 }
   public function updateShop(Request $request)
@@ -197,7 +205,7 @@ public function showOrder($orderId)
     $shopOwner = ShopOwner::where('user_id', $user->id)->first();
     $shop = $shopOwner->shops()->first();
 
-    $order = Order::with(['customer.user', 'items.product','reports.product', 'reports.customer'])
+    $order = Order::with(['customer.user', 'items.product'])
         ->where('order_id', $orderId)
         ->firstOrFail();
 
@@ -238,8 +246,25 @@ public function updateOrderStatus(Request $request, $orderId)
     // Update status
     $order->order_status = $request->order_status;
     $order->save();
+    $customers = Customer::all();
+
+    // Send notification
+    foreach ($customers as $customer) {
+        $customer->notify(new OrderStatusChanged($order));
+    }
+    $adminEmail = 'fatima9ali10@gmail.com';
+    Notification::route('mail', $adminEmail)
+        ->notify(new OrderStatusChanged($order,'admin'));
+      
 
     return redirect()->route('shop.orders.show', $order->order_id)
                      ->with('success', 'Order status updated successfully.');
+}
+
+public function notifications()
+{
+    return view('shop_owner.notifications', [
+        'notifications' => auth()->user()->unreadNotifications
+    ]);
 }
 }

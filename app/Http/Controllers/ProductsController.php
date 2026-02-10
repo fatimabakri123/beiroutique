@@ -12,8 +12,8 @@ use App\Models\Orders;
 use App\Notifications\NewProductNotification;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\SaleAppliedNotification;
-use App\Notifications\SaleAppliedMail;
-
+use App\Models\ProductImage;
+use App\Services\RecommendationService;
 
 class ProductsController extends Controller
 {
@@ -125,11 +125,19 @@ public function bySubcategory($id)
 }
 public function show($id)
 {
-    $product = products::with('reviews.customer')->findOrFail($id); 
-    // get product with reviews and customer info
-    
-    return view('products.show', compact('product'));
+    $product = products::with('reviews.customer.user')->findOrFail($id);
+
+    // Get 3 reviews per page
+    $reviews = $product->reviews()->with('customer.user')->paginate(3);
+
+      $recommendationService = new RecommendationService();
+    $recommendations = $recommendationService->forProduct($product);
+
+    return view('products.show', compact('product', 'reviews', 'recommendations'));
 }
+
+
+
 public function storeAjax(Request $request)
 {
     $shopOwner = auth()->user()->shopOwner;
@@ -157,11 +165,16 @@ public function storeAjax(Request $request)
     ]);
 
     // 2️⃣ Upload image AFTER create
-    if ($request->hasFile('image_url')) {
-        $path = $request->file('image_url')->store('products', 'public');
-        $product->image_url = $path;
-        $product->save();
+   if ($request->hasFile('images')) {
+    foreach ($request->file('images') as $image) {
+        $path = $image->store('products', 'public');
+
+        ProductImage::create([
+            'product_id' => $product->product_id,
+            'image_path' => $path,
+        ]);
     }
+}
 
     // 3️⃣ IMPORTANT 🔥 reload model from DB
     $product->refresh();
@@ -221,9 +234,18 @@ public function updateAjax(Request $request, $id)
     $product->size = $request->size;
     $product->color = $request->color;
 
-    if($request->hasFile('image_url')){
-        $product->image_url = $request->file('image_url')->store('products', 'public');
+   // ✅ ADD NEW IMAGES (do not delete old ones)
+if ($request->hasFile('images')) {
+    foreach ($request->file('images') as $image) {
+        $path = $image->store('products', 'public');
+
+        ProductImage::create([
+            'product_id' => $product->product_id,
+            'image_path' => $path,
+        ]);
     }
+}
+
 
     $product->save();
 
@@ -249,23 +271,29 @@ public function saleAll(Request $request)
             return response()->json(['success' => false, 'message' => 'Invalid percentage']);
         }
 
-        // Apply discount to all products
-        foreach ($shop->products as $product) {
-            $discountPrice = round($product->price * (1 - $percentage / 100), 2);
-            $product->update([
-                'is_on_sale' => true,
-                'discount_value' => $discountPrice
-            ]);
-        }
+      
+$shopProducts = $shop->products()->get(); 
+foreach ($shop->products as $product) {
+    $discountPrice = round($product->price * (1 - $percentage / 100), 2);
+    $product->update([
+        'is_on_sale' => true,
+        'discount_value' => $discountPrice
+    ]);
 
-        // --- Notify all customers (in-app notification only) ---
-        $customers = Customer::all();
-        Notification::send($customers, new SaleAppliedNotification($shop->shop_name, $percentage));
+  
+}
 
-        // --- Send email notification to just ONE email ---
-        $adminEmail = 'fatima9ali10@gmail.com'; // put your desired email here
+    // Notify all customers about this sale
+   $customers = Customer::all();
+
+Notification::send(
+    $customers,
+    new SaleAppliedNotification($shop->shop_name, $percentage)
+);
+$adminEmail = 'fatima9ali10@gmail.com'; // put your desired email here
         Notification::route('mail', $adminEmail)
             ->notify(new SaleAppliedNotification($shop->shop_name, $percentage));
+
 
         return response()->json([
             'success' => true,
@@ -277,7 +305,6 @@ public function saleAll(Request $request)
         return response()->json(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
     }
 }
-
 
 public function create()
 {
@@ -298,7 +325,9 @@ public function create()
         abort(404, "Shop not found for this user.");
     }
 
-    $products = $shop->products()->with('category', 'subcategory')->paginate(12);
+$products = $shop->products()
+    ->with('category', 'subcategory', 'images')
+    ->paginate(12);
 
     $categories = \App\Models\categories::all();
     $subcategories = \App\Models\Subcategory::all();
@@ -306,5 +335,8 @@ public function create()
     return view('shop_owner.products.all', compact('shop', 'products', 'categories', 'subcategories'));
 }
 
-
+public function ownerUser()
+{
+    return $this->shop->owner->user();
+}
 }

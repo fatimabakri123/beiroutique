@@ -4,6 +4,13 @@
 <section id="dashboard-home" class="content-section active">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- Back Button -->
+    <div class="back-btn-wrapper">
+        <a href="{{ url()->previous() }}" class="back-btn">
+            <i class="fa fa-arrow-left"></i> Back
+        </a>
+    </div>
+
     <h1>Welcome, {{ $user->name }} 👋</h1>
 
     <div class="stats-grid">
@@ -15,6 +22,7 @@
 
         <div class="stat-card">
             <i class="fa fa-heart"></i>
+            
             <a href="{{ route('customer.wishlist') }}">
                 <h3>Wishlist</h3>
             </a>
@@ -27,123 +35,132 @@
             <p>{{ $notifications->count() ?? 0 }} New Alerts</p>
         </div>
     </div>
-<div class="ai-chat">
-    <div class="chat-header">Ask Beirut Boutique ✨</div>
+    <style>
 
-    <div id="chat-body"></div>
+/* ===== GENERAL ===== */
 
-    <div class="chat-input">
-        <input type="text" id="userText" placeholder="Ask for a gift..." 
-            onkeydown="if(event.key==='Enter') sendMsg();" />
-        <button type="button" onclick="sendMsg()">➤</button>
-    </div>
-</div>
-
-<style>
-.ai-chat {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 320px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 15px 40px rgba(0,0,0,.15);
-  overflow: hidden;
-  font-family: 'Poppins', sans-serif;
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2e2e50;
 }
 
-.chat-header {
-  background: #111;
+/* ===== DASHBOARD WRAPPER ===== */
+#dashboard-home {
+    padding: 60px 30px 40px;
+}
+
+/* ===== BACK BUTTON ===== */
+.back-btn-wrapper {
+  margin-bottom: 25px;
+}
+
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 10px 18px;
+  background: linear-gradient(135deg, var(--purple-soft), var(--blue-soft));
   color: #fff;
-  padding: 14px;
   font-weight: 600;
+  font-size:20px;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 8px 25px rgba(124,77,255,0.25);
+  transition: all 0.3s ease;
 }
 
-#chat-body {
-  height: 300px;
-  padding: 10px;
-  overflow-y: auto;
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(96,165,250,0.35);
+  color: #fff;
+}
+/* ===== STATS GRID ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
 }
 
-.chat-input {
-  display: flex;
-  border-top: 1px solid #eee;
+/* ===== STAT CARD ===== */
+.stat-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s, color 0.3s;
+    cursor: pointer;
 }
 
-.chat-input input {
-  flex: 1;
-  padding: 10px;
-  border: none;
+.stat-card i {
+    font-size: 28px;
+    color: #7e22ce; /* purple icon */
+    margin-bottom: 12px;
+    display: inline-block;
+    transition: color 0.3s;
 }
 
-.chat-input button {
-  background: #111;
-  color: white;
-  border: none;
-  padding: 0 18px;
-  cursor: pointer;
+.stat-card h3 {
+    font-size: 25px;
+    margin-bottom: 6px;
+    color: #1e1e2f;
+    transition: color 0.3s;
 }
 
-.product {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+.stat-card p {
+    font-size: 18px;
+    color: #555;
+    transition: color 0.3s;
 }
 
-.product img {
-  width: 60px;
-  border-radius: 8px;
+/* ===== STAT CARD HOVER ===== */
+.stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    background: linear-gradient(135deg, #a080bc, #5b93c7);
+    color: #fff;
 }
+
+.stat-card:hover i,
+.stat-card:hover h3,
+.stat-card:hover p {
+    color: #fff;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+    #dashboard-home {
+        padding: 40px 20px 20px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .back-btn {
+        font-size: 18px;
+        padding: 8px 16px;
+    }
+}
+
 </style>
-<script>
-    function sendMsg() {
-  const input = document.getElementById('userText');
-  const text = input.value.trim();
-  if(!text) return;
 
-  const chat = document.getElementById('chat-body');
-  chat.innerHTML += `<p><b>You:</b> ${text}</p>`;
-  chat.innerHTML += `<p><b>AI:</b> Searching...</p>`;
 
-  fetch('{{ route("ai-chat") }}', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-      },
-      body: JSON.stringify({ question: text })
-  })
-  .then(res => res.json())
-  .then(data => {
-      chat.querySelector("p:last-child").remove(); // إزالة "Searching..."
-      if(!Array.isArray(data) || data.length === 0){
-          chat.innerHTML += `<p><b>AI:</b> No products found 😔</p>`;
-          return;
-      }
-
-      data.forEach(p => {
-          chat.innerHTML += `
-            <div class="product">
-                <img src="/storage/${p.image_url}">
-                <div>
-                    <strong>${p.product_name}</strong><br>
-                    $${p.price}
-                </div>
-            </div>
-          `;
-      });
-      chat.scrollTop = chat.scrollHeight;
-  })
-  .catch(err => {
-      console.error(err);
-      chat.innerHTML += `<p><b>AI:</b> Something went wrong 😔</p>`;
-  });
-
-  input.value = '';
-}
-</script>
 
 
 </section>
+
+
 
 @endsection

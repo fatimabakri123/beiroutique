@@ -43,7 +43,7 @@ class RegisterController extends Controller
             Customer::create([
                 'user_id' => $user->id,
                 'phone_number' => $request->customer_phone,
-                'address' => $request->address,
+                'address' => $request->customer_address,
                 'username' => $request->username ?? $request->name,
             ]);
             break;
@@ -54,23 +54,23 @@ class RegisterController extends Controller
         'phone_number' => $request->owner_phone,
     ]);
 
-    // رفع الصورة إذا تم اختيارها
+    
     $logoPath = null;
     if ($request->hasFile('logo_url')) {
         $file = $request->file('logo_url');
         $filename = time() . '.' . $file->getClientOriginalExtension();
-        $file->storeAs('public/logos', $filename); // يحفظ داخل storage/app/public/logos
-        $logoPath = 'logos/' . $filename; // هذا هو المسار اللي نحطه بالـ database
+        $file->storeAs('public/logos', $filename); 
+        $logoPath = 'logos/' . $filename; 
     }
 
     Shop::create([
         'shop_name' => $request->shop_name,
         'description' => $request->description,
-        'logo_url' => $logoPath, // <--- هنا لازم يكون المسار
+        'logo_url' => $logoPath, 
         'owner_id' => $owner->owner_id,
         'contact_email' => $request->contact_email,
         'contact_phone' => $request->contact_phone,
-        'address' => $request->address,
+        'address' => $request->shop_address,
     ]);
     break;
 

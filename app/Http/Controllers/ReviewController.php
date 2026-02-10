@@ -61,6 +61,7 @@ class ReviewController extends Controller
     /**
      * Display the specified resource.
      */
+    
     public function show(review $review)
     {
         //
@@ -83,7 +84,7 @@ class ReviewController extends Controller
         'image'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
     ]);
 
-    // 🖼️ إذا المستخدم رفع صورة جديدة
+   
     if ($request->hasFile('image')) {
 
         // حذف الصورة القديمة إذا موجودة

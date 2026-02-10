@@ -1,0 +1,90 @@
+/* ===== Edit Category Page ===== */
+.edit-category-page {
+    max-width: 600px;
+    margin: 40px auto;
+}
+
+.edit-category-page h3 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #5e1cc0e1;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    padding: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #5e1cc0e1;
+}
+
+.form-control {
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.form-control:focus {
+    border-color: #8f3f9b;
+    box-shadow: 0 0 0 3px rgba(143,63,155,0.25);
+}
+
+.preview-image {
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    margin-bottom: 10px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    border-radius: 30px;
+    padding: 8px 20px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary {
+    background: #750dd053;
+    color: #530795e2;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(91,42,134,.35);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg,#9ca3af,#6b7280);
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-secondary:hover {
+    opacity: 0.9;
+}

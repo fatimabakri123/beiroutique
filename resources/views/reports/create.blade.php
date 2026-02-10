@@ -17,14 +17,27 @@
 
     <button type="submit">Submit Report</button>
     <style>
+        :root {
+  --purple-dark: #5b2d8b;
+  --purple-soft: #7c4dff;
+  --blue-soft: #4f8cff;
+  --bg-light: #f5f6fb;
+  --white: #ffffff;
+  --text-dark: #1f2937;
+  --text-muted: #6b7280;
+  --border-soft: #e5e7eb;
+  --shadow-soft: 0 10px 30px rgba(0,0,0,0.06);
+}
+
         /* ================= REPORT FORM ================= */
+/* ================= REPORT FORM ================= */
 form {
     max-width: 520px;
     margin: 40px auto;
     padding: 35px 40px;
-    background: #ffffff;
+    background: var(--white);
     border-radius: 22px;
-    box-shadow: 0 15px 45px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow-soft);
     font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
@@ -34,7 +47,7 @@ form label {
     margin-bottom: 8px;
     font-size: 15px;
     font-weight: 700;
-    color: #6b3f12;
+    color: var(--purple-dark);
     letter-spacing: 0.3px;
 }
 
@@ -44,10 +57,10 @@ form textarea {
     width: 100%;
     padding: 14px 16px;
     border-radius: 14px;
-    border: 1.5px solid #e0d6cc;
-    background: #faf7f4;
+    border: 1.5px solid var(--border-soft);
+    background: var(--bg-light);
     font-size: 14px;
-    color: #333;
+    color: var(--text-dark);
     margin-bottom: 22px;
     transition: all 0.25s ease;
 }
@@ -56,9 +69,9 @@ form textarea {
 form select:focus,
 form textarea:focus {
     outline: none;
-    border-color: #8B5E34;
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(139,94,52,0.15);
+    border-color: var(--purple-dark);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(139,94,52,0.15); /* optional, or create a variable for this */
 }
 
 /* Textarea size */
@@ -73,8 +86,8 @@ form button {
     padding: 14px;
     border-radius: 16px;
     border: none;
-    background: linear-gradient(135deg, #8B5E34, #B07A4A);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--purple-dark), var(--purple-soft));
+    color: var(--white);
     font-size: 16px;
     font-weight: 700;
     letter-spacing: 0.6px;
@@ -85,8 +98,8 @@ form button {
 /* Hover */
 form button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(139,94,52,0.35);
-    background: linear-gradient(135deg, #7a4e28, #a56f3f);
+    box-shadow: 0 10px 25px rgba(91,45,139,0.35); /* or create a shadow-hover variable */
+    background: linear-gradient(135deg, var(--purple-soft), var(--blue-soft));
 }
 
 /* Active */
@@ -100,5 +113,6 @@ form button:active {
         padding: 25px;
     }
 }
+
 </style>
 </form>

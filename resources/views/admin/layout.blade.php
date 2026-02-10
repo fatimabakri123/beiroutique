@@ -5,6 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title','Admin Dashboard') — {{ config('app.name') }}</title>
+    <link rel="stylesheet" href="{{ asset('css/admin-categories.css') }}">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 <script src="{{ asset('js/admin.js') }}"></script>
 
@@ -63,7 +65,7 @@ html, body {
 }
 
 .admin-sidebar::-webkit-scrollbar-thumb {
-    background: var(--primary-light);
+    background: #750fc8;
     border-radius: 10px;
 }
 
@@ -88,7 +90,7 @@ html, body {
 }
 
 .admin-sidebar .brand-text {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 700;
 }
 
@@ -106,7 +108,7 @@ html, body {
     border-radius: var(--radius);
     color: var(--sidebar-text);
     font-weight: 600;
-    font-size: 15px;
+    font-size: 18px;
     transition: 0.25s;
 }
 
@@ -410,12 +412,7 @@ form button {
 
     {{-- Sidebar --}}
     <aside class="admin-sidebar" id="adminSidebar" aria-label="Admin Sidebar">
-        <div class="brand">
-            <div class="logo text-white">AD</div>
-            <div>
-                <div class="brand-text text-white fw-bold">Admin Panel</div>
-                <div class="small">Platform Control</div>
-            </div>
+       
         </div>
 
         <nav class="mt-3">
@@ -442,6 +439,15 @@ form button {
             <a href="{{ route('admin.categories.index') }}" class="nav-link {{ request()->is('admin/categories*') ? 'active' : '' }}">
     <i class="fa fa-tags"></i> <span class="label">Categories</span>
 </a>
+
+   <a href="{{ route('admin.subcategories') }}"
+   class="nav-link {{ request()->is('admin/subcategories*') ? 'active' : '' }}">
+
+        <i class="fa fa-layer-group"></i> <span class="label">Subcategories</span>
+            </a>
+ 
+
+
             <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->is('admin/orders*') ? 'active' : '' }}">
                 <i class="fa fa-shopping-cart"></i> <span class="label">Orders</span>
             </a>
@@ -478,14 +484,8 @@ form button {
                     <i class="fa fa-bars"></i>
                 </button>
 
-                <form class="d-flex align-items-center" onsubmit="event.preventDefault();">
-                    <div class="input-group search-input">
-                        <input type="search" id="adminSearch" class="form-control form-control-sm" placeholder="Search users, orders, products..." aria-label="Search">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="performSearch()">
-                            <i class="fa fa-search"></i>
-                        </button>
-                    </div>
-                </form>
+                
+                
             </div>
 
             <div class="d-flex align-items-center gap-2">

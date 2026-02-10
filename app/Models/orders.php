@@ -12,9 +12,10 @@ class orders extends Model
     public function customer() { return $this->belongsTo(Customer::class, 'customer_id'); }
     public function items() { return $this->hasMany(OrderItem::class, 'order_id'); }
     public function paymentMethod() { return $this->belongsTo(PaymentMethod::class, 'payment_method_id'); }
-    public function deliveryMethod() { return $this->belongsTo(DeliveryMethod::class, 'delivery_method_id'); }
+    public function deliveryMethod() { return $this->belongsTo(DeliveryMethod::class, 'delivery_method_id','delivery_method_id'); }
     public function reports() {
     return $this->hasMany(ReportIssue::class,'order_id','order_id');
 }
+
 
 }

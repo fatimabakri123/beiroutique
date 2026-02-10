@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable; 
 
 class ShopOwner extends Model
 {
+     use HasFactory, Notifiable;
     protected $table = 'shop_owners';
 
     protected $primaryKey = 'owner_id';

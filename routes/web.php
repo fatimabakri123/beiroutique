@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Categories;
 use App\Models\Shop;
-
+use App\Models\products as Product;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CustomerController;
@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminSubcategoryController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CategoriesController;
@@ -49,8 +50,15 @@ use App\Notifications\SaleAppliedNotification;
 */
 
 
+
+
+
+
 Route::get('/', function () {
-    
+      $deals = Product::where('is_on_sale', 1)
+                    ->orderBy('discount_value', 'desc')
+                    ->take(8) 
+                    ->get();
     // Categories sorted
     $categories = Categories::orderByRaw("
         CASE 
@@ -63,8 +71,24 @@ Route::get('/', function () {
 
     // Get all active shops
     $shops = Shop::where('is_active', true)->get();
-
-    return view('index', compact('categories', 'shops'));
+       $topProducts = Product::with('shop')
+            ->select([
+                'products.*',
+                DB::raw('(SELECT COALESCE(SUM(order_items.quantity), 0) 
+                          FROM order_items 
+                          INNER JOIN orders ON order_items.order_id = orders.order_id 
+                          WHERE order_items.product_id = products.product_id 
+                          AND orders.order_status = "delivered") as sold_qty'),
+                DB::raw('(SELECT COALESCE(SUM(order_items.price_at_purchase * order_items.quantity), 0) 
+                          FROM order_items 
+                          INNER JOIN orders ON order_items.order_id = orders.order_id 
+                          WHERE order_items.product_id = products.product_id 
+                          AND orders.order_status = "delivered") as total_revenue')
+            ])
+            ->orderByDesc('sold_qty')
+            ->limit(5)
+            ->get();
+    return view('index', compact('categories', 'shops','deals', 'topProducts'));
 })->name('index');
 
 
@@ -97,9 +121,13 @@ Route::get('/subcategory/{id}', [CategoriesController::class, 'showSubcategory']
 Route::get('/register', [RegisterController::class, 'showForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+});
+
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -145,7 +173,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/wishlist/toggle/{product_id}', [WhishlistController::class, 'toggle'])->name('wishlist.toggle');
 });
 
-Route::post('/cart/add/{product}', [CartsController::class, 'add'])->name('cart.add');
+Route::post('/cart/add/{product}', [CartsController::class, 'add'])
+    ->name('cart.add');
+   
+
 Route::post('/cart/remove/{product}', [CartsController::class, 'remove'])->name('cart.remove');
 
 /*
@@ -177,15 +208,24 @@ Route::post('/order/{product}', [OrdersController::class, 'store'])
 
 //
 //|--------------------------------------------------------------------------
-Route::get('/products', [ProductsController::class, 'index'])->name('products.index');
+Route::get('/products', [ProductsController::class, 'index'])->name('products.index')->middleware('auth');
 ///////////////////
 ////shopowner
 
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function() {
+
+    // Notifications
+    
+
+});
 
 ////23\11
 
 
 Route::middleware(['auth'])->group(function() {
+    Route::get('notifications', [AdminNotificationController::class, 'index'])->name('admin.notifications.index');
+    Route::delete('notifications/{id}', [AdminNotificationController::class, 'destroy'])->name('admin.notifications.destroy');
+    Route::post('notifications/send', [AdminNotificationController::class, 'send'])->name('notifications.send');
   
     Route::patch('/cart/{item}/update', [CartSController::class, 'updateQuantity'])->name('cart.updateQuantity');
     Route::delete('/cart/{item}/remove', [CartSController::class, 'remove'])->name('cart.remove');
@@ -202,6 +242,8 @@ Route::post('/customer/update-password', [CustomerController::class, 'updatePass
 /////////////////////////////////////////////////////////////////////////////
 // Admin Routes
 Route::middleware(['auth'])->prefix('admin')->group(function(){
+    Route::delete('notifications/{id}', [AdminNotificationController::class, 'destroy'])->name('notifications.destroy');
+
     // Inside your admin group
 Route::get('/products/pending', [AdminProductController::class, 'pending'])
     ->name('admin.products.pending');
@@ -242,6 +284,8 @@ Route::delete('/shopowners/{id}', [AdminShopOwnerController::class, 'destroy'])
     Route::post('shops/{shop}/approve',[AdminShopController::class,'approve'])->name('shops.approve');
     Route::get('/shops', [AdminShopController::class, 'index'])->name('admin.shops.index');
     Route::get('/shops/{id}', [AdminShopController::class, 'show'])->name('admin.shops.show');
+    Route::delete('/admin/shops/{shop}', [AdminShopController::class, 'destroy'])->name('admin.shops.destroy');
+
    
     // Products
     Route::resource('products', AdminProductController::class)->except(['create','store','edit']);
@@ -260,13 +304,12 @@ Route::post('products/{product}/reject', [AdminProductController::class,'reject'
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
     Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
     // Reports
-    Route::resource('reports', AdminReportController::class)->only(['index','show','destroy']);
-    Route::post('reports/{report}/resolve',[AdminReportController::class,'resolve'])->name('reports.resolve');
-    Route::get('/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
+   
     // Notifications
-    Route::resource('notifications', AdminNotificationController::class)->only(['index']);
-    Route::post('notifications/send',[AdminNotificationController::class,'send'])->name('notifications.send');
-    Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('admin.notifications.index');
+   // Route::resource('notifications', AdminNotificationController::class)->only(['index']);
+   // Route::post('notifications/send',[AdminNotificationController::class,'send'])->name('notifications.send');
+   // Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('admin.notifications.index');
+    
     // Payment & Delivery
     Route::resource('payment_methods', AdminPaymentMethodController::class)->only(['index','store']);
     Route::post('payment_methods/{id}/toggle',[AdminPaymentMethodController::class,'toggle'])->name('payment_methods.toggle');
@@ -322,7 +365,9 @@ Route::post('/checkout/submit', [CartsController::class, 'submitCheckout'])->nam
 ////////
 //////
 //////bycatgory
-Route::get('/product/{id}', [ProductsController::class, 'show'])->name('product.show');
+Route::get('/product/{id}', [ProductsController::class, 'show'])
+    ->name('product.show');
+   
 Route::post('/product/{id}/review', [ReviewController::class, 'store'])->name('reviews.store');
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -337,9 +382,8 @@ Route::get('/shop-owner/dashboard', [ShopOwnerController::class, 'dashboard'])
      ->middleware('auth')
      ->name('shop.dashboard');
 
-     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
-Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+
 
 Route::post('/shop/update', [ShopController::class, 'updateShop'])->name('shop.update');
 
@@ -407,10 +451,10 @@ Route::delete('/wishlist/{item}', [WhishlistController::class, 'destroy'])->name
 //////////////////////////////////////////////////////////////////////////////////
 Route::post('/ask-ai', [App\Http\Controllers\AIChatController::class, 'ask']);
 
-
 Route::get('/faq', function () {
-    return view('faq'); // make sure your Blade file is resources/views/faq.blade.php
-})->name('faq');
+    return view('faq'); // resources/views/faq.blade.php
+});
+Route::post('/faq/ask', [AIChatController::class, 'faq']);
 /////////////////////////////////////////
 
 
@@ -436,16 +480,16 @@ Route::get('/checkout/now/{product}', [OrdersController::class, 'show'])
 //Route::post('/search/image', [App\Http\Controllers\SearchController::class, 'imageSearch'])
    //  ->name('image.search');
 
-Route::post('/admin/notifications/send', 
-    [AdminNotificationController::class, 'send']
-)->name('admin.notifications.send');
+//Route::post('/admin/notifications/send', 
+ //   [AdminNotificationController::class, 'send']
+//)->name('notifications.send');
 /////////////////////////////////
 //16/1
-Route::delete('/admin/notifications/{id}', 
-    [App\Http\Controllers\Admin\AdminNotificationController::class, 'destroy']
-)->name('admin.notifications.delete');
-Route::delete('/admin/notifications', [AdminNotificationController::class, 'destroyAll'])
-    ->name('admin.notifications.deleteAll');
+//Route::prefix('admin')->group(function () {
+//    Route::get('notifications', [AdminNotificationController::class, 'index'])->name('admin.notifications.index');
+//    Route::delete('notifications/{id}', [AdminNotificationController::class, 'destroy'])->name('admin.notifications.destroy');
+//});
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Route::get('/admin/profile', [App\Http\Controllers\Admin\AdminProfileController::class, 'index'])
@@ -549,13 +593,13 @@ Route::get('/ai', function () {
 });
 ///////////////////////////26/1
 Route::middleware('auth')->group(function () {
-    // بدء الدردشة
+   
     Route::get('/chat/{user}', [ChatController::class, 'start'])->name('chat.start');
 
-    // إرسال الرسائل
+    
     Route::post('/chat/send', [MessageController::class, 'send'])->name('chat.send');
 
-    // جلب الرسائل
+    
     Route::get('/chat/fetch/{chat}', [MessageController::class, 'fetch'])->name('chat.fetch');
 });
 use App\Http\Controllers\ShopChatController;
@@ -579,7 +623,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->post('/ai-chat', [RecommendationController::class, 'chat'])->name('ai-chat');
 
-//Route::post('/search/image', [ProductSearchController::class, 'imageSearch'])->name('search.image');
+Route::post('/search/image', [SearchController::class, 'search'])->name('search.image');
 use App\Http\Controllers\SaleController;
 
 Route::get('/sale', [SaleController::class, 'index'])->name('sale');
@@ -614,3 +658,92 @@ Route::get('/shop/stats', [ShopController::class, 'stats'])->name('shop.stats');
 
 Route::post('/shop/loyalty-settings', [App\Http\Controllers\LoyaltySettingController::class, 'save'])
     ->name('shop.loyalty.save');
+
+////////////////////
+Route::post('/stripe/create', [App\Http\Controllers\StripeController::class, 'charge'])->name('stripe.create');
+Route::get('/chat/{user}', [ChatController::class, 'start'])->name('chat.customer');
+Route::post('/messages/send', [MessageController::class, 'send'])->name('messages.send');
+//////////////////////////////////
+Route::get('/cart/all', [CartsController::class, 'allCarts'])->name('cart.all');
+use App\Http\Controllers\StripeController;
+
+Route::post('/stripe/charge', [StripeController::class, 'charge'])->name('stripe.charge');
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/shop_owner/notifications', 
+        [ShopOwnerController::class, 'notifications']
+    )->name('shopowner.notifications');
+
+});
+
+Route::get('/shop/stats', [ShopController::class, 'stats'])->name('shop.stats');
+
+Route::post('/shop/loyalty-settings', [App\Http\Controllers\LoyaltySettingController::class, 'save'])
+    ->name('shop.loyalty.save');
+
+    //////////////////////////
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+// Edit review (show form)
+
+// Update review (submit form)
+Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
+
+
+Route::post('/save-redirect-url', function (Request $request) {
+    session(['redirect_after_login' => $request->url]);
+    session(['product_id' => $request->product_id]);
+    return response()->json(['success' => true]);
+})->name('save.redirect.url');
+
+  // routes/web.php
+
+
+Route::prefix('admin')->middleware('auth')->group(function () {
+    Route::get('/subcategories', [AdminSubcategoryController::class, 'index'])
+        ->name('admin.subcategories');
+
+    Route::post('/subcategories/store', [AdminSubcategoryController::class, 'store'])
+        ->name('admin.subcategories.store');
+    Route::delete('/subcategories/{id}', [AdminSubcategoryController::class, 'destroy'])
+        ->name('admin.subcategories.destroy');
+        Route::get('/subcategories/{id}/edit', [AdminSubcategoryController::class, 'edit'])
+        ->name('admin.subcategories.edit');
+   Route::put('/subcategories/{id}', [AdminSubcategoryController::class, 'update'])
+    ->name('admin.subcategories.update');
+
+
+});
+
+
+// web.php
+Route::post('/ai-faq', [AIController::class, 'faq'])->name('ai.faq');
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/shop_owner/notifications', 
+        [ShopOwnerController::class, 'notifications']
+    )->name('shopowner.notifications');
+
+});
+
+Route::post('/shop/product/{product}/update-stock',
+    [ProductsController::class, 'updateStock'])
+    ->name('shop.product.update-stock');
+
+Route::post('/notifications/{notification}/mark-as-read', function ($notificationId) {
+    $notification = auth()->user()->notifications()->where('id', $notificationId)->first();
+    
+    if ($notification) {
+        $notification->markAsRead();
+        return response()->json(['success' => true]);
+    }
+    
+    return response()->json(['success' => false], 404);
+})->middleware('auth');
+
+// In routes/web.php
+Route::get('/shop/notifications', [ShopOwnerController::class, 'notifications'])
+    ->name('shop.notifications')
+    ->middleware('auth');

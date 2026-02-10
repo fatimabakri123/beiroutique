@@ -345,14 +345,14 @@ a {
 
 /* Home Button (Light Brown) */
 .home-btn {
-    background: #D9B382;
+    background: #330f68;
     color: #2b2b2b;
     margin-left: 10px;
-    box-shadow: 0 4px 15px rgba(217, 179, 130, 0.3);
+    box-shadow: 0 4px 15px rgba(8, 11, 73, 0.3);
 }
 
 .home-btn:hover {
-    background: #8b5e3ce3;
+    background: #3a0f83e3;
     color: #fff;
     transform: translateY(-3px);
     box-shadow: 0 6px 18px rgba(139, 94, 60, 0.35);

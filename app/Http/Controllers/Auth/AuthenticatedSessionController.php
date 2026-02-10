@@ -8,15 +8,20 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthenticatedSessionController extends Controller
 {
-    public function create()
+    public function create(Request $request)
     {
+       
+        if ($request->has('redirect')) {
+            session(['redirect_after_login' => $request->redirect]);
+        }
+        
         return view('auth.login');
     }
 
     public function store(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
@@ -24,22 +29,20 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
-            switch ($user->role) {
-                case 'admin':
-                    return redirect()->route('admin.dashboard');
-
-                case 'shop_owner':
-                    return redirect()->route('shop.dashboard');
-
-                case 'customer':
-                    return redirect()->route('index');
-
-                default:
-                    Auth::logout();
-                    return redirect()->route('login')->withErrors([
-                        'role' => 'Invalid user role.',
-                    ]);
+          
+            if (session()->has('redirect_after_login')) {
+                $redirectUrl = session('redirect_after_login');
+                session()->forget('redirect_after_login');
+                return redirect($redirectUrl);
             }
+
+            
+            return match ($user->role) {
+                'admin'      => redirect()->route('admin.dashboard'),
+                'shop_owner' => redirect()->route('shop.dashboard'),
+                'customer'   => redirect()->route('index'),
+                default      => redirect()->route('index'),
+            };
         }
 
         return back()->withErrors([

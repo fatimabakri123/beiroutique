@@ -30,6 +30,6 @@ class ReportIssue extends Model
 
     public function product()
     {
-        return $this->belongsTo(products::class);
+        return $this->belongsTo(products::class,'product_id','product_id');
     }
 }

@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
   <title>Creative Shein-style Navbar</title>
  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
@@ -111,7 +113,7 @@
     visibility: hidden;
 } -->
  
-</style>
+
 
 <script>
   window.addEventListener("load", function() {
@@ -128,7 +130,7 @@
     </div>
 
 
-<form method="POST" action="{{ route('search') }}" 
+<form method="POST" action="{{ route('search.image') }}" 
       class="vision-search-form" id="mainSearchForm" enctype="multipart/form-data">
     @csrf
 
@@ -161,7 +163,7 @@
 
 <style>
 :root {
-    --gold-gradient: linear-gradient(135deg, #C5A059, #8C6C3E);
+    --gold-gradient: linear-gradient(135deg, #a359c5, #1638e2d3);
     --glass: rgba(255, 255, 255, 0.9);
 }
 
@@ -180,7 +182,7 @@
 }
 
 .search-glass-wrapper:focus-within {
-    border-color: #C5A059;
+    border-color: #7413a4;
     box-shadow: 0 15px 40px rgba(197, 160, 89, 0.15);
     transform: translateY(-2px);
 }
@@ -204,7 +206,7 @@
     margin-right: 15px;
     border-radius: 10px;
     overflow: hidden;
-    border: 2px solid #C5A059;
+    border: 2px solid #9359c5d7;
 }
 
 .search-image-preview img {
@@ -219,8 +221,8 @@
     left: 0;
     width: 100%;
     height: 4px;
-    background: #C5A059;
-    box-shadow: 0 0 10px #C5A059;
+    background: #7e16cd;
+    box-shadow: 0 0 10px #9a1ded;
     animation: scanning 1.5s infinite ease-in-out;
 }
 
@@ -245,13 +247,13 @@
 .camera-trigger {
     cursor: pointer;
     font-size: 20px;
-    color: #888;
+    color: #570789d7;
     margin-right: 15px;
     transition: color 0.3s;
     position: relative;
 }
 
-.camera-trigger:hover { color: #C5A059; }
+.camera-trigger:hover { color: #960adc9d; }
 
 .submit-btn {
     background: var(--gold-gradient);
@@ -265,7 +267,7 @@
 
 .submit-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(197, 160, 89, 0.4);
+    box-shadow: 0 5px 15px rgba(113, 19, 156, 0.63);
 }
 </style>
 <script>
@@ -310,7 +312,7 @@ function clearImage() {
     <div class="nav-icons" role="navigation" aria-label="User navigation">
       @guest
         {{-- When user not logged in --}}
-        <a href="{{ route('register') }}" aria-label="Account">
+        <a href="{{ route('login') }}" aria-label="Account">
           <i class="fa-regular fa-user"></i>
         </a>
       @else
@@ -359,16 +361,16 @@ function clearImage() {
   <div class="carousel-track-container">
     <ul class="carousel-track">
       <li class="carousel-slide current-slide">
-        <img src="{{ asset('image/Home page.png') }}" alt="Description 1"  class="clothes"/>
+        <img src="{{ asset('image/image1.png') }}" alt="Description 1"  class="clothes"/>
       </li>
       <li class="carousel-slide">
-        <img src="{{ asset('image/shoes.png') }}" alt="Description 2" class="shoes"/>
+        <img src="{{ asset('image/image2.png') }}" alt="Description 2" class="shoes"/>
       </li>
       <li class="carousel-slide">
-        <img src="{{ asset('image/care.jpg') }}" alt="Description 3" class="care"/>
+        <img src="{{ asset('image/image5.png') }}" alt="Description 3" class="care"/>
       </li>
       <li class="carousel-slide">
-        <img src="{{ asset('image/esharb.png') }}" alt="Description 4" class="curve"/>
+        <img src="{{ asset('image/image4.png') }}" alt="Description 4" class="curve"/>
       </li>
     </ul>
   </div>
@@ -448,99 +450,101 @@ function clearImage() {
     updateSlidePosition(currentIndex);
   });
 </script>
-<!--------- shops Section===-->
 <section id="shops" class="shops-section">
-  <div class="shops-banner">
-    <img src="{{ asset('image/Shops.png') }}" alt="Shops Banner" class="banner-img">
-    <button class="explore-btn" onclick="showShops()">Explore Our Shops</button>
+  <div class="shops-trigger-container">
+    <div class="floating-emoji e1">🛍️</div>
+    <div class="floating-emoji e2">✨</div>
+    <div class="floating-emoji e3">🔥</div>
+    <div class="floating-emoji e4">💎</div>
+    <div class="trigger-content">
+      <h2 class="section-title">Start Your Jounery Now!</h2>
+      <p class="section-description">Discover unique collections from our verified local shops</p>
+      <button class="explore-btn-modern" onclick="toggleShops()">
+        <span id="btnText">Explore Shops</span>
+        <i class="fas fa-arrow-right" id="btnIcon"></i>
+      </button>
+    </div>
   </div>
 
   <div class="shops-list" id="shopsList">
     @foreach($shops ?? [] as $shop)
-      <a class="shop-card" href="{{ route('shop.products', $shop->shop_id) }}">
-        <img src="{{ $shop->logo_url 
-                     ? asset('storage/' . $shop->logo_url) 
-                     : asset('images/default-shop.png') }}"
-             alt="{{ $shop->shop_name }}">
-        <p>{{ $shop->shop_name }}</p>
-        <p>{{ $shop->location }}</p>
-        <p>{{ $shop->description }}</p>
-      </a>
+      <div class="shop-entry">
+        <a class="shop-card-circle" href="{{ route('shop.products', $shop->shop_id) }}">
+          <div class="circle-inner">
+            <img src="{{ $shop->logo_url ? asset('storage/' . $shop->logo_url) : asset('images/default-shop.png') }}" 
+                 alt="{{ $shop->shop_name }}">
+            <div class="glass-overlay">VIEW</div>
+          </div>
+        </a>
+        <div class="shop-info-text">
+          <h3>{{ $shop->shop_name }}</h3>
+          <span class="shop-loc"><i class="fas fa-map-marker-alt"></i> {{ $shop->address }}</span>
+        </div>
+      </div>
     @endforeach
   </div>
+
+
+  <script>
+    function toggleShops() {
+      const list = document.getElementById('shopsList');
+      const btnText = document.getElementById('btnText');
+      const entries = list.querySelectorAll('.shop-entry');
+      
+      if (list.style.display === 'flex') {
+        // Hide logic
+        list.style.display = 'none';
+        btnText.innerText = 'Explore Shops';
+        // Remove classes so they can re-animate next time
+        entries.forEach(el => el.classList.remove('animate-in'));
+      } else {
+        // Show logic
+        list.style.display = 'flex';
+        btnText.innerText = 'Close Shops';
+        
+        entries.forEach((entry, index) => {
+          setTimeout(() => {
+            entry.classList.add('animate-in');
+          }, index * 100);
+        });
+
+        list.scrollIntoView({ behavior: 'smooth', block: 'center' });
+const topPos = list.getBoundingClientRect().top + window.scrollY - 100; // adjust 100px as needed
+window.scrollTo({ top: topPos, behavior: 'smooth' });
+
+      }
+    }
+  function toggleShops() {
+  const list = document.getElementById('shopsList');
+  const btnText = document.getElementById('btnText');
+  const btnIcon = document.getElementById('btnIcon');
+  const entries = list.querySelectorAll('.shop-entry');
+
+  if (list.style.display === 'flex') {
+    list.style.display = 'none';
+    btnText.innerText = 'Explore Universe';
+    btnIcon.className = 'fas fa-rocket';
+    entries.forEach(el => el.classList.remove('animate-in'));
+  } else {
+    list.style.display = 'flex';
+    btnText.innerText = 'Close Universe';
+    btnIcon.className = 'fas fa-times';
+
+    entries.forEach((entry, index) => {
+      setTimeout(() => entry.classList.add('animate-in'), index * 100);
+    });
+
+    // Smooth scroll with offset
+    const topPos = list.getBoundingClientRect().top + window.scrollY - 80; // adjust offset
+    window.scrollTo({ top: topPos, behavior: 'smooth' });
+  }
+}
+
+  </script>
+  
 </section>
 
-         <style>
-          .shops-list {
-  display: none; /* مخفية بالبداية */
-  gap: 20px;
-  margin-top: 30px;
-  flex-wrap: wrap;
-}
-
-.shops-section {
-  text-align: center;
-  margin: 50px 0;
-}
-
-.shops-banner {
-  position: relative;
-  display: inline-block;
-}
-
-.banner-img {
-  width: 600px;
-  max-height: 500px;
-  
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.explore-btn {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #bfa36f; /* لون luxury/classic */
-  color: white;
-  border: none;
-  padding: 12px 25px;
-  font-size: 18px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.explore-btn:hover {
-  background-color: #8c6b3e;
-}
-  
-.shops-list {
-  display: none; 
-  margin-top: 30px;
-
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.shop-item {
-  background-color: #f5f5f5;
-  padding: 15px 25px;
-  border-radius: 8px;
-  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-  font-weight: bold;
-}
-</style>
-
-
-<script>
-function showShops() {
-  const shops = document.getElementById('shopsList');
-  shops.style.display = shops.style.display === 'flex' ? 'none' : 'flex';
-}
-</script>
-
+         
 
 <!-- ====== Categories Section ====== -->
 <section   id="categories-section" class="categories-section">
@@ -556,25 +560,45 @@ function showShops() {
   </div>
 </section>
 
+<section class="deals-section">
+    <h3>🔥 Deals & Offers</h3>
+    <div class="deals-grid">
+        @foreach($deals as $deal)
+        <div class="deal-card">
+          @php
+    $images = $deal->images && $deal->images->count()
+        ? $deal->images
+        : collect([(object)['image_path' => $deal->image_url]]);
+@endphp
+
+<a href="{{ route('product.show', $deal->product_id) }}">
+    <img
+        src="{{ Str::startsWith($images->first()->image_path, 'products/')
+            ? asset('storage/' . $images->first()->image_path)
+            : asset($images->first()->image_path) }}"
+        alt="{{ $deal->product_name }}"
+        class="deal-img"
+    >
+</a>
+
+            <p class="product-name">{{ $deal->product_name }}</p>
+            <div class="prices">
+                <span class="original-price">${{ $deal->price }}</span>
+                <span class="discount-price">${{ $deal->price - $deal->discount_value }}</span>
+            </div>
+            <span class="discount-tag">-{{ $deal->discount_value }}$</span>
+        </div>
+        @endforeach
+    </div>
+    
+</section>
 
 <!-- ====== Shops Section ====== -->
-<section id="shops-section" class="shops-section">
-    <div class="shops-container">
-        @foreach($shops ?? [] as $shop)
-        <a class="shop-card" href="{{ route('shop.products', $shop->shop_id) }}">
-            <img src="{{ $shop->logo_url 
-                         ? asset('storage/' . $shop->logo_url) 
-                         : asset('images/default-shop.png') }}"
-                 alt="{{ $shop->shop_name }}" />
-            <p>{{ $shop->shop_name }}</p>
-            <p>{{ $shop->location }}</p>
-            <p>{{ $shop->description }}</p>
-        </a>
-        @endforeach
+
         <style>/* ===== SHOPS SECTION ===== */
 .shops-section {
     padding: 60px 40px;
-    background: #f9f7f4;
+    background: #f9f7f406;
 }
 
 .shops-container {
@@ -607,7 +631,7 @@ function showShops() {
 
 .shop-card:hover img {
     transform: scale(1.2) rotate(-5deg);
-    border-color: #D4A373;
+    border-color:linear-gradient(135deg, #a359c5, #1638e2d3);
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
@@ -633,7 +657,7 @@ function showShops() {
     bottom: -15px;
     left: 50%;
     transform: translateX(-50%) translateY(10px);
-    background: linear-gradient(135deg, #B08968, #7F5539);
+    background: linear-gradient(135deg, #a359c5, #1638e2d3);
     color: #fff;
     padding: 6px 18px;
     border-radius: 25px;
@@ -856,123 +880,152 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <!-- ====== Trending Now====== -->
- <section >
-  <h2 style="text-align:center; margin-bottom: 20px;">Trending Now</h2>
-  <div class="product-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-      <div class="product-card">
-          <img src="{{ asset('image/trendingDress.jpg') }}" alt="Trending 1" />
-          <p class="title">Dresses</p>
-          <p class="price">$30.00</p>
-      </div>
-      <div class="product-card">
-          <img src="{{ asset('image/t-shirt.jpg') }}" alt="Trending 2" />
-          <p class="title">T-Shirts</p>
-          <p class="price">$40.00</p>
-      </div>
-      <div class="product-card">
-          <img src="{{ asset('image/jeans.jpg') }}" alt="Trending 3" />
-          <p class="title">Jeans</p>
-          <p class="price">$50.00</p>
-      </div>
-      <div class="product-card">
-          <img src="{{ asset('image/sneaker.jpg') }}" alt="Trending 4" />
-          <p class="title">Sneakers</p>
-          <p class="price">$60.00</p>
-      </div>
-      <div class="product-card">
-          <img src="{{ asset('image/handbag.jpg') }}" alt="Trending 5" />
-          <p class="title">Handbags</p>
-          <p class="price">$18.00</p>
-      </div>
-        <div class="product-card">
-          <img src="{{ asset('image/sunscreen.jpg') }}" alt="Trending 5" />
-          <p class="title">L'adora sunscreen</p>
-          <p class="price">$10.00</p>
-      </div>
+ <section class="trending-section">
 
+  <h2 style="text-align:center; margin-bottom: 20px;">Trending Now</h2>
+  <div class="cards-row">
+       @forelse($topProducts as $index => $product)
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="bg-light rounded p-1 text-center" style="width:30px;height:30px;line-height:28px;">
+                                        
+                                    </div>
+                                    <div>
+                                       
+                                        @php
+        $images = $product->images && $product->images->count()
+            ? $product->images
+            : collect([(object)['image_path' => $product->image_url]]);
+    @endphp
+
+    @foreach($images as $img)
+        <a href="{{ route('product.show', $product->product_id) }}">
+            <img
+                src="{{ Str::startsWith($img->image_path, 'products/')
+                    ? asset('storage/' . $img->image_path)
+                    : asset($img->image_path) }}"
+                class="slider-img"
+            >
+        </a>
+    @endforeach
+     <div class="fw-medium text-truncate" style="max-width:120px">{{ $product->product_name }}</div>
+                                        <small class="text-muted">{{ $product->shop->shop_name ?? 'N/A' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="2" class="text-center py-4 text-muted">No sales data yet</td>
+                        </tr>
+                        @endforelse
+</div>
   </div>
   <style>
     /* Trending Section */
-section {
-    padding: 40px 20px;
-    background-color: #f9f9f9;
+/* ===== TRENDING HORIZONTAL CARDS ===== */
+.trending-section {
+    max-width: 1500px;
+    margin: 50px auto;
+    padding: 10px;
 }
 
-section h2 {
-    font-size: 28px;
-    color: #1e1e2f;
-    margin-bottom: 30px;
-    font-weight: 600;
-}
-
-/* Product Grid */
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-/* Product Card */
-.product-card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.trending-section h2 {
+    font-weight: 800;
+    color: #421a76;
     text-align: center;
+    margin-bottom: 25px;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* cards row */
+.trending-section .cards-row {
+    display: flex;
+    gap: 50px;
+    overflow-x: auto;
     padding-bottom: 15px;
+    scrollbar-width: none;
+}
+.trending-section .cards-row::-webkit-scrollbar {
+    display: none;
 }
 
-.product-card img {
-    width: 100%;
-    height: 200px;
+/* each card */
+.trending-section tr {
+    min-width: 260px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 18px 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: 0.3s;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.trending-section tr:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+/* circle image */
+.trending-section .slider-img {
+    width: 150px;
+    height: 150px;
     object-fit: cover;
+    border-radius: 50%;
+    margin: 10px auto 12px;
     display: block;
-    border-bottom: 1px solid #eee;
+    border: 4px solid #eee;
 }
 
-/* Hover effect */
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
-
-/* Product Title */
-.product-card .title {
+/* product name */
+.trending-section .fw-medium {
     font-size: 16px;
-    font-weight: 500;
-    margin: 12px 0 5px;
-    color: #333;
+    font-weight: 700;
+    color: #501590;
 }
 
-/* Product Price */
-.product-card .price {
-    font-size: 14px;
-    color: #555;
+/* shop name */
+.trending-section small.text-muted {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 10px;
 }
 
-/* Responsive adjustments */
+/* stats row */
+.trending-section td.text-end {
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* sold */
+.trending-section .fw-bold {
+    font-size: 18px;
+    color: #111;
+}
+
+/* revenue */
+.trending-section .text-success {
+    font-weight: 700;
+    color: #16a34a !important;
+}
+
+/* responsive */
 @media (max-width: 600px) {
-    .product-card img {
-        height: 180px;
+    .trending-section tr {
+        min-width: 220px;
     }
-    section h2 {
-        font-size: 24px;
+    .trending-section .slider-img {
+        width: 90px;
+        height: 90px;
     }
 }
-/* Product Grid - Centered */
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    justify-content: center; /* centers the grid */
-    max-width: 1200px;       /* optional: limits width */
-    margin: 0 auto;          /* center the container */
-}
-
-/* Optional: if you want each card to shrink to content */
-.product-card {
-    width: 200px; /* fixed width */
+.trending-section .cards-row {
+    justify-content: center;  
 }
 
   </style>
@@ -1007,8 +1060,9 @@ section h2 {
   <style>
     /* ====== Professional Testimonials ====== */
 
+/* ===== Testimonials Section ===== */
 .testimonials-professional {
-  background: radial-gradient(circle at top left, #ffff);
+  background: linear-gradient(135deg, var(--purple-soft), var(--blue-soft));
   padding: 90px 20px;
   text-align: center;
   font-family: "Poppins", sans-serif;
@@ -1016,12 +1070,12 @@ section h2 {
   overflow: hidden;
 }
 
+/* ===== Title ===== */
 .testimonials-title-professional {
   font-size: 2.6rem;
   font-weight: 700;
-  color: #4b3b2b;
+  color: var(--white);
   margin-bottom: 60px;
-  position: relative;
   letter-spacing: 1px;
 }
 
@@ -1030,10 +1084,13 @@ section h2 {
   display: block;
   width: 70px;
   height: 3px;
-  background: #b08b6701;
+  background: var(--white);
   margin: 14px auto 0;
   border-radius: 4px;
+  opacity: 0.7;
 }
+
+/* ===== Cards Wrapper ===== */
 .testimonial-cards-professional {
   display: flex;
   flex-wrap: wrap;
@@ -1043,36 +1100,37 @@ section h2 {
   margin: 0 auto;
 }
 
-
+/* ===== Bubble Card ===== */
 .testimonial-bubble {
-  background: #fffaf4;
-  border-radius: 60px;
+  background: var(--bg-light);
+  border-radius: 50px;
   padding: 40px 30px 30px;
   width: 300px;
   position: relative;
-  box-shadow: 0 8px 25px rgba(139, 94, 60, 0.15);
+  box-shadow: var(--shadow-soft);
   transition: all 0.4s ease;
-  border: 1px solid #e6d6c4;
+  border: 1px solid var(--border-soft);
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: floatUp 0.9s ease forwards;
+  opacity: 0;
 }
 
 .testimonial-bubble:hover {
-  transform: translateY(-8px) scale(1.03);
-  box-shadow: 0 12px 35px rgba(139, 94, 60, 0.25);
+  transform: translateY(-10px) scale(1.05);
 }
 
-
+/* ===== Avatar ===== */
 .testimonial-avatar {
   width: 110px;
   height: 110px;
   border-radius: 50%;
   overflow: hidden;
-  border: 4px solid #c5a880;
-  box-shadow: 0 0 20px rgba(197, 168, 128, 0.4);
+  border: 4px solid var(--purple-dark);
+  box-shadow: 0 0 18px rgba(0,0,0,0.15);
   margin-top: -80px;
-  background: #fff;
+  background: var(--white);
 }
 
 .testimonial-avatar img {
@@ -1081,44 +1139,39 @@ section h2 {
   object-fit: cover;
 }
 
-
+/* ===== Content ===== */
 .testimonial-content {
   margin-top: 20px;
 }
 
 .testimonial-message {
-  background: #f8f2ea;
+  background: var(--white);
   padding: 18px 22px;
   border-radius: 20px 20px 20px 0px;
   font-size: 1rem;
-  color: #4b3b2b;
+  color: var(--text-dark);
   line-height: 1.6;
   font-style: italic;
   margin-bottom: 20px;
-  border: 1px solid #e6d6c4;
+  border: 1px solid var(--border-soft);
 }
 
 .testimonial-name {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #3b2d1e;
+  color: var(--purple-dark);
   margin-bottom: 4px;
 }
 
 .testimonial-occupation {
-  font-size: 0.95rem;
-  color: #8a7258;
+  font-size: 1rem;
+  color: var(--text-muted);
 }
 
-
+/* ===== Animations ===== */
 @keyframes floatUp {
   from { opacity: 0; transform: translateY(40px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.testimonial-bubble {
-  animation: floatUp 0.9s ease forwards;
-  opacity: 0;
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .testimonial-bubble:nth-child(1) { animation-delay: 0.1s; }
@@ -1131,63 +1184,394 @@ section h2 {
 
 
 <!-- ====== SHEIN Style Footer - Brown & Beige + Payment ====== -->
+
+
 <footer class="shein-footer">
-  <div class="footer-top">
-    <div class="footer-column">
-      <h4>Quick Links</h4>
-      <ul>
-        <li><a href="#categories-section">Categories</a></li>
-        <li><a href="#sellers">Sellers</a></li>
-        <li><a href="{{ url('/bio') }}">About</a></li>
+    <div class="footer-top">
+        <div class="footer-column">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="#categories-section"><i class="fas fa-tags"></i> Categories</a></li>
+                <li><a href="#shops"><i class="fas fa-store"></i> Sellers</a></li>
+             <li class="about-dropdown">
+    <a href="javascript:void(0)" onclick="toggleBioBox()">
+        <i class="fas fa-info-circle"></i> About
+    </a>
 
-        <li><a href="#contact">Contact</a></li>
-        <li><a href="#faq">FAQ</a></li>
-      </ul>
+    <div id="bioBox" class="bio-dropdown-box">
+        <p><strong>About Our Website</strong></p>
+        <p>
+            Our platform connects customers with local shops in one place.
+            Browse, compare, and support small businesses easily.
+        </p>
+    </div>
+</li>
+
+
+                <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+                <li><a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a></li>
+            </ul>
+    
+<script>
+function toggleBioBox() {
+    const box = document.getElementById("bioBox");
+    box.style.display = box.style.display === "block" ? "none" : "block";
+}
+</script>
+
+
+        </div>
+
+       <div class="footer-column">
+    <h4>Customer Service</h4>
+    <ul class="cs-list">
+        <li>
+            <a href="#" onclick="toggleInfo(event,'shipping')">
+                <i class="fas fa-truck"></i> Shipping Info
+            </a>
+            <div class="cs-box" id="shipping">
+                Orders are received either from the shop location or via delivery depending on the seller.
+            </div>
+        </li>
+
+        <li>
+            <a href="#" onclick="toggleInfo(event,'returns')">
+                <i class="fas fa-exchange-alt"></i> Returns & Exchanges
+            </a>
+            <div class="cs-box" id="returns">
+                Return and exchange policies depend on each shop and its owner.
+            </div>
+        </li>
+
+        <li>
+            <a href="#" onclick="toggleInfo(event,'payment')">
+                <i class="fas fa-credit-card"></i> Payment Options
+            </a>
+            <div class="cs-box" id="payment">
+                Credit Card, Bank Transfer, or Cash on Delivery.
+            </div>
+        </li>
+
+        <li>
+            <a href="#" onclick="toggleInfo(event,'support')">
+                <i class="fas fa-headset"></i> Support
+            </a>
+            <div class="cs-box" id="support">
+                Contact the shop directly or use our support form.
+            </div>
+        </li>
+    </ul>
+    <style>
+      .cs-list li {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.cs-box {
+    display: none;
+    background: #fff;
+    color: #333;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 6px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+    animation: fadeIn .25s ease;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-5px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+    </style>
+</div>
+
+
+
+        <div class="footer-column">
+            <h4>Follow Us</h4>
+            <div class="social-icons">
+                <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
+                <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
+                <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
+                <a href="#"><ion-icon name="logo-whatsapp"></ion-icon></a>
+                <a href="#"><ion-icon name="logo-tiktok"></ion-icon></a>
+            </div>
+        </div>
+
+        <div class="footer-column">
+            <h4>Newsletter</h4>
+            <p>Subscribe for latest updates & offers!</p>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Enter your email" required>
+                <button type="submit">Subscribe <i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
     </div>
 
-    <div class="footer-column">
-      <h4>Customer Service</h4>
-      <ul>
-        <li><a href="#shipping">Shipping Info</a></li>
-        <li><a href="#returns">Returns & Exchanges</a></li>
-        <li><a href="#payment">Payment Options</a></li>
-        <li><a href="#support">Support</a></li>
-      </ul>
+    <!-- ====== Payment Methods ====== -->
+    <div class="footer-payment">
+        <h4>Payment Methods</h4>
+        <div class="payment-icons">
+            <img src="{{asset('image/visa.jpg')}}" alt="Visa">
+  
+            <img src="{{asset('image/omt.webp')}}" alt="OMT">
+          
+            <img src="{{asset('image/cash.png')}}" alt="Cash on Delivery">
+        </div>
     </div>
 
-    <div class="footer-column">
-      <h4>Follow Us</h4>
-      <div class="social-icons">
-        <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
-        <a href="#"><ion-icon name="logo-instagram"></ion-icon></a>
-        <a href="#"><ion-icon name="logo-twitter"></ion-icon></a>
-        <a href="#"><ion-icon name="logo-whatsapp"></ion-icon></a>
-      </div>
+    <div class="footer-bottom">
+        <p>© 2025 Beiroutique. All Rights Reserved. | Made with <i class="fas fa-heart" style="color: #FFE4C4;"></i> in Lebanon</p>
     </div>
-
-    <div class="footer-column">
-      <h4>Newsletter</h4>
-      <p>Subscribe for latest updates & offers!</p>
-      <form class="newsletter-form">
-        <input type="email" placeholder="Enter your email">
-        <button type="submit">Subscribe</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ====== Payment Methods ====== -->
-  <div class="footer-payment">
-    <h4>Payment Methods</h4>
-    <div class="payment-icons">
-      <img src="{{asset('image/visa.jpg')}}" alt="Visa">
-      <img src="{{asset('image/paypal.jpg')}}" alt="PayPal">
-      <img src="{{asset('image/omt.webp')}}" alt="omt">
-    </div>
-  </div>
-
-  <div class="footer-bottom">
-    <p>© 2025 YourShopName. All Rights Reserved.</p>
-  </div>
 </footer>
+
+<script>
+    // Newsletter form submission
+    document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = this.querySelector('input[type="email"]').value;
+        if (email) {
+            // Add animation to button
+            const btn = this.querySelector('button');
+            btn.innerHTML = '<i class="fas fa-check"></i> Subscribed!';
+            btn.style.background = '#2E8B57'; // SeaGreen
+            
+            setTimeout(() => {
+                btn.innerHTML = 'Subscribe <i class="fas fa-paper-plane"></i>';
+                btn.style.background = '#8B4513';
+                this.reset();
+            }, 2000);
+        }
+    });
+
+</script>
+<script>
+function toggleInfo(e, id) {
+    e.preventDefault();
+
+    const box = document.getElementById(id);
+
+    // close other open boxes
+    document.querySelectorAll('.cs-box').forEach(el => {
+        if (el !== box) el.style.display = "none";
+    });
+
+    // toggle selected one
+    box.style.display = (box.style.display === "block") ? "none" : "block";
+}
+</script>
+<style>
+/* ===== Modern Footer CSS (Purple + Blue Theme) ===== */
+.shein-footer {
+  background: #f9f9ff; /* very light purple-blue background */
+  color: #1e1b4b;      /* dark blue text */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 50px 20px 30px;
+  border-top: 2px solid #d3d3f0;
+}
+
+.shein-footer a {
+  color: #5b2a86; /* purple accent */
+  text-decoration: none;
+  transition: 0.3s ease-in-out;
+}
+
+.shein-footer a:hover {
+  color: #1f7bb8; /* blue hover accent */
+  transform: translateX(3px);
+}
+
+/* Footer Top */
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px;
+  max-width: 1200px;
+  margin: auto;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #d3d3f0;
+}
+
+.footer-column h4 {
+  font-size: 25px;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+  font-weight: 600;
+  color: #5b2a86; /* purple titles */
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 12px;
+  font-size: 18px;
+  transition: color 0.3s;
+}
+
+.footer-column ul li:hover {
+  color: #1f7bb8;
+}
+
+/* About/Bio Box */
+.bio-dropdown-box {
+  display: none;
+  background: #e4e4ff;
+  color: #1e1b4b;
+  padding: 12px 15px;
+  margin-top: 8px;
+  border-radius: 10px;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+  font-size: 14px;
+}
+
+/* Customer Service Boxes */
+.cs-box {
+  display: none;
+  background: #e4e4ff;
+  color: #1e1b4b;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-top: 6px;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+  animation: fadeIn .25s ease;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(-5px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* Social Icons */
+.social-icons {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.social-icons a {
+  display: inline-block;
+  font-size: 25px;
+  color: #5b2a86;
+  transition: transform 0.3s, color 0.3s;
+}
+
+.social-icons a:hover {
+  color: #1f7bb8;
+  transform: scale(1.2);
+}
+
+/* Newsletter */
+.newsletter-form {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #aaaaff;
+  border-radius: 25px;
+  outline: none;
+  background-color: #fff;
+  color: #1e1b4b;
+  font-size: 16px;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.newsletter-form input:focus {
+  border-color: #5b2a86;
+  box-shadow: 0 0 6px #7b42d8;
+}
+
+.newsletter-form button {
+  padding: 12px 20px;
+  border: none;
+  background-color: #5b2a86;
+  color: #fff;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.newsletter-form button:hover {
+  background-color: #1f7bb8;
+  transform: translateY(-2px);
+}
+
+/* Payment Section */
+.footer-payment {
+  background: #f0f0ff;
+  color: #1e1b4b;
+  padding: 30px 20px;
+  text-align: center;
+  margin-top: 20px;
+  border-top: 1px solid #d3d3f0;
+}
+
+.payment-icons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-top: 15px;
+}
+
+.payment-icons img {
+  width: 70px;
+  height: auto;
+  border-radius: 10px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.payment-icons img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  color: #666;
+  border-top: 1px solid #d3d3f0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .footer-top {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-column {
+    width: 100%;
+  }
+
+  .newsletter-form {
+    flex-direction: column;
+  }
+
+  .newsletter-form button {
+    width: 100%;
+  }
+
+  .payment-icons img {
+    width: 50px;
+  }
+}
+
+</style>
+
 </body>
 </html>

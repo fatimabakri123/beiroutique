@@ -9,23 +9,27 @@ use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
-    public function start($userId)
-    {
-        $otherUser = User::findOrFail($userId);
-        $authUser = Auth::user();
+   public function start($userId)
+{
+    $authUser = Auth::user();
+    $otherUser = User::findOrFail($userId);
 
-        // التأكد من صلاحية الدردشة
-        if (!$this->canChat($authUser, $otherUser)) {
-            abort(403, 'You are not allowed to chat with this user');
-        }
-
-        $chat = Chat::firstOrCreate([
-            'user_one_id' => min($authUser->id, $otherUser->id),
-            'user_two_id' => max($authUser->id, $otherUser->id),
-        ]);
-
-        return view('chat.customer', compact('chat'));
+    // التأكد من الصلاحيات
+    if (!$this->canChat($authUser, $otherUser)) {
+        abort(403, 'You are not allowed to chat with this user');
     }
+
+    $chat = Chat::firstOrCreate([
+        'user_one_id' => min($authUser->id, $otherUser->id),
+        'user_two_id' => max($authUser->id, $otherUser->id),
+    ]);
+
+    return view('chat.customer', [
+        'chat' => $chat,
+        'otherUser' => $otherUser, 
+    ]);
+}
+
 
     private function canChat($userA, $userB)
     {
@@ -33,6 +37,7 @@ class ChatController extends Controller
         if ($userA->role === 'shop_owner' && $userB->role === 'customer') return true;
         if ($userA->role === 'shop_owner' && $userB->role === 'admin') return true;
         if ($userA->role === 'admin' && $userB->role === 'shop_owner') return true;
+
         return false;
     }
 }

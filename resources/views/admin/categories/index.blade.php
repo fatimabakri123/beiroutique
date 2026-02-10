@@ -3,231 +3,200 @@
 @section('title','Categories')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class=" mb-3">
     <h3>Categories</h3>
-    <a href="{{ route('admin.categories.create') }}" class="btn btn-primary btn-sm">+ Add Category</a>
+   <a href="{{ route('admin.categories.create') }}" class="btn add-btn">
+    + Add Category
+</a>
+
 </div>
 
 @if(session('success'))
 <div class="alert alert-success">{{ session('success') }}</div>
 @endif
 
-<div class="card">
-    <div class="card-body table-responsive">
-        <table class="table table-bordered">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Image</th>
-                    <th width="150">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($categories as $cat)
-                    <tr>
-                        <td>{{ $cat->category_id }}</td>
-                        <td>{{ $cat->category_name }}</td>
-                        <td>{{ $cat->description ?? '-' }}</td>
-                        <td>
-                            @if($cat->image)
-                                <img src="{{ asset('storage/'.$cat->image) }}" width="60">
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td class="d-flex gap-1">
-                            <a href="{{ route('admin.categories.edit',$cat->category_id) }}" class="btn btn-sm btn-warning">Edit</a>
+<div class="categories-list">
 
-                            <form method="POST" action="{{ route('admin.categories.destroy',$cat->category_id) }}">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this category?')">
-                                    Delete
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="5" class="text-center text-muted">No categories found</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+    @forelse($categories as $cat)
+    <div class="category-card">
+        <div class="category-info">
+            <div class="category-image">
+                @if($cat->image)
+                    <img src="{{ asset('storage/'.$cat->image) }}" alt="{{ $cat->category_name }}">
+                @else
+                    <div class="placeholder">No Image</div>
+                @endif
+            </div>
+            <div class="category-details">
+                <h5>{{ $cat->category_name }}</h5>
+                <p>{{ $cat->description ?? 'No description' }}</p>
+            </div>
+        </div>
+        <div class="category-actions">
+            <a href="{{ route('admin.categories.edit',$cat->category_id) }}" class="btn btn-warning btn-sm">Edit</a>
+            <form method="POST" action="{{ route('admin.categories.destroy',$cat->category_id) }}">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-danger btn-sm" onclick="return confirm('Delete this category?')">Delete</button>
+            </form>
+        </div>
+    </div>
+    @empty
+    <p class="text-center text-muted">No categories found</p>
+    @endforelse
 
-        {{-- Pagination inside card --}}
-        @if ($categories->hasPages())
+  @if ($categories->hasPages())
 <div class="mt-3 d-flex justify-content-center">
-    <ul class="pagination">
-        {{-- Previous Page Link --}}
-        @if ($categories->onFirstPage())
-            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
-        @else
-            <li class="page-item">
-                <a class="page-link" href="{{ $categories->previousPageUrl() }}">&laquo;</a>
-            </li>
-        @endif
-
-        {{-- Page Numbers --}}
-        @foreach ($categories->getUrlRange(1, $categories->lastPage()) as $page => $url)
-            <li class="page-item {{ $categories->currentPage() == $page ? 'active' : '' }}">
-                <a class="page-link" href="{{ $url }}">{{ $page }}</a>
-            </li>
-        @endforeach
-
-        {{-- Next Page Link --}}
-        @if ($categories->hasMorePages())
-            <li class="page-item">
-                <a class="page-link" href="{{ $categories->nextPageUrl() }}">&raquo;</a>
-            </li>
-        @else
-            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
-        @endif
-    </ul>
+    {{ $categories->links('pagination::simple-bootstrap-4') }}
 </div>
 @endif
 
-    </div>
+</div>
 
-   <style>
-/* ===== General Page Styling ===== */
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f4f6f9;
-    color: #333;
-}
-
-/* ===== Card Styling ===== */
-.card {
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    background-color: #fff;
-}
-
-/* ===== Table Styling ===== */
-.table {
-    border-collapse: separate;
-    border-spacing: 0 8px;
-    font-size: 16px;
-}
-
-.table thead {
-    background-color: #0d6efd; /* nice blue */
-    color: #fff;
+<style>
+    .add-btn {
+    background: linear-gradient(135deg, #7c3aed, #5e1cc0);
+    color: #fff !important;
+    padding: 10px 22px;
+    font-size: 15px;
     font-weight: 600;
-    border-radius: 12px 12px 0 0;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(124,77,255,0.3);
+    transition: all 0.3s ease;
+    text-decoration: none;
 }
 
-.table th, .table td {
-    padding: 12px 15px;
-    vertical-align: middle;
+.add-btn:hover {
+    background: linear-gradient(135deg, #5e1cc0, #350799);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 25px rgba(124,77,255,0.45);
 }
 
-.table tbody tr {
-    background-color: #ffffff;
-    border-radius: 8px;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    .btn a{
+        font-size:16px;
+    }
+  h3 {
+    color: #5e1cc0e1;
+    text-align: center; 
 }
 
-.table tbody tr:hover {
-    background-color: #e6f0ff;
-    transform: translateY(-2px);
+   .category-actions a{
+    color:#ffff;
+   }
+.category-actions .btn-warning {
+    background-color: #5e1cc0cc; 
+    border-color: #0d6dfd2f;
+    padding: 8px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
 }
 
-/* ===== Images ===== */
-.table img {
-    border-radius: 6px;
-    border: 1px solid #ddd;
+.category-actions .btn-warning:hover {
+    background-color: #3817b0ce;
+    border-color: #0a57ca71;
 }
 
-/* ===== Buttons ===== */
-.btn {
+.category-actions .btn-danger {
+    background-color: #dc3545; 
+    border-color: #dc3545;
+    padding: 8px 16px; 
     font-size: 14px;
     font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 8px;
-    transition: 0.2s;
+    border-radius: 10px;
 }
 
+.category-actions .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* ===== Categories List ===== */
+.categories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* ===== Single Category Card ===== */
+.category-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    border-radius: 14px;
+    padding: 15px 20px;
+    box-shadow: 0 8px 25px rgba(124,77,255,0.08);
+    transition: all 0.3s ease;
+}
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(124,77,255,0.18);
+}
+
+.category-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.category-image img {
+    width:100px;
+    height: 100px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.category-image .placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-size: 12px;
+}
+
+.category-details h5 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #6311ac;
+}
+
+.category-details p {
+    margin: 2px 0;
+    font-size: 16px;
+    color: #555;
+}
+
+/* Actions */
+.category-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Buttons */
 .btn-sm {
     padding: 5px 10px;
     font-size: 13px;
-}
-
-.btn-primary {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-    color: #fff;
-}
-
-.btn-primary:hover {
-    background-color: #0956d3;
-    border-color: #0956d3;
-    color: #fff;
-}
-
-.btn-warning {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #fff;
-}
-
-.btn-warning:hover {
-    background-color: #e0a800;
-    border-color: #e0a800;
-    color: #fff;
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
-    color: #fff;
-}
-
-.btn-danger:hover {
-    background-color: #a71d2a;
-    border-color: #a71d2a;
-    color: #fff;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    color: #fff;
-}
-
-.btn-secondary:hover {
-    background-color: #565e64;
-    border-color: #565e64;
-}
-
-/* ===== Pagination Styling ===== */
-.pagination .page-item .page-link {
-    color: #0d6efd;
     border-radius: 8px;
-    border: 1px solid #ddd;
-    padding: 6px 12px;
-    margin: 0 2px;
 }
 
-.pagination .page-item.active .page-link {
-    background-color: #0d6efd;
-    color: #fff;
-    border-color: #0d6efd;
-}
-
-.pagination .page-item.disabled .page-link {
-    color: #aaa;
-}
-
-/* ===== Headings ===== */
-h3 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #0d6efd;
+/* Responsive */
+@media (max-width: 768px) {
+    .category-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .category-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
 }
 </style>
-
-</div>
 @endsection

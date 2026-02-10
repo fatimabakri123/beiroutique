@@ -2,11 +2,15 @@
 
 @section('content')
 <section id="cart" class="content-section active">
-  <h2>My Shopping Cart</h2>
+
+  <!-- Back Button -->
+  <div class="back-btn-wrapper">
+    
+    <h2 class="center-title">My Shopping Cart</h2>
+  </div>
 
   {{-- ================= FILTERS ================= --}}
   <form method="GET" class="cart-filters">
-    {{-- Shop Filter --}}
     <div class="filter-group">
       <label for="shopSelect">Filter by Shop:</label>
       <select name="shop_id" id="shopSelect">
@@ -19,7 +23,6 @@
       </select>
     </div>
 
-    {{-- Search --}}
     <div class="filter-group">
       <label for="searchItem">Search Item:</label>
       <input type="text" name="search" id="searchItem" value="{{ request('search') }}" placeholder="Search in cart...">
@@ -41,101 +44,123 @@
     </thead>
     <tbody>
       @foreach($cartItems as $item)
+      @php
+        $price = $item->product->is_on_sale ? $item->product->discount_value : $item->product->price;
+      @endphp
       <tr>
+<td>
+  <a href="{{ route('product.show', $item->product->product_id) }}">
+    @php
+        $productImage = null;
+        if ($item->product) {
+            if ($item->product->images()->exists()) {
+                $productImage = $item->product->images()->first()->image_path;
+            } else {
+                $productImage = $item->product->image_url;
+            }
+        }
+    @endphp
+
+    @if($productImage)
+        <img src="{{ Str::startsWith($productImage,'products/') ? asset('storage/'.$productImage) : asset($productImage) }}" class="cart-img">
+    @endif
+  </a>
+
+  <div class="product-info">
+    <strong>{{ $item->product->product_name }}</strong>
+
+    {{-- COLORS --}}
+    @if($item->color)
+      @php
+        $colors = is_array($item->color) ? $item->color : explode(',', $item->color);
+      @endphp
+      <div class="item-option">
+        Color:
+        @foreach($colors as $color)
+          <span class="color-badge" style="background:{{ trim($color) }}" title="{{ trim($color) }}"></span>
+        @endforeach
+      </div>
+    @endif
+
+    {{-- SIZES --}}
+    @if($item->size)
+      @php
+        $sizes = is_array($item->size) ? $item->size : explode(',', $item->size);
+      @endphp
+      <div class="item-option">
+        Size:
+        @foreach($sizes as $size)
+          <span>{{ trim($size) }}</span>
+        @endforeach
+      </div>
+    @endif
+  </div>
+</td>
+
+
         <td>
-          <a href="{{ route('product.show', $item->product->product_id) }}">
-            <img src="{{ Str::startsWith($item->product->image_url, 'products/') 
-                ? asset('storage/' . $item->product->image_url) 
-                : asset($item->product->image_url) }}" 
-                alt="{{ $item->product->product_name }}" 
-                class="cart-img">
-          </a>
-          <div class="product-info">
-            <strong>{{ $item->product->product_name }}</strong>
-
-            @if($item->color)
-            <div class="item-option">
-              Color: 
-              <span class="color-badge" style="background:{{ $item->color }}"></span>
-              {{ $item->color }}
-            </div>
-            @endif
-
-            @if($item->size)
-            <div class="item-option">
-              Size: {{ $item->size }}
-            </div>
-            @endif
-          </div>
-        </td>
-
-        {{-- Price --}}
-        <td>
-          @php
-            $price = $item->product->is_on_sale ? $item->product->discount_value : $item->product->price;
-          @endphp
-
           @if($item->product->is_on_sale)
-            <span class="sale-price">${{ number_format($price, 2) }}</span>
-            <br>
-            <small class="old-price">${{ number_format($item->product->price, 2) }}</small>
+            <span class="sale-price">${{ number_format($price,2) }}</span>
+            <small class="old-price">${{ number_format($item->product->price,2) }}</small>
           @else
-            <span class="normal-price">${{ number_format($item->product->price, 2) }}</span>
+            <span class="normal-price">${{ number_format($price,2) }}</span>
           @endif
         </td>
 
-        {{-- Quantity + Options --}}
         <td>
-         <form action="{{ route('cart.updateQuantity', $item) }}" method="POST" class="update-form horizontal">
-    @csrf
-    @method('PATCH')
+          <form action="{{ route('cart.updateQuantity',$item) }}" method="POST" class="update-form horizontal">
+            @csrf
+            @method('PATCH')
+            <input type="number" name="quantity" value="{{ $item->quantity }}" min="1">
 
-    {{-- Quantity --}}
-    <div class="field-group">
-        <span class="field-label">Qty</span>
-        <input type="number" name="quantity" value="{{ $item->quantity }}" min="1">
-    </div>
+{{-- CHANGE COLOR --}}
+@if($item->product->color)
+@php
+  $colors = json_decode($item->product->color,true);
+  if(!is_array($colors)){
+      $colors = explode(',', $item->product->color);
+  }
+@endphp
+<select name="color" class="option-select">
+  @foreach($colors as $color)
+    <option value="{{ trim($color) }}"
+      {{ trim($color) == trim($item->color) ? 'selected' : '' }}>
+      {{ trim($color) }}
+    </option>
+  @endforeach
+</select>
+@endif
 
-    {{-- Color --}}
-    @if($item->product->color)
-        <div class="field-group">
-            <span class="field-label">Color</span>
-            <select name="color">
-                @foreach(explode(',', $item->product->color) as $color)
-                    <option value="{{ trim($color) }}" {{ $item->color == trim($color) ? 'selected' : '' }}>
-                        {{ trim($color) }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-    @endif
 
-    {{-- Size --}}
-    @if($item->product->size)
-        <div class="field-group">
-            <span class="field-label">Size</span>
-            <select name="size">
-                @foreach(explode(',', $item->product->size) as $size)
-                    <option value="{{ trim($size) }}" {{ $item->size == trim($size) ? 'selected' : '' }}>
-                        {{ trim($size) }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-    @endif
+{{-- CHANGE SIZE --}}
+{{-- CHANGE SIZE --}}
+@if($item->product->size)
+@php
+  $sizes = json_decode($item->product->size,true);
+  if(!is_array($sizes)){
+      $sizes = explode(',', $item->product->size);
+  }
+@endphp
+<select name="size" class="option-select">
+  @foreach($sizes as $size)
+    <option value="{{ trim($size) }}"
+      {{ trim($size) == trim($item->size) ? 'selected' : '' }}>
+      {{ trim($size) }}
+    </option>
+  @endforeach
+</select>
+@endif
 
-    <button type="submit" class="update-btn">Update</button>
 
-</form>
 
+            <button class="update-btn">Update</button>
+          </form>
         </td>
 
-        {{-- Total --}}
         <td>${{ number_format($price * $item->quantity, 2) }}</td>
 
-        {{-- Remove --}}
         <td>
-          <form action="{{ route('cart.remove', $item) }}" method="POST">
+          <form action="{{ route('cart.remove',$item) }}" method="POST">
             @csrf
             @method('DELETE')
             <button class="btn-sm danger">Remove</button>
@@ -145,160 +170,208 @@
       @endforeach
     </tbody>
   </table>
+   <div class="pagination-wrapper">
+        {{ $cartItems->links('pagination::simple-tailwind') }}
+    </div>
 
-  {{-- Cart Summary --}}
+  {{-- CART TOTAL --}}
   <div class="cart-summary">
-    @php
-      $cartTotal = $cartItems->sum(function($i) {
-          return ($i->product->is_on_sale ? $i->product->discount_value : $i->product->price) * $i->quantity;
-      });
-    @endphp
-    <p><strong>Total: </strong>${{ number_format($cartTotal, 2) }}</p>
-    <a href="{{ route('checkout') }}" class="btn checkout-btn">Proceed to Checkout</a>
+    <strong>Total: </strong>${{ number_format($cartItems->sum(fn($i)=>($i->product->is_on_sale?$i->product->discount_value:$i->product->price)*$i->quantity),2) }}
+    <br>
+    <a href="{{ route('checkout') }}" class="checkout-btn">Proceed to Checkout</a>
   </div>
+
 
   @else
     <p class="empty-cart-msg">Your cart is empty. Start shopping now!</p>
   @endif
 
-  <style>
-    /* ===== Update form horizontal ===== */
-.update-form.horizontal {
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-/* Each field box */
-.field-group {
-    display: flex;
-    flex-direction: column;
-    min-width: 70px; /* عرض موحد تقريبا */
-}
-
-/* Label above each input/select */
-.field-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #6b511c;
-    margin-bottom: 3px;
-    text-align: center;
-}
-
-/* Quantity input */
-.update-form input[type="number"] {
-    width: 65px;
-    height: 34px;
-    padding: 4px 6px;
-    text-align: center;
-    font-size: 13px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-/* Selects (Color / Size) */
-.update-form select {
-    width: 100%;
-    height: 34px;
-    padding: 4px 6px;
-    font-size: 13px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-/* Update button aligned */
-.update-btn {
-    height: 34px;
-    background: #ab761b;
-    color: #fff;
-    padding: 0 14px;
-    border: none;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.update-btn:hover {
-    background: #533b0b;
-}
-
-
-.color-badge {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: 1px solid #ccc;
-    vertical-align: middle;
-    margin-right: 4px;
-}
-
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; background:#f8f9fa; margin:0; padding:0; }
-    .content-section { padding:40px 20px; max-width:1100px; margin:0 auto; background:#fff; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
-    h2 { text-align:center; margin-bottom:30px; color:#333; }
-
-    /* Filters */
-    .cart-filters { display:flex; flex-wrap:wrap; gap:15px; align-items:flex-end; margin-bottom:25px; }
-    .filter-group { display:flex; flex-direction:column; }
-    .cart-filters label { font-weight:600; color:#555; margin-bottom:5px; font-size:14px; }
-    .cart-filters select, .cart-filters input[type="text"] { padding:8px 12px; border-radius:8px; border:1px solid #ccc; transition:all 0.2s; font-size:14px; }
-    .cart-filters select:hover, .cart-filters input[type="text"]:hover { border-color:#ab761b; }
-    .apply-btn { background-color:#ab761b; color:#fff; padding:8px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:600; transition:all 0.2s; }
-    .apply-btn:hover { background-color:#533b0b; }
-
-    /* Table */
-    .cart-table { width:100%; border-collapse:collapse; margin-bottom:30px; }
-    .cart-table th, .cart-table td { padding:12px 15px; text-align:left; border-bottom:1px solid #eee; vertical-align:middle; font-size:14px; }
-    .cart-table th { background:#f1f1f1; font-weight:600; color:#555; }
-    .cart-table tbody tr:hover { background:#f9f9f9; }
-    .cart-img { width:60px; height:60px; object-fit:cover; border-radius:8px; margin-right:10px; vertical-align:middle; }
-    .product-info { display:inline-block; vertical-align:middle; }
-    .item-option { font-size:13px; color:#555; margin-top:3px; }
-    .color-badge { display:inline-block; width:14px; height:14px; border-radius:50%; border:1px solid #ccc; vertical-align:middle; margin-right:4px; }
-
-    /* Price */
-    .sale-price { color:#E63946; font-weight:700; }
-    .old-price { text-decoration:line-through; color:#999; font-size:12px; display:block; }
-    .normal-price { color:#1b1b1b; font-weight:600; }
-
-    /* Update form */
-    .update-form input[type="number"], .update-form select { margin-bottom:5px; padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
-    .update-btn { background:#ab761b; color:#fff; padding:6px 12px; border:none; border-radius:6px; cursor:pointer; transition:all 0.2s; }
-    .update-btn:hover { background:#533b0b; }
-
-    /* Remove button */
-    .btn-sm.danger { background:#9c5815; color:#fff; padding:6px 12px; border:none; border-radius:6px; cursor:pointer; transition:all 0.2s; }
-    .btn-sm.danger:hover { background:#c0392b; }
-
-    /* Cart summary */
-    .cart-summary { text-align:right; font-size:16px; font-weight:600; margin-top:20px; }
-    .checkout-btn { display:inline-block; padding:10px 20px; background:#6b511c; color:#fff; border-radius:8px; text-decoration:none; margin-top:10px; transition:all 0.2s; }
-    .checkout-btn:hover { background:#533b0b; }
-
-    /* Empty */
-    .empty-cart-msg { text-align:center; font-size:16px; color:#777; margin-top:40px; }
-
-    /* Responsive */
-    @media(max-width:768px) {
-      .cart-filters { flex-direction:column; align-items:flex-start; }
-      .cart-table { font-size:13px; }
-      .cart-img { width:50px; height:50px; }
-    }
-    /* Quantity input smaller */
-.update-form input[type="number"] {
-    width: 65px;          /* صغر العرض */
-    height: 34px;         /* صغر الارتفاع */
-    padding: 4px 6px;
-    text-align: center;
-    font-size: 13px;
-}
-
-/* Remove arrows (optional – cleaner look) */
-
-
-  </style>
 </section>
+
+<style>
+  .back-btn-wrapper {
+  margin-bottom: 25px;
+}
+
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 10px 18px;
+  background: linear-gradient(135deg, var(--purple-soft), var(--blue-soft));
+  color: #fff;
+  font-weight: 600;
+  font-size:20px;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 8px 25px rgba(124,77,255,0.25);
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(96,165,250,0.35);
+  color: #fff;
+}
+  .pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination-wrapper nav {
+    display: flex;
+    gap: 10px;
+}
+
+.pagination-wrapper a,
+.pagination-wrapper span {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+    color: var(--text-dark);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.pagination-wrapper .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.pagination-wrapper .active {
+    background: var(--purple-soft);
+    color: #fff;
+    border-color: var(--purple-soft);
+}
+
+
+
+
+
+.content-section{padding:30px;max-width:1150px;margin:auto;background:#fff;border-radius:18px;box-shadow:var(--shadow-soft)}
+
+/* Filters */
+.cart-filters{display:flex;gap:12px;justify-content:center;margin-bottom:25px;flex-wrap:wrap}
+.filter-group label{font-weight:600;color:var(--text-muted)}
+.cart-filters input, .cart-filters select{padding:10px;border-radius:10px;border:1px solid var(--border-soft)}
+.apply-btn{background:linear-gradient(135deg,var(--purple-soft),var(--blue-soft));color:#fff;border:none;padding:10px 22px;border-radius:12px}
+
+/* TABLE → CARD LOOK */
+.cart-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 16px;
+}
+
+.cart-table thead{display:none;}
+
+.cart-table tbody tr{
+  background:#fff;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  border-radius:16px;
+}
+
+.cart-table td{
+  border:none;
+  padding:16px;
+  vertical-align:middle;
+}
+
+.cart-table td:first-child{
+  border-radius:16px 0 0 16px;
+}
+.cart-table td:last-child{
+  border-radius:0 16px 16px 0;
+  text-align:right;
+}
+
+/* product image */
+.cart-img{
+  width:90px;
+  height:90px;
+  border-radius:12px;
+  object-fit:cover;
+  margin-right:12px;
+}
+
+/* options */
+.item-option{font-size:13px;color:var(--text-muted)}
+.color-badge{
+  width:14px;height:14px;border-radius:50%;
+  display:inline-block;border:1px solid #ccc;margin-right:4px;
+}
+
+/* price */
+.sale-price{color:#ef4444;font-weight:700}
+.old-price{text-decoration:line-through;color:#9ca3af;font-size:12px}
+.normal-price{font-weight:600}
+
+/* qty form */
+.update-form.horizontal{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap
+}
+.update-btn{
+  background:var(--purple-soft);
+  color:#fff;border:none;border-radius:8px;padding:6px 14px
+}
+
+/* remove */
+.btn-sm.danger{
+  background:#ef4444;color:#fff;border:none;border-radius:8px;padding:8px 16px
+}
+
+/* total */
+.cart-summary{text-align:right;font-size:18px;font-weight:700;margin-top:25px}
+
+/* responsive */
+@media(max-width:768px){
+.cart-table tbody tr{display:flex;flex-direction:column}
+.cart-table td:last-child{text-align:left}
+}
+
+/* ===== SELECT OPTIONS (Color & Size) ===== */
+.option-select {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  font-size: 14px;
+  background: #fff;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: 0.25s;
+  min-width: 100px;
+}
+
+.option-select:focus {
+  outline: none;
+  border-color: var(--purple-soft);
+  box-shadow: 0 0 6px rgba(124,77,255,0.3);
+}
+
+/* Color select – show a small color box inside select */
+.option-select.color-select {
+  padding-left: 30px;
+  position: relative;
+}
+
+.option-select.color-select option {
+  padding-left: 10px;
+}
+
+/* Style the wrapper of select in form */
+.update-form select {
+  margin-top: 4px;
+}
+
+/* Add label before select */
+.update-form select + label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-right: 6px;
+}
+
+</style>
+
 @endsection

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\Shop;
 use App\Models\products;
@@ -16,70 +15,129 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // 1️⃣ Counts
+       
         $customerCount = Customer::count();
         $shopCount = Shop::count();
         $productCount = products::count();
         $orderCount = orders::count();
 
-        // 2️⃣ Sales Last 7 Days
-       // 2️⃣ Sales per Shop
-$salesLabels = [];
-$salesData = [];
+        
+        $totalRevenue = OrderItem::whereHas('order', function($q) {
+                $q->where('order_status', 'delivered');
+            })
+            ->sum(DB::raw('price_at_purchase * quantity'));
 
-// Get all shops with their products and order items
-$shops = Shop::with(['products.orderItems' => function($q){
-    $q->whereHas('order', fn($q2) => $q2->where('order_status','delivered'));
-}])->get();
-
-foreach($shops as $shop){
-    $totalSales = 0;
-
-    foreach($shop->products as $product){
-        foreach($product->orderItems as $item){
-            // Use price at purchase * quantity
-            $totalSales += $item->price_at_purchase * $item->quantity;
+        
+        $salesData = [];
+        $salesLabels = [];
+        
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $nextDate = Carbon::now()->subDays($i - 1);
+            
+            $dailyRevenue = OrderItem::whereHas('order', function($q) use ($date, $nextDate) {
+                    $q->where('order_status', 'delivered')
+                      ->whereBetween('created_at', [$date, $nextDate]);
+                })
+                ->sum(DB::raw('price_at_purchase * quantity'));
+            
+            $salesLabels[] = $date->format('d M');
+            $salesData[] = $dailyRevenue;
         }
-    }
 
-    $salesLabels[] = $shop->shop_name;
-    $salesData[] = $totalSales;
-}
-
-        // 3️⃣ Top Selling Products (by quantity sold)
-        $topProductsList = products::with('shop')
-            ->select('products.*', DB::raw('(SELECT SUM(quantity) FROM order_items WHERE order_items.product_id = products.product_id) as sold_qty'))
-            ->selectRaw('(SELECT SUM(price_at_purchase) FROM order_items WHERE order_items.product_id = products.product_id) as total_sales')
+        $topProducts = products::with('shop')
+            ->select([
+                'products.*',
+                DB::raw('(SELECT COALESCE(SUM(order_items.quantity), 0) 
+                          FROM order_items 
+                          INNER JOIN orders ON order_items.order_id = orders.order_id 
+                          WHERE order_items.product_id = products.product_id 
+                          AND orders.order_status = "delivered") as sold_qty'),
+                DB::raw('(SELECT COALESCE(SUM(order_items.price_at_purchase * order_items.quantity), 0) 
+                          FROM order_items 
+                          INNER JOIN orders ON order_items.order_id = orders.order_id 
+                          WHERE order_items.product_id = products.product_id 
+                          AND orders.order_status = "delivered") as total_revenue')
+            ])
             ->orderByDesc('sold_qty')
             ->limit(5)
             ->get();
 
-        // 4️⃣ Top Shops by revenue
-        $topShopsList = Shop::withCount(['products as orders_count' => function($q){
-                $q->join('order_items','products.product_id','=','order_items.product_id');
-            }])
-            ->with(['products' => function($q){
-                $q->join('order_items','products.product_id','=','order_items.product_id')
-                  ->select('products.shop_id', DB::raw('SUM(order_items.price_at_purchase) as total_revenue'))
-                  ->groupBy('products.shop_id');
-            }])
-            ->get()
-            ->map(function($shop){
-                $shop->total_revenue = optional($shop->products->first())->total_revenue ?? 0;
-                return $shop;
-            })
-            ->sortByDesc('total_revenue')
-            ->take(5);
+       
+        $topShops = Shop::select([
+                'shops.*',
+                DB::raw('(SELECT COUNT(DISTINCT o.order_id) 
+                          FROM orders o
+                          INNER JOIN order_items oi ON o.order_id = oi.order_id
+                          INNER JOIN products p ON oi.product_id = p.product_id
+                          WHERE p.shop_id = shops.shop_id 
+                          AND o.order_status = "delivered") as total_orders'),
+                DB::raw('(SELECT COALESCE(SUM(oi.price_at_purchase * oi.quantity), 0) 
+                          FROM order_items oi
+                          INNER JOIN orders o ON oi.order_id = o.order_id
+                          INNER JOIN products p ON oi.product_id = p.product_id
+                          WHERE p.shop_id = shops.shop_id 
+                          AND o.order_status = "delivered") as total_revenue'),
+                DB::raw('(SELECT COALESCE(SUM(oi.quantity), 0) 
+                          FROM order_items oi
+                          INNER JOIN orders o ON oi.order_id = o.order_id
+                          INNER JOIN products p ON oi.product_id = p.product_id
+                          WHERE p.shop_id = shops.shop_id 
+                          AND o.order_status = "delivered") as total_items_sold')
+            ])
+            ->having('total_revenue', '>', 0)
+            ->orderByDesc('total_revenue')
+            ->limit(5)
+            ->get();
+
+   
+        $orderStats = orders::select('order_status', DB::raw('COUNT(*) as count'))
+            ->groupBy('order_status')
+            ->pluck('count', 'order_status')
+            ->toArray();
+
+        $topCustomers = Customer::select([
+                'customers.*',
+                DB::raw('COUNT(DISTINCT orders.order_id) as total_orders'),
+                DB::raw('COALESCE(SUM(order_items.price_at_purchase * order_items.quantity), 0) as total_spent')
+            ])
+            ->leftJoin('orders', 'customers.customer_id', '=', 'orders.customer_id')
+            ->leftJoin('order_items', 'orders.order_id', '=', 'order_items.order_id')
+            ->where('orders.order_status', 'delivered')
+            ->groupBy('customers.customer_id')
+            ->orderByDesc('total_spent')
+            ->limit(5)
+            ->get();
+
+
+        $monthlyData = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = Carbon::now()->subMonths($i);
+            $start = $month->copy()->startOfMonth();
+            $end = $month->copy()->endOfMonth();
+            
+            $monthlyData[$month->format('M Y')] = [
+                'revenue' => OrderItem::whereHas('order', function($q) use ($start, $end) {
+                        $q->where('order_status', 'delivered')
+                          ->whereBetween('created_at', [$start, $end]);
+                    })->sum(DB::raw('price_at_purchase * quantity')),
+                'orders' => orders::whereBetween('created_at', [$start, $end])->count()
+            ];
+        }
 
         return view('admin.dashboard', compact(
             'customerCount',
             'shopCount',
             'productCount',
             'orderCount',
+            'totalRevenue',
             'salesLabels',
             'salesData',
-            'topProductsList',
-            'topShopsList'
+            'topProducts',
+            'topShops',
+            'orderStats',
+            'topCustomers',
+            'monthlyData'
         ));
     }
 }
