@@ -22,42 +22,51 @@
     <form method="POST" action="{{ route('shop.profile.update') }}" enctype="multipart/form-data">
         @csrf
 
-        <div class="form-group">
-            <label>Shop Name <span>*</span></label>
-            <input type="text" name="shop_name" value="{{ $shop->shop_name }}" required>
+        <div class="form-row">
+            <div class="form-group half">
+                <label>Shop Name <span>*</span></label>
+                <input type="text" name="shop_name" value="{{ $shop->shop_name }}" required>
+            </div>
+
+            <div class="form-group half">
+                <label>Phone</label>
+                <input type="text" name="contact_phone" value="{{ $shop->contact_phone }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group half">
+                <label>Email <span>*</span></label>
+                <input type="email" name="contact_email" value="{{ $shop->contact_email }}" required>
+            </div>
+
+            <div class="form-group half">
+                <label>Address</label>
+                <input type="text" name="address" value="{{ $shop->address }}">
+            </div>
         </div>
 
         <div class="form-group">
             <label>Description</label>
-            <textarea name="description" rows="4">{{ $shop->description }}</textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Phone</label>
-            <input type="text" name="contact_phone" value="{{ $shop->contact_phone }}">
-        </div>
-
-        <div class="form-group">
-            <label>Email <span>*</span></label>
-            <input type="email" name="contact_email" value="{{ $shop->contact_email }}" required>
-        </div>
-
-        <div class="form-group">
-            <label>Address</label>
-            <input type="text" name="address" value="{{ $shop->address }}">
+            <textarea name="description" rows="3">{{ $shop->description }}</textarea>
         </div>
 
         <div class="form-group">
             <label>Logo</label>
-            @if($shop->logo_url)
-                <div class="logo-preview">
-                    <img src="{{ asset('storage/'.$shop->logo_url) }}" alt="Shop Logo">
-                </div>
-            @endif
-            <input type="file" name="logo">
+            <div class="logo-section">
+                @if($shop->logo_url)
+                    <div class="logo-preview">
+                        <img src="{{ asset('storage/'.$shop->logo_url) }}" alt="Shop Logo">
+                    </div>
+                @endif
+                <input type="file" name="logo" id="logo" class="file-input">
+                <label for="logo" class="file-label">Choose File</label>
+            </div>
         </div>
 
-        <button type="submit" class="btn-save">Save Changes</button>
+        <div class="form-actions">
+            <button type="submit" class="btn-save">Save Changes</button>
+        </div>
     </form>
 </div>
 </div>
@@ -65,69 +74,96 @@
 
 @section('scripts')
 <style>
-/* Container */
 :root {
     --purple-dark: #5b2a86;
     --purple-soft: #1f7bb8eb;
     --blue-soft: #8f3f9beb;
-
     --bg-light: #fdfcff;
     --white: #ffffff;
-
     --text-dark: #1e1b4b;
     --text-muted: #6b7280;
-
-    --border-soft: rgba(226, 232, 240, 0.8);
-    --shadow-soft: 0 18px 40px rgba(91, 42, 134, 0.18);
+    --border-soft: #e2e8f0;
+    --shadow-soft: 0 10px 25px rgba(91, 42, 134, 0.12);
 }
 
-/* Container */
+/* Wrapper - centers everything */
+.edit-profile-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 60px);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Container - compact laptop size */
 .edit-profile-container {
-    max-width: 750px;
-    margin: 40px auto;
-    background: var(--bg-light);
-    padding: 30px 40px;
+    width: 750px;
+    max-width: 100%;
+    padding: 25px 30px;
     border-radius: 12px;
     box-shadow: var(--shadow-soft);
-    font-family: 'Poppins', sans-serif;
+    background: var(--bg-light);
+    border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 /* Heading */
 .edit-profile-container h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 20px;
     color: var(--purple-dark);
-    margin-bottom: 25px;
-    text-align: center;
+    border-bottom: 2px solid rgba(91, 42, 134, 0.1);
+    padding-bottom: 12px;
 }
 
 /* Alerts */
 .alert {
-    padding: 12px 20px;
+    padding: 10px 16px;
     border-radius: 8px;
     margin-bottom: 20px;
     font-weight: 500;
+    font-size: 0.95rem;
+    border-left: 4px solid;
 }
 
 .alert.success {
-    background: rgba(31, 123, 184, 0.15);
-    color: var(--purple-soft);
+    background: #f0f9ff;
+    color: #0369a1;
+    border-left-color: #0284c7;
 }
 
 .alert.error {
-    background: rgba(143, 63, 155, 0.15);
-    color: var(--purple-dark);
+    background: #fff1f2;
+    color: #9f1239;
+    border-left-color: #e11d48;
 }
 
-/* Form Groups */
+/* Form rows - 2 columns */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     display: flex;
     flex-direction: column;
+    flex: 1;
+}
+
+.form-group.half {
+    flex: 1;
 }
 
 .form-group label {
     font-weight: 500;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     color: var(--text-dark);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .form-group label span {
@@ -137,172 +173,120 @@
 /* Inputs */
 .form-group input[type="text"],
 .form-group input[type="email"],
-.form-group input[type="file"],
 .form-group textarea {
-    padding: 12px 15px;
-    border: 1px solid var(--border-soft);
+    padding: 10px 14px;
+    border: 1.5px solid var(--border-soft);
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 0.95rem;
     color: var(--text-dark);
     outline: none;
-    transition: 0.25s ease;
+    transition: all 0.2s ease;
     background: var(--white);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-    border-color: var(--purple-soft);
-    box-shadow: 0 0 0 3px rgba(31, 123, 184, 0.15);
+    border-color: var(--purple-dark);
+    box-shadow: 0 0 0 3px rgba(91, 42, 134, 0.08);
 }
 
-/* Logo Preview */
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Logo section */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
 .logo-preview img {
-    height: 80px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    height: 60px;
+    width: auto;
+    border-radius: 8px;
+    border: 2px solid var(--border-soft);
+    padding: 4px;
+    background: white;
+}
+
+/* File input styling */
+.file-input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.file-label {
+    background: white;
+    border: 1.5px solid var(--purple-soft);
+    color: var(--purple-soft);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.file-label:hover {
+    background: var(--purple-soft);
+    color: white;
+}
+
+/* Form actions */
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-soft);
+    padding-top: 20px;
 }
 
 /* Save Button */
 .btn-save {
-    background: linear-gradient(135deg, var(--purple-dark), var(--purple-soft));
+    background: linear-gradient(135deg, var(--purple-dark), #6d3a9c);
     color: #fff;
-    padding: 12px 32px;
+    padding: 10px 28px;
     border: none;
-    border-radius: 10px;
-    font-size: 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
 }
 
 .btn-save:hover {
     transform: translateY(-1px);
-    box-shadow: 0 10px 25px rgba(91, 42, 134, 0.35);
+    box-shadow: 0 6px 15px rgba(91, 42, 134, 0.25);
 }
 
-/* Center content in screen */
-
-
-/* Container: professional, fixed, medium width */
-.edit-profile-container {
-    width: 850px;             
-    max-width: 95%;           
-    padding: 40px 50px;       
-    border-radius: 14px;
-    box-shadow: var(--shadow-soft);
-    font-size: 1.125rem;       /* slightly bigger than before */
-    background: var(--bg-light);
-    overflow: auto;
-    max-height: 95%;          
+/* Responsive */
+@media (max-width: 640px) {
+    .edit-profile-wrapper {
+        padding: 15px;
+        align-items: flex-start;
+    }
+    
+    .edit-profile-container {
+        padding: 20px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .edit-profile-container h2 {
+        font-size: 1.4rem;
+    }
 }
-
-/* Heading */
-.edit-profile-container h2 {
-    font-size: 2.3rem;        /* slightly bigger */
-    font-weight: 700;
-    margin-bottom: 30px;
-    text-align: center;
-    color: var(--purple-dark);
-}
-
-/* Alerts */
-.alert {
-    padding: 14px 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    font-weight: 600;
-    font-size: 1.1rem;        /* slightly bigger */
-}
-
-/* Form Groups */
-.form-group {
-    margin-bottom: 22px;
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group label {
-    font-weight: 600;
-    margin-bottom: 6px;
-    font-size: 1.15rem;       /* slightly bigger */
-    color: var(--text-dark);
-}
-
-.form-group input,
-.form-group textarea,
-.form-group input[type="file"] {
-    padding: 12px 15px;
-    border-radius: 8px;
-    font-size: 1.15rem;       /* slightly bigger */
-}
-
-/* Logo Preview */
-.logo-preview img {
-    height: 90px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.12);
-}
-
-/* Save Button */
-.btn-save {
-    padding: 14px 36px;
-    font-size: 1.25rem;       /* slightly bigger */
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-
-.edit-profile-container {
-    max-width: 850px;
-    width: 100%;
-    margin: 40px auto;   /* THIS centers it properly */
-    padding: 40px 50px;
-    border-radius: 14px;
-    box-shadow: var(--shadow-soft);
-    background: var(--bg-light);
-}
-
-.edit-profile-wrapper {
-    display: flex;
-    justify-content: center; /* horizontal center */
-    align-items: center;     /* vertical center */
-    min-height: 100vh;       /* full screen height */
-    padding: 20px;           /* small padding for small screens */
-    box-sizing: border-box;
-}
-
-/* Keep your container size fixed */
-.edit-profile-container {
-    width: 850px;
-    max-width: 95%;
-    padding: 40px 50px;
-    border-radius: 14px;
-    box-shadow: var(--shadow-soft);
-    background: var(--bg-light);
-    overflow: auto;
-}
-
-.edit-profile-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;          /* fill viewport */
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-.edit-profile-container {
-    width: 850px;
-    max-width: 100%;         /* fit small screens */
-    max-height: 90vh;        /* do not exceed viewport height */
-    overflow-y: auto;        /* scroll only inside container if needed */
-    padding: 30px 40px;
-    border-radius: 14px;
-    box-shadow: var(--shadow-soft);
-    background: var(--bg-light);
-}
-
 </style>
 @endsection

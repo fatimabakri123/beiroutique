@@ -92,11 +92,13 @@
 
 .product-slider img {
     width: 100%;
-    height: 280px;
-    object-fit: cover;
+    height: 360px;         
+    object-fit: contain;   
+    background: #f6f6f6;  
     display: none;
     border-radius: 14px;
 }
+
 
 .product-slider img.active {
     display: block;

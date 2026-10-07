@@ -12,6 +12,7 @@ class LoyaltySetting extends Model
         'min_orders',
         'min_revenue',
         'discount_percentage',
+        'reward_type',
     ];
 
     // Relationship to Shop

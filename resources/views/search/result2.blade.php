@@ -50,7 +50,8 @@
 
 @if($products->count())
 <div class="products-grid">
-    @foreach($products as $product)
+  @foreach($products->where('stock_quantity', '>', 0) as $product)
+
     @php
         $images = $product->images && $product->images->count()
             ? $product->images

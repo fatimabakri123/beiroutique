@@ -28,7 +28,8 @@ class OrderStatusChanged extends Notification
     $name = $notifiable->name ?? 'Customer';
 
     return (new MailMessage)
-        ->subject("Your Order #{$this->order->order_id} Status Updated")
+       ->subject("🚚 Your Order #{$this->order->order_id} Status Updated")
+
         ->greeting("Hello {$name},")
         ->line("The status of your order #{$this->order->order_id} has been updated to:")
         ->line("**{$this->order->order_status}**")
@@ -41,7 +42,9 @@ class OrderStatusChanged extends Notification
         return [
             'order_id' => $this->order->order_id,
             'status' => $this->order->order_status,
-            'message' => "Your order #{$this->order->order_id} status has been updated to {$this->order->order_status}"
+            'message' => "Your order #{$this->order->order_id} status has been updated to {$this->order->order_status}",
+            'type' => 'order_status_changed',
+            'title' => "Order #{$this->order->order_id} Status Updated",
         ];
     }
 }

@@ -19,10 +19,15 @@ class Customer extends Model
     public function cart() { return $this->hasOne(carts::class, 'customer_id'); }
     public function wishlist() { return $this->hasOne(Wishlist::class); }
     public function reviews() { return $this->hasMany(Review::class); }
-      // Notifications relationship
+
     public function notifications()
     {
         return $this->morphMany(\Illuminate\Notifications\DatabaseNotification::class, 'notifiable');
+    }
+
+      public function loyalties()
+    {
+        return $this->hasMany(CustomerLoyalty::class, 'customer_id', 'customer_id');
     }
 
     public function isLoyal($shopId)
@@ -44,9 +49,28 @@ $totalRevenue = $orders->sum(\DB::raw('order_items.quantity * order_items.price_
 
 
 return $totalOrders >= $loyalty->min_orders && $totalRevenue >= $loyalty->min_revenue;
-
 }
+
 public function reports() {
     return $this->hasMany(ReportIssue::class);
+}
+
+// In App\Models\Customer.php
+public function hasReceivedLoyalty($shopId)
+{
+    return Order::where('customer_id', $this->customer_id)
+        ->where('loyalty_applied', 1)
+        ->whereHas('items.product', function ($query) use ($shopId) {
+            $query->where('shop_id', $shopId); 
+        })
+        ->exists();
+}
+
+public function loyaltyForShop($shopId)
+{
+   return \App\Models\CustomerLoyalty::where([
+            'customer_id' => $this->customer_id,  
+            'shop_id' => $shopId
+        ])->first();
 }
 }

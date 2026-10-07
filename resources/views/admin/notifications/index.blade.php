@@ -28,23 +28,6 @@
 
 <hr>
 
-<h4>Notifications</h4>
-<div id="notif-box">
-@foreach($notifications as $notif)
-<div class="notif-card notif-{{ $notif->target ?? 'specific' }}" id="notif-{{ $notif->id }}">
-    <div class="notif-info">
-        <strong>{{ $notif->data['title'] ?? 'No title' }}</strong>
-        <p>{{ $notif->data['message'] ?? 'No message' }}</p>
-        <small>Target: {{ ucfirst($notif->target ?? 'Specific') }}</small>
-    </div>
-    <form method="POST" action="{{ route('admin.notifications.destroy', $notif->id) }}">
-        @csrf
-        @method('DELETE')
-        <button type="submit">Delete</button>
-    </form>
-</div>
-@endforeach
-</div>
 
 <style>
 :root {

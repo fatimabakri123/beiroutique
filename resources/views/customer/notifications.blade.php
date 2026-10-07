@@ -8,7 +8,10 @@
    
   </div>
 
-  <h2 class="notif-title">🔔 Notifications</h2>
+  <div class="notif-header">
+    <h2 class="notif-title">🔔 Notifications</h2>
+</div>
+
 
   @if($notifications->count() > 0)
     <ul class="notification-list">
@@ -16,46 +19,49 @@
         <a href="{{ $note->data['url'] ?? '#' }}" class="notification-link">
           <li class="notification-item {{ $note->read_at ? '' : 'unread' }}">
 
-            {{-- IMAGE OR ICON --}}
-            @if(($note->data['type'] ?? '') === 'product')
-
-  @php
-    $images = collect($note->data['images'] ?? []);
-
-    if ($images->isEmpty() && isset($note->data['image'])) {
-        $images = collect([$note->data['image']]);
-    }
-  @endphp
-
-  <div class="notif-slider">
- @foreach($images as $img)
+           <div class="notif-icon-wrapper">
     @php
-        // if $img is an array (sometimes happens if JSON stored incorrectly), take the first element
-        if (is_array($img)) {
-            $img = $img[0] ?? null;
-        }
+        $type = $note->data['type'] ?? '';
     @endphp
 
-    @if($img)
-        <img
-            src="{{ Str::startsWith($img, 'storage/')
-                  ? asset($img)
-                  : asset('storage/' . $img) }}"
-            class="notif-slide"
-            alt="Product">
+    @if($type === 'product')
+        @php
+            $images = collect($note->data['images'] ?? []);
+            if ($images->isEmpty() && isset($note->data['image'])) {
+                $images = collect([$note->data['image']]);
+            }
+        @endphp
+        <div class="notif-slider">
+            @foreach($images as $img)
+                @php
+                    if (is_array($img)) $img = $img[0] ?? null;
+                @endphp
+                @if($img)
+                    <img src="{{ Str::startsWith($img, 'storage/') ? asset($img) : asset('storage/' . $img) }}"
+                        class="notif-slide" alt="Product">
+                @endif
+            @endforeach
+            @if($images->count() > 1)
+                <button class="notif-arrow prev">❮</button>
+                <button class="notif-arrow next">❯</button>
+            @endif
+        </div>
+
+    @elseif($type === 'sale')
+        <div class="notif-icon" style="background: linear-gradient(135deg,#ff4d4d,#ff9900);">🔥</div>
+
+    @elseif($type === 'order_status_changed')
+        <div class="notif-icon" style="background: linear-gradient(135deg,#5b2a86,#8f3f9b);">🚚</div>
+
+    @elseif($type === 'loyalty')
+        <div class="notif-icon" style="background: linear-gradient(135deg,#ffd700,#ffa500);">🎉</div>
+
+    @else
+        <div class="notif-icon" style="background: #ccc;">❔</div>
     @endif
-@endforeach
+</div>
+{{-- IMAGE OR ICON --}}
 
-
-    @if($images->count() > 1)
-      <button class="notif-arrow prev">❮</button>
-      <button class="notif-arrow next">❯</button>
-    @endif
-  </div>
-
-@else
-  <div class="notif-icon">🔥</div>
-@endif
 
 
             {{-- CONTENT --}}
@@ -82,7 +88,10 @@
   padding: 10px 40px 30px; 
   border-radius: 24px;
   box-shadow: inset 0 0 0 1px rgba(124,77,255,0.08);
-  min-height: 100vh;
+   height: 100vh;
+  display: flex;
+  flex-direction: column; 
+   overflow: hidden; 
 }
 
 
@@ -126,11 +135,12 @@
   list-style: none;
   padding: 0;
   margin: 0 auto;
-  max-height: 500px;
-  overflow-y: auto;
   width: 95%;
   max-width: 1100px;
+    flex: 1;           
+  overflow-y: auto;
 }
+
 
 /* Scrollbar */
 .notification-list::-webkit-scrollbar {
@@ -199,16 +209,17 @@
 .notif-content { flex: 1; }
 
 .notif-content h4 {
-  font-size: 17px;
+  font-size: 20px;
   margin-bottom: 6px;
   color: #fff;
   font-weight: 600;
 }
 
 .notif-content p {
-  font-size: 15px;
-  color: #f3e8ff;
+  font-size: 18px;
+  color: #faf5ff;
   margin-bottom: 4px;
+  font-weight: 500;
 }
 
 .notif-content small {
@@ -285,6 +296,26 @@
 
 .notif-arrow:hover {
   transform: translateY(-50%) scale(1.1);
+}
+
+.notif-header {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(135deg, #fdfcff, #f6f0ff);
+  padding: 10px 0;
+  z-index: 100;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 95%;
+  max-width: 1100px;
+
+  flex: 1;              /* takes remaining space */
+  overflow-y: auto;     /* ONLY this scrolls */
 }
 
 </style>

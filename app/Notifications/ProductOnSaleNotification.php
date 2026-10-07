@@ -19,7 +19,7 @@ class ProductOnSaleNotification extends Notification
         $this->product = $product;
     }
 
-    // 📌 القنوات
+    
     public function via($notifiable)
     {
         return ['mail', 'database'];
@@ -34,7 +34,7 @@ class ProductOnSaleNotification extends Notification
             ->line("{$this->shop->shop_name} has a new sale 🎉")
             ->line("Product: {$this->product->product_name}")
             ->line("Sale Price: {$this->product->discount_value}$")
-            ->action('View Product', url('/'))
+            ->action('View Product', url('/sale'))
             ->line('Don’t miss it!');
     }
 

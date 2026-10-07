@@ -1509,7 +1509,43 @@ input[type="checkbox"] {
     margin-top: 15px;
 }
 
+/* Fix for Product Modal - Smaller and centered */
+#productModal .modal-content {
+    max-width: 500px !important; /* Smaller width */
+    width: 90% !important;
+   
+    padding: 25px !important;
+    margin: auto !important;
+}
 
+/* Make form inputs smaller */
+#productModal input,
+#productModal textarea,
+#productModal select {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+    margin-bottom: 12px !important;
+}
+
+/* Make the modal title smaller */
+#productModal h2 {
+    font-size: 1.5rem !important;
+    margin-bottom: 20px !important;
+}
+
+/* Make the save button smaller */
+#productModal button {
+    padding: 10px 20px !important;
+    font-size: 1rem !important;
+}
+
+/* Ensure modal is properly centered on mobile */
+@media (max-width: 600px) {
+    #productModal .modal-content {
+        width: 95% !important;
+        padding: 20px !important;
+    }
+}
 </style>
 
      @php use Illuminate\Support\Str; @endphp
@@ -1530,7 +1566,7 @@ input[type="checkbox"] {
 <div class="dashboard-container">
     <!-- Shop Info -->
 <div class="shop-info">
-    <img id="shopLogo" src="{{ $shop->logo_url ? asset('storage/' . $shop->logo_url) : asset('image/default.jpg') }}" alt="Shop Logo">
+   <img id="shopLogo" src="{{ $shop->logo_url ? asset('storage/' . $shop->logo_url) : asset('image/default.jpg') }}" alt="Shop Logo">
 
     <div class="details">
         <h2 id="shopName">{{ $shop->shop_name ?? 'Your Shop Name' }}</h2>

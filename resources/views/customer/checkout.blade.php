@@ -736,25 +736,33 @@
                 <span class="error-message" id="addressError"></span>
             </div>
 
-            <div class="form-group">
-                <label><i class="fas fa-credit-card"></i> Payment Method *</label>
-                <select name="payment_method_id" id="paymentSelect" required>
-                    <option value="">-- Select Payment Method --</option>
-                    @foreach($paymentMethods as $method)
-                        <option value="{{ $method->payment_method_id }}">{{ ucfirst($method->method_name) }}</option>
-                    @endforeach
-                </select>
-                <span class="error-message" id="paymentError"></span>
-            </div>
+           
 
             <div class="form-group">
-                <label><i class="fas fa-shipping-fast"></i> Delivery Method *</label>
-                <select name="delivery_method_id" id="deliverySelect" required onchange="updateDeliveryCost()">
-                    <option value="">-- Select Delivery Method --</option>
+                 <label>Payment Method</label>
+                <select name="payment_method_id" id="paymentSelect" required>
+                    <option value="">-- Select Payment --</option>
+                    @foreach($paymentMethods as $method)
+                        @if($method->is_active)
+                            <option value="{{ $method->payment_method_id }}">{{ ucfirst($method->method_name) }}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label>Delivery Method</label>
+                <select name="delivery_method_id" id="deliverySelect" required>
+                    <option value="">-- Select Delivery --</option>
                     @foreach($deliveryMethods as $method)
-                        <option value="{{ $method->delivery_method_id }}" data-cost="{{ $method->cost }}">
-                            {{ ucfirst($method->method_name) }} - ${{ number_format($method->cost, 2) }}
-                        </option>
+                        @if($method->is_active)
+                            <option 
+                                value="{{ $method->delivery_method_id }}"
+                                data-cost="{{ $method->cost }}"
+                                data-name="{{ strtolower($method->method_name) }}"
+                            >
+                                {{ ucfirst($method->method_name) }} - ${{ number_format($method->cost,2) }}
+                            </option>
+                        @endif
                     @endforeach
                 </select>
                 <span class="error-message" id="deliveryError"></span>
@@ -940,7 +948,8 @@
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             updateDeliveryCost();
-            
+            document.getElementById('deliverySelect').addEventListener('change', updateDeliveryCost);
+
             // Add real-time validation
             const inputs = document.querySelectorAll('input[required], select[required], textarea[required]');
             inputs.forEach(input => {

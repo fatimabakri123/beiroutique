@@ -565,33 +565,37 @@ window.scrollTo({ top: topPos, behavior: 'smooth' });
     <div class="deals-grid">
         @foreach($deals as $deal)
         <div class="deal-card">
-          @php
-    $images = $deal->images && $deal->images->count()
-        ? $deal->images
-        : collect([(object)['image_path' => $deal->image_url]]);
-@endphp
+            @php
+                $images = $deal->images && $deal->images->count()
+                    ? $deal->images
+                    : collect([(object)['image_path' => $deal->image_url]]);
+                
+                $discount_amount = $deal->price - $deal->discount_value;
+            @endphp
 
-<a href="{{ route('product.show', $deal->product_id) }}">
-    <img
-        src="{{ Str::startsWith($images->first()->image_path, 'products/')
-            ? asset('storage/' . $images->first()->image_path)
-            : asset($images->first()->image_path) }}"
-        alt="{{ $deal->product_name }}"
-        class="deal-img"
-    >
-</a>
+            <a href="{{ route('product.show', $deal->product_id) }}">
+                <img
+                    src="{{ Str::startsWith($images->first()->image_path, 'products/')
+                        ? asset('storage/' . $images->first()->image_path)
+                        : asset($images->first()->image_path) }}"
+                    alt="{{ $deal->product_name }}"
+                    class="deal-img"
+                >
+            </a>
 
             <p class="product-name">{{ $deal->product_name }}</p>
+
             <div class="prices">
+                <span class="remaining-price">${{ $deal->discount_value }}</span>
                 <span class="original-price">${{ $deal->price }}</span>
-                <span class="discount-price">${{ $deal->price - $deal->discount_value }}</span>
             </div>
-            <span class="discount-tag">-{{ $deal->discount_value }}$</span>
+
+            <span class="discount-tag">-{{ $discount_amount }}$</span>
         </div>
         @endforeach
     </div>
-    
 </section>
+
 
 <!-- ====== Shops Section ====== -->
 
@@ -880,48 +884,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <!-- ====== Trending Now====== -->
- <section class="trending-section">
+<section class="trending-section">
+    <h2 style="text-align:center; margin-bottom: 20px;">Trending Now</h2>
+    <div class="cards-row">
+        @forelse($topProducts as $product)
+            <div class="trending-card">
+                @php
+                    // Pick first image if exists, else fallback to product main image
+                    $img = $product->images && $product->images->count()
+                        ? $product->images->first()->image_path
+                        : $product->image_url;
+                @endphp
 
-  <h2 style="text-align:center; margin-bottom: 20px;">Trending Now</h2>
-  <div class="cards-row">
-       @forelse($topProducts as $index => $product)
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="bg-light rounded p-1 text-center" style="width:30px;height:30px;line-height:28px;">
-                                        
-                                    </div>
-                                    <div>
-                                       
-                                        @php
-        $images = $product->images && $product->images->count()
-            ? $product->images
-            : collect([(object)['image_path' => $product->image_url]]);
-    @endphp
+                <a href="{{ route('product.show', $product->product_id) }}">
+                    <img
+                        src="{{ Str::startsWith($img, 'products/') ? asset('storage/' . $img) : asset($img) }}"
+                        class="slider-img"
+                        alt="{{ $product->product_name }}"
+                    >
+                </a>
 
-    @foreach($images as $img)
-        <a href="{{ route('product.show', $product->product_id) }}">
-            <img
-                src="{{ Str::startsWith($img->image_path, 'products/')
-                    ? asset('storage/' . $img->image_path)
-                    : asset($img->image_path) }}"
-                class="slider-img"
-            >
-        </a>
-    @endforeach
-     <div class="fw-medium text-truncate" style="max-width:120px">{{ $product->product_name }}</div>
-                                        <small class="text-muted">{{ $product->shop->shop_name ?? 'N/A' }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="2" class="text-center py-4 text-muted">No sales data yet</td>
-                        </tr>
-                        @endforelse
-</div>
+                <div class="product-info">
+                    <div class="fw-medium text-truncate">{{ $product->product_name }}</div>
+                    <small class="text-muted">{{ $product->shop->shop_name ?? 'N/A' }}</small>
+                </div>
+            </div>
+        @empty
+            <p class="text-center py-4 text-muted">No trending products yet</p>
+        @endforelse
+    </div>
+</section>
   </div>
   <style>
     /* Trending Section */
@@ -1178,6 +1170,54 @@ document.addEventListener("DOMContentLoaded", () => {
 .testimonial-bubble:nth-child(2) { animation-delay: 0.3s; }
 .testimonial-bubble:nth-child(3) { animation-delay: 0.5s; }
 .testimonial-bubble:nth-child(4) { animation-delay: 0.7s; }
+
+
+
+.trending-card {
+    min-width: 260px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 18px 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: 0.3s;
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.slider-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #eee;
+    margin: 0 auto;
+}
+
+.product-info .fw-medium {
+    font-size: 16px;
+    font-weight: 700;
+    color: #501590;
+}
+
+.product-info small.text-muted {
+    font-size: 14px;
+    display: block;
+    margin-top: 4px;
+    color: #6c5f58;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .trending-card {
+        min-width: 180px;
+    }
+    .slider-img {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+
 
     </style>
 </section>

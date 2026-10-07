@@ -732,6 +732,56 @@ Route::post('/shop/product/{product}/update-stock',
     [ProductsController::class, 'updateStock'])
     ->name('shop.product.update-stock');
 
+// In routes/web.php
+Route::get('/shop/notifications', [ShopOwnerController::class, 'notifications'])
+    ->name('shop.notifications')
+    ->middleware('auth');
+
+    // Change your notification route to this:
+Route::get('/customer/notifications', function () {
+    $notifications = auth()->user()->customer->notifications()->latest()->get();
+    return view('customer.notifications', compact('notifications'));
+})->name('customer.notifications');
+
+
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/customer/notifications', function () {
+        $customer = auth()->user()->customer;
+        
+        if (!$customer) {
+            return redirect('/')->with('error', 'Customer not found');
+        }
+        
+        // ✅ CORRECT: Use full namespace
+        $notifications = $customer->notifications()
+            ->where('notifiable_type', 'App\Models\Customer')
+            ->latest()
+            ->get();
+        
+        return view('customer.notifications', compact('notifications'));
+    })->name('customer.notifications');
+    
+    Route::post('/customer/notifications/{id}/read', function ($id) {
+        $customer = auth()->user()->customer;
+        $notification = $customer->notifications()->where('id', $id)->first();
+        
+        if ($notification) {
+            $notification->markAsRead();
+        }
+        
+        return back();
+    })->name('customer.notifications.read');
+    
+    Route::post('/customer/notifications/read-all', function () {
+        $customer = auth()->user()->customer;
+        $customer->unreadNotifications->markAsRead();
+        
+        return back();
+    })->name('customer.notifications.read-all');
+});
+
 Route::post('/notifications/{notification}/mark-as-read', function ($notificationId) {
     $notification = auth()->user()->notifications()->where('id', $notificationId)->first();
     

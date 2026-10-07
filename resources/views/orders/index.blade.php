@@ -2,6 +2,24 @@
 
 @section('content')
 <div class="order-page">
+        {{-- ADD LOYALTY MESSAGE HERE --}}
+      
+    @if(session('loyalty_unlocked'))
+    @php $reward = session('loyalty_unlocked'); @endphp
+    <div class="alert alert-success">
+        🎉 <strong>Congratulations!</strong> 
+        You've just earned a {{ $reward['percentage'] }}% loyalty discount on your next order!
+        <br><small>The discount will be automatically applied when you place your next order from this shop.</small>
+    </div>
+    @endif
+
+    {{-- Show if reward is available for this order --}}
+    @if($isRewardAvailable)
+    <div class="alert alert-success">
+        🎉 <strong>Loyalty Reward Applied!</strong> 
+        Your {{ $loyaltyDiscount }}% discount has been applied to this order!
+    </div>
+    @endif
 
     <h2>Order: {{ $product->product_name }}</h2>
 
@@ -56,19 +74,28 @@
             </div>
             <div>
                 <label>Total Price</label>
-                <div id="loyalty-text" style="color:green; font-weight:400; font-size:0.9em;">
-                    @if($loyaltyDiscount)
-                        ({{ $loyaltyDiscount }}% loyalty discount will apply)
-                    @endif
-                </div>
+
+                 @php
+    // Base price: check if product is on sale
+    $basePrice = $product->is_on_sale ? $product->discount_value : $product->price;
+
+    // Calculate initial loyalty discount (if any)
+    $loyaltyDiscountAmount = $loyaltyDiscount ? ($basePrice * $loyaltyDiscount / 100) : 0;
+
+    // Total price after loyalty discount
+    $initialTotal = $basePrice - $loyaltyDiscountAmount;
+@endphp
+               <div id="loyalty-text" style="color:green; font-weight:400; font-size:0.9em;">
+    @if($loyaltyDiscount)
+        {{ $loyaltyDiscount }}% Loyalty Discount (-${{ number_format($loyaltyDiscountAmount, 2) }})
+    @endif
+</div>
+
+
                 <div class="total-price-wrapper">
-                    $<span id="total-price">0.00</span>
-                    @if($product->is_on_sale)
-                        <span style="color: #ef4444;">${{ number_format($product->discount_value, 2) }}</span>
-                    @else
-                        ${{ number_format($product->price, 2) }}
-                    @endif
-                </div>
+    $<span id="total-price">{{ number_format($initialTotal, 2) }}</span>
+</div>
+
                 <small>Price per item: ${{ number_format($product->price,2) }}</small>
                 <small id="deliveryFee"></small>
             </div>
@@ -210,52 +237,119 @@ document.addEventListener('DOMContentLoaded', function() {
         return qty;
     }
 
-    function updateTotal() {
-        const quantity = sanitizeQuantity();
-        let basePrice = pricePerItem;
-        @if($product->is_on_sale)
-            basePrice = parseFloat(@json($product->discount_value));
-        @endif
-
-        let total = quantity * basePrice;
-
-        // Loyalty discount
-        if(loyaltyDiscount > 0) {
-            const discountAmount = total * (loyaltyDiscount / 100);
-            total -= discountAmount;
-            loyaltyText.textContent = `-${loyaltyDiscount}% Loyalty Discount (-$${discountAmount.toFixed(2)})`;
-        } else {
-            loyaltyText.textContent = '';
-        }
-
-        // Delivery cost
-        const selectedDelivery = deliverySelect.selectedOptions[0];
-        if(selectedDelivery){
-            const cost = parseFloat(selectedDelivery.dataset.cost || 0);
-            total += cost;
-            deliveryFeeSpan.textContent = `+ $${cost.toFixed(2)} delivery`;
-        } else {
-            deliveryFeeSpan.textContent = '';
-        }
-
-        // Disable Pickup if Cash on Delivery
-        const selectedPayment = paymentSelect.selectedOptions[0]?.text.toLowerCase() || '';
-        for(let i=0;i<deliverySelect.options.length;i++){
-            const opt = deliverySelect.options[i];
-            const name = opt.dataset.name || '';
-            if(selectedPayment.includes('cash on delivery') && name.includes('pickup')){
-                opt.disabled = true;
-                if(deliverySelect.selectedIndex === i){
-                    deliverySelect.selectedIndex = 0;
-                }
-            } else { opt.disabled = false; }
-        }
-
-        totalPriceSpan.textContent = total.toFixed(2);
-
-        // Show Stripe if credit card
-        stripeWrapper.style.display = selectedPayment.includes('credit card') ? 'block' : 'none';
+  function updateTotal() {
+    const quantity = sanitizeQuantity();
+    const originalPrice = parseFloat(@json($product->price));
+    const isOnSale = @json($product->is_on_sale);
+    const salePrice = isOnSale ? parseFloat(@json($product->discount_value)) : originalPrice;
+    const loyaltyDiscount = parseFloat(@json($loyaltyDiscount ?? 0));
+    
+    // 1. Preço inicial (com sale se aplicável)
+    let unitPrice = isOnSale ? salePrice : originalPrice;
+    let baseSubtotal = unitPrice * quantity;
+    
+    // 2. Desconto de sale
+    let saleDiscountAmount = 0;
+    if (isOnSale) {
+        saleDiscountAmount = (originalPrice - salePrice) * quantity;
     }
+    
+    // 3. Desconto de loyalty
+    let loyaltyDiscountAmount = 0;
+    let finalUnitPrice = unitPrice;
+    let productTotal = baseSubtotal;
+    
+    if (loyaltyDiscount > 0) {
+        loyaltyDiscountAmount = (baseSubtotal * loyaltyDiscount) / 100;
+        finalUnitPrice = unitPrice - ((unitPrice * loyaltyDiscount) / 100);
+        productTotal = finalUnitPrice * quantity;
+        
+        loyaltyText.innerHTML = `
+            <div style="color:#28a745; margin-bottom:5px;">
+                <strong>🎉 Loyalty Reward Applied!</strong><br>
+                ${loyaltyDiscount}% discount: -$${loyaltyDiscountAmount.toFixed(2)}
+            </div>
+        `;
+    } else {
+        loyaltyText.innerHTML = '';
+    }
+    
+    // 4. Custo de entrega
+    const selectedDelivery = deliverySelect.selectedOptions[0];
+    let deliveryCost = 0;
+    if (selectedDelivery) {
+        deliveryCost = parseFloat(selectedDelivery.dataset.cost || 0);
+        deliveryFeeSpan.textContent = `Delivery: +$${deliveryCost.toFixed(2)}`;
+    } else {
+        deliveryFeeSpan.textContent = '';
+    }
+    
+    // 5. Total final (SEM TAXA COD)
+    const finalTotal = productTotal + deliveryCost;
+    totalPriceSpan.textContent = finalTotal.toFixed(2);
+    
+    // 6. Mostrar breakdown
+    const breakdown = document.getElementById('price-breakdown');
+    if (!breakdown) {
+        const breakdownDiv = document.createElement('div');
+        breakdownDiv.id = 'price-breakdown';
+        breakdownDiv.style.marginTop = '10px';
+        breakdownDiv.style.padding = '10px';
+        breakdownDiv.style.background = '#f8f9fa';
+        breakdownDiv.style.borderRadius = '8px';
+        breakdownDiv.style.fontSize = '0.9em';
+        totalPriceSpan.parentNode.appendChild(breakdownDiv);
+    }
+    
+    let breakdownHTML = `
+        <div><strong>Price Breakdown:</strong></div>
+        <div>Unit Price: $${originalPrice.toFixed(2)}</div>
+    `;
+    
+    if (isOnSale) {
+        breakdownHTML += `<div style="color:#28a745;">Sale Price: $${salePrice.toFixed(2)} (Save $${saleDiscountAmount.toFixed(2)})</div>`;
+    }
+    
+    if (loyaltyDiscount > 0) {
+        breakdownHTML += `<div style="color:#17a2b8;">Loyalty Discount: -${loyaltyDiscount}% (-$${loyaltyDiscountAmount.toFixed(2)})</div>`;
+    }
+    
+    breakdownHTML += `
+        <div>Final Unit Price: $${finalUnitPrice.toFixed(2)}</div>
+        <div>Quantity: ${quantity}</div>
+        <div>Product Total: $${productTotal.toFixed(2)}</div>
+    `;
+    
+    if (deliveryCost > 0) {
+        breakdownHTML += `<div>Delivery: +$${deliveryCost.toFixed(2)}</div>`;
+    }
+    
+    breakdownHTML += `
+        <hr style="margin:5px 0">
+        <div><strong>Total: $${finalTotal.toFixed(2)}</strong></div>
+    `;
+    
+    document.getElementById('price-breakdown').innerHTML = breakdownHTML;
+    
+    // 7. Desabilitar Pickup se for Cash on Delivery (remover se quiser)
+    const selectedPayment = paymentSelect.selectedOptions[0]?.text.toLowerCase() || '';
+    for(let i = 0; i < deliverySelect.options.length; i++) {
+        const opt = deliverySelect.options[i];
+        const name = opt.dataset.name || '';
+        // REMOVER ESTA RESTRIÇÃO SE QUISER
+        if(selectedPayment.includes('cash on delivery') && name.includes('pickup')) {
+            opt.disabled = true;
+            if(deliverySelect.selectedIndex === i) {
+                deliverySelect.selectedIndex = 0;
+            }
+        } else { 
+            opt.disabled = false; 
+        }
+    }
+    
+    // 8. Mostrar Stripe se for cartão de crédito
+    stripeWrapper.style.display = selectedPayment.includes('credit card') ? 'block' : 'none';
+}
 
     quantityInput.addEventListener('input', updateTotal);
     paymentSelect.addEventListener('change', updateTotal);
@@ -446,7 +540,34 @@ button[type="submit"]:hover {
     transition: opacity 0.3s ease;
 }
 
+/* Add this to your <style> section at the bottom */
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid transparent;
+}
 
+.alert-success {
+    background-color: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #17a2b8;
+    color: #0c5460;
+}
+
+.alert strong {
+    font-weight: 600;
+}
+
+.alert small {
+    font-size: 0.85em;
+    opacity: 0.9;
+}
 </style>
 
 @endsection

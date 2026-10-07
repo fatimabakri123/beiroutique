@@ -97,7 +97,7 @@ html, body {
 .admin-sidebar nav {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .admin-sidebar nav .nav-link {
@@ -108,7 +108,7 @@ html, body {
     border-radius: var(--radius);
     color: var(--sidebar-text);
     font-weight: 600;
-    font-size: 18px;
+    font-size: 16px;
     transition: 0.25s;
 }
 
@@ -461,6 +461,15 @@ form button {
             <a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->is('admin/settings*') ? 'active' : '' }}">
                 <i class="fa fa-gear"></i> <span class="label">Settings</span>
             </a>
+          <a href="{{ route('logout') }}" class="nav-link"
+   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+    <i class="fa fa-right-from-bracket"></i> <span class="label">Logout</span>
+</a>
+
+<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+    @csrf
+</form>
+
         </nav>
 
         <div class="mt-4 small text-white-50">
@@ -490,30 +499,8 @@ form button {
 
             <div class="d-flex align-items-center gap-2">
                 {{-- Notifications --}}
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-light position-relative" id="notifBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-bell"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notifCount" style="font-size:10px;display:none">0</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" style="width:320px" aria-labelledby="notifBtn" id="notifDropdown">
-                        <li class="dropdown-header">Notifications</li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li class="text-center small text-muted">No notifications</li>
-                    </ul>
-                </div>
-
-                {{-- Messages --}}
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-light" id="msgBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-envelope"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" style="width:320px" aria-labelledby="msgBtn">
-                        <a href="{{ route('chat.index') }}" class="dropdown-item text-center small text-primary fw-bold">Go to Chat</a>
-                        <li class="dropdown-header">Messages</li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li class="text-center small text-muted">No messages</li>
-                    </ul>
-                </div>
+                
+            
 
                 {{-- Admin menu --}}
                 <div class="dropdown">

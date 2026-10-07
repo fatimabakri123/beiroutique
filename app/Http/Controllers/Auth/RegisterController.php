@@ -56,12 +56,13 @@ class RegisterController extends Controller
 
     
     $logoPath = null;
-    if ($request->hasFile('logo_url')) {
-        $file = $request->file('logo_url');
-        $filename = time() . '.' . $file->getClientOriginalExtension();
-        $file->storeAs('public/logos', $filename); 
-        $logoPath = 'logos/' . $filename; 
-    }
+  if ($request->hasFile('logo_url')) {
+    $file = $request->file('logo_url');
+    $filename = time() . '.' . $file->getClientOriginalExtension();
+    $file->storeAs('public/logos', $filename);
+    $logoPath = 'logos/' . $filename;
+}
+
 
     Shop::create([
         'shop_name' => $request->shop_name,

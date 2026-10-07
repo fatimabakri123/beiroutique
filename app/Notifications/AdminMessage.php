@@ -22,7 +22,7 @@ class AdminMessage extends Notification
     public function toDatabase($notifiable)
     {
         return [
-            'title' => $this->title,
+            'title' => 'from Admin:Enjoy your journey in our website',
             'message' => $this->message,
         ];
     }

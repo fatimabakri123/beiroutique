@@ -214,6 +214,143 @@ input[type="radio"]:checked + label {
         align-items: center;
     }
 }
+/* ===== BACK BUTTON STYLES ===== */
+.back-btn-wrapper {
+    max-width: 1000px;
+    margin: 20px auto 10px auto;
+    padding: 0 15px;
+    width: 100%;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--purple-dark), var(--purple-soft));
+    color: #fff;
+    font-weight: 600;
+    font-size: 18px;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(91, 42, 134, 0.25);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    gap: 10px;
+}
+
+.back-btn i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.back-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(91, 42, 134, 0.35);
+    background: linear-gradient(135deg, var(--purple-soft), var(--purple-dark));
+    color: #fff;
+}
+
+.back-btn:hover i {
+    transform: translateX(-5px);
+}
+
+.back-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 5px 15px rgba(91, 42, 134, 0.25);
+}
+
+/* Sticky/Fixed Back Button */
+.back-btn-wrapper.sticky {
+    position: sticky;
+    top: 80px;
+    z-index: 999;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    padding: 15px 20px;
+    margin: 0 auto 20px auto;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* Simple Back Button Alternative */
+.back-btn-simple {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--purple-dark);
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+}
+
+.back-btn-simple:hover {
+    background: rgba(91, 42, 134, 0.1);
+    color: var(--purple-dark);
+}
+
+.back-btn-simple i {
+    font-size: 16px;
+}
+
+/* Outline Style */
+.back-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: transparent;
+    color: var(--purple-dark);
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 50px;
+    text-decoration: none;
+    border: 2px solid var(--purple-dark);
+    transition: all 0.3s ease;
+}
+
+.back-btn-outline:hover {
+    background: var(--purple-dark);
+    color: #fff;
+    transform: translateX(-5px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .back-btn-wrapper {
+        margin: 15px auto 5px auto;
+        padding: 0 12px;
+    }
+    
+    .back-btn {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    
+    .back-btn i {
+        font-size: 16px;
+    }
+}
+
+/* Animation */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.back-btn {
+    animation: slideInLeft 0.5s ease;
+}
 
 </style>
 <!-- NAVBAR -->
@@ -223,6 +360,7 @@ input[type="radio"]:checked + label {
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 <nav class="product-navbar">
+    
     <div class="nav-container">
         <a href="{{ route('customer.profile') }}" class="nav-icon">
             <i class="fa fa-user fa-lg"></i>
@@ -239,64 +377,51 @@ input[type="radio"]:checked + label {
         </a>
     </div>
 </nav>
+<!-- Add this right after the navbar and before product-page -->
+<div class="back-btn-wrapper">
+    <a href="javascript:history.back()" class="back-btn">
+        <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Back
+    </a>
+</div>
 
 <style>
+  
+/* ===== CLEAN PRODUCT NAVBAR ===== */
 .product-navbar {
     width: 100%;
-    background: var(--white);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    padding: 10px 0;
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    padding: 6px 0;
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
 .product-navbar .nav-container {
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
     display: flex;
+    align-items: center;
     justify-content: flex-end;
-    gap: 25px;
-    padding: 0 15px;
+    gap: 18px;
+    padding: 0 20px;
 }
 
+/* ===== BACK BUTTON ===== */
+
+/* ===== ICONS ===== */
 .product-navbar .nav-icon {
-    position: relative;
     color: var(--purple-dark);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    padding: 8px;
-    transition: all 0.3s;
+    font-size: 20px;
+    padding: 6px;
+    transition: all 0.3s ease;
 }
 
 .product-navbar .nav-icon:hover {
     color: var(--purple-soft);
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
-/* BADGE */
-.product-navbar .badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #e74c3c;
-    color: #fff;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 50%;
-    line-height: 1;
-}
-
-@media (max-width: 900px) {
-    .product-navbar .nav-container {
-        justify-content: center;
-        gap: 15px;
-    }
-}
 
 /* PRODUCT IMAGE SLIDER */
 .product-slider {
@@ -346,15 +471,6 @@ input[type="radio"]:checked + label {
 
 
 <style>
-.product-navbar {
-    width: 100%;
-    background: var(--white);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    padding: 10px 0;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
 
 .product-navbar .nav-container {
     max-width: 1200px;
@@ -796,7 +912,7 @@ input[type="radio"]:checked + label {
     </div>
 
     <!-- Pagination -->
-<!-- Pagination Links بدون onclick -->
+
 <div class="reviews-pagination">
     @if ($reviews->onFirstPage())
         <span class="page disabled">&lt;</span>
@@ -820,13 +936,6 @@ input[type="radio"]:checked + label {
 </div>
 
 </div>
-
-
-
-
-
-      
-    <h3>You may also like</h3>
 <div class="grid">
     <style>
         .reviews-pagination {
@@ -864,14 +973,21 @@ input[type="radio"]:checked + label {
 }
 
         /* ===== RECOMMENDATION GRID ===== */
-.grid{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 18px;
-    margin-top: 20px;
+/* ===== RECOMMENDATION GRID FIX ===== */
+.recommendations-section {
+    width: 100%;
+    max-width: 1100px;
+    margin: 30px auto;
 }
 
-.card{
+.recommendations-section .grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.recommendations-section .card {
     background: #fff;
     border-radius: 14px;
     padding: 10px;
@@ -881,31 +997,18 @@ input[type="radio"]:checked + label {
     cursor: pointer;
 }
 
-.card:hover{
-    transform: translateY(-6px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-}
-
-.card img{
+.recommendations-section .card img {
     width: 100%;
     height: 180px;
     object-fit: cover;
     border-radius: 10px;
 }
 
-.card p{
-    font-size: 14px;
-    font-weight: 600;
-    margin: 8px 0 4px;
-    color: #222;
-    line-height: 1.3;
+.recommendations-section .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
 }
 
-.card span{
-    font-size: 15px;
-    font-weight: bold;
-    color: #6b21a8; /* purple */
-}
 
 /* REVIEW CARD */
 .review-box {

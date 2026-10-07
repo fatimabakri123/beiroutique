@@ -17,42 +17,31 @@ use App\Notifications\LoyaltyUnlockedNotification;
 class OrdersController extends Controller
 {
     // Show order page
-    public function show(products $product)
-    {
-        $paymentMethods = PaymentMethod::all();
-        $deliveryMethods = DeliveryMethod::all();
-        
+public function show(products $product)
+{
+    $paymentMethods = PaymentMethod::all();
+    $deliveryMethods = DeliveryMethod::all();
+    
     $customer = auth()->user()->customer;
-    $loyaltyDiscount = 0; // default is 0%
+    $loyaltyDiscount = 0;
+    $isRewardAvailable = false;
 
-    $loyalty = LoyaltySetting::where('shop_id', $product->shop_id)->first();
-
-    if ($loyalty) {
-        // Count previous orders from this customer for this shop
-        $ordersCount = $customer->orders()
-            ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
-            ->join('products', 'order_items.product_id', '=', 'products.product_id')
-            ->where('products.shop_id', $product->shop_id)
-            ->where('orders.customer_id', $customer->customer_id)
-            ->distinct('orders.order_id')
-            ->count();
-
-        // Calculate total spent for this shop
-        $totalSpent = $customer->orders()
-            ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
-            ->join('products', 'order_items.product_id', '=', 'products.product_id')
-            ->where('products.shop_id', $product->shop_id)
-            ->where('orders.customer_id', $customer->customer_id)
-            ->sum(DB::raw('order_items.quantity * order_items.price_at_purchase'));
-
-        // Include current order in the calculation (optional)
-        if (($ordersCount + 1) >= $loyalty->min_orders && ($totalSpent + $product->price) >= $loyalty->min_revenue) {
-            $loyaltyDiscount = $loyalty->discount_percentage; // e.g., 10 for 10%
-        }
+    if ($customer) {
+        $loyaltyDiscount = \App\Services\LoyaltyService::getCustomerDiscount(
+            $customer, 
+            $product->shop_id
+        );
+        $isRewardAvailable = ($loyaltyDiscount > 0);
     }
 
-        return view('orders.index', compact('product', 'paymentMethods', 'deliveryMethods', 'loyaltyDiscount'));
-    }
+    return view('orders.index', compact(
+        'product', 
+        'paymentMethods', 
+        'deliveryMethods', 
+        'loyaltyDiscount',
+        'isRewardAvailable'
+    ));
+}
 
     // Store order
 public function store(Request $request, products $product)
@@ -73,109 +62,149 @@ public function store(Request $request, products $product)
     ]);
 
     $customer = auth()->user()->customer;
-
-    // 💰 Base total amount
-  
-$basePrice = $product->is_on_sale 
-    ? $product->discount_value 
-    : $product->price;
-
-// 💰 Base total amount
-$totalAmount = $basePrice * $request->quantity;
-
-
-    // 🔹 Cash on Delivery surcharge
-    $paymentMethod = \App\Models\PaymentMethod::find($request->payment_method_id);
-    if (strtolower($paymentMethod->method_name) === 'cash on delivery') {
-        $totalAmount += 5;
-    }
-
-    // ✅ Combine address fields into one column
-    $fullAddress = '';
-    if ($request->city) $fullAddress .= 'City: ' . $request->city . "\n";
-    $fullAddress .= 'Address: ' . $request->shipping_address . "\n";
-    if ($request->additional_info) $fullAddress .= 'More info: ' . $request->additional_info . "\n";
-    if ($request->latitude && $request->longitude) {
-        $fullAddress .= 'Google Maps: https://www.google.com/maps?q=' . $request->latitude . ',' . $request->longitude;
-    }
-
-    // 🔹 Loyalty Discount Calculation
     $shopId = $product->shop_id;
-    $loyalty = \App\Models\LoyaltySetting::where('shop_id', $shopId)->first();
-    $discountAmount = 0;
+    $quantity = $request->quantity;
 
-  // 🔹 Loyalty Discount Calculation BEFORE creating the order
-$shopId = $product->shop_id;
-$loyalty = LoyaltySetting::where('shop_id', $shopId)->first();
-$discountAmount = 0;
+    // =============== CALCULAR PREÇOS ===============
 
-if ($loyalty) {
-    // Include current order in totals
-    $ordersCount = $customer->orders()
-        ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
-        ->join('products', 'order_items.product_id', '=', 'products.product_id')
-        ->where('products.shop_id', $shopId)
-        ->where('orders.customer_id', $customer->customer_id)
-        ->distinct('orders.order_id')
-        ->count('orders.order_id') + 1; // include this order
-
-    $totalSpent = $customer->orders()
-        ->join('order_items', 'orders.order_id', '=', 'order_items.order_id')
-        ->join('products', 'order_items.product_id', '=', 'products.product_id')
-        ->where('products.shop_id', $shopId)
-        ->where('orders.customer_id', $customer->customer_id)
-        ->sum(DB::raw('order_items.quantity * order_items.price_at_purchase'));
-
-    $totalSpent += $totalAmount; // include this order's total
-
-    if ($ordersCount >= $loyalty->min_orders && $totalSpent >= $loyalty->min_revenue) {
-        $discountAmount = ($totalAmount * $loyalty->discount_percentage) / 100;
-        $totalAmount -= $discountAmount;
+    // 1. Preço base (original)
+    $originalPrice = $product->price;
+    
+    // 2. Verificar se está em sale
+    $isOnSale = $product->is_on_sale;
+    $salePrice = $isOnSale ? $product->discount_value : null;
+    
+    // 3. Preço unitário inicial (considerando sale se houver)
+    $initialUnitPrice = $isOnSale ? $salePrice : $originalPrice;
+    
+    // 4. Subtotal base (sem descontos de loyalty ainda)
+    $baseSubtotal = $initialUnitPrice * $quantity;
+    
+    // 5. Calcular desconto de sale (se aplicável)
+    $saleDiscountAmount = 0;
+    if ($isOnSale) {
+        $saleDiscountAmount = ($originalPrice - $salePrice) * $quantity;
     }
-}
 
+    // =============== LOYALTY DISCOUNT ===============
+    $loyaltyDiscount = \App\Services\LoyaltyService::getCustomerDiscount($customer, $shopId);
+    $loyaltyApplied = false;
+    $loyaltyDiscountAmount = 0;
+    $finalUnitPrice = $initialUnitPrice;
+    
+    if ($loyaltyDiscount > 0) {
+        // Aplicar loyalty discount ao preço unitário (depois do sale)
+        $loyaltyDiscountAmount = ($baseSubtotal * $loyaltyDiscount) / 100;
+        $finalUnitPrice = $initialUnitPrice - (($initialUnitPrice * $loyaltyDiscount) / 100);
+        $loyaltyApplied = true;
+        
+        // Marcar recompensa como usada
+        \App\Services\LoyaltyService::markRewardAsUsed($customer, $shopId);
+    }
 
-    // 👤 Create the order
+    // =============== CALCULAR TOTAIS ===============
+    
+    // Total do produto (depois de sale + loyalty)
+    $productTotal = $finalUnitPrice * $quantity;
+    
+    // Custo de entrega
+    $deliveryMethod = DeliveryMethod::find($request->delivery_method_id);
+    $deliveryCost = $deliveryMethod->cost ?? 0;
+    
+    // TOTAL FINAL (SEM TAXA COD)
+    $totalAmount = $productTotal + $deliveryCost;
+
+    // =============== CRIAR ENDEREÇO ===============
+    $address = $request->shipping_address;
+    if ($request->city) {
+        $address .= ', ' . $request->city;
+    }
+    if ($request->additional_info) {
+        $address .= ' - ' . $request->additional_info;
+    }
+
+    // =============== CRIAR PEDIDO ===============
     $order = orders::create([
         'customer_id' => $customer->customer_id,
         'full_name' => $request->full_name,
         'phone' => $request->phone,
         'payment_method_id' => $request->payment_method_id,
         'delivery_method_id' => $request->delivery_method_id,
-        'shipping_address' => $fullAddress,
+        'shipping_address' => $address,
         'order_status' => 'pending',
+        
+        // Totais
         'total_amount' => $totalAmount,
-        'discount_applied' => $loyalty ? $loyalty->discount_percentage : 0,
-        'discount_amount' => $discountAmount,
+        'subtotal' => $originalPrice * $quantity, // Preço original total
+        
+        // Descontos
+        'sale_discount_amount' => $saleDiscountAmount,
+        'loyalty_discount' => $loyaltyDiscount,
+        'loyalty_discount_amount' => $loyaltyDiscountAmount,
+        
+        // Custos adicionais (SEM COD FEE)
+        'delivery_cost' => $deliveryCost,
+        'cash_on_delivery_fee' => 0, // Zerado
+        
+        // Flags
+        'loyalty_applied' => $loyaltyApplied,
+        'is_on_sale' => $isOnSale,
     ]);
 
-
-  // 📦 Add product to order
+    // =============== ADICIONAR ITENS ===============
     $order->items()->create([
         'product_id' => $product->product_id,
-        'quantity' => $request->quantity,
-        'price_at_purchase' => $basePrice,
-
+        'quantity' => $quantity,
+        
+        // Informações de preço
+        'price_at_purchase' => $finalUnitPrice, // Preço FINAL pago por unidade
+        'original_price' => $originalPrice, // Preço original
+        'sale_price' => $salePrice, // Preço de sale (se aplicável)
+        'is_on_sale' => $isOnSale,
+        
+        // Detalhes de desconto
+        'loyalty_discount_percentage' => $loyaltyDiscount,
+        'loyalty_discount_amount' => $loyaltyDiscount > 0 ? ($loyaltyDiscountAmount / $quantity) : 0,
+        
         'color' => $request->color ? implode(',', $request->color) : null,
         'size'  => $request->size ? implode(',', $request->size) : null,
     ]);
 
+    // =============== ATUALIZAÇÕES ===============
+    
+    // Atualizar loyalty counters
+    \App\Services\LoyaltyService::updateCustomerLoyalty(
+        $customer, 
+        $shopId, 
+        $baseSubtotal
+    );
 
-  
-$ownerUser = $product->shop->owner->user;
-if ($ownerUser) {
-    $ownerUser->notify(new \App\Notifications\NewOrderNotification($order, $product));
-}
+    // Decrementar stock
+    $product->decrement('stock_quantity', $quantity);
 
+    // Notificar dono da loja
+    $ownerUser = $product->shop->owner->user;
+    if ($ownerUser) {
+        $ownerUser->notify(new \App\Notifications\NewOrderNotification($order, $product));
+    }
 
-
-    // 🔻 Decrement product stock automatically
-    $product->decrement('stock_quantity', $request->quantity);
+    // =============== MENSAGEM DE SUCESSO ===============
+    $message = 'Order placed successfully! Total: $' . number_format($totalAmount, 2);
+    
+    if ($saleDiscountAmount > 0) {
+        $message .= " | Sale discount: $" . number_format($saleDiscountAmount, 2);
+    }
+    
+    if ($loyaltyDiscountAmount > 0) {
+        $message .= " | Loyalty discount (" . $loyaltyDiscount . "%): $" . number_format($loyaltyDiscountAmount, 2);
+    }
+    
+    if ($deliveryCost > 0) {
+        $message .= " | Delivery: $" . number_format($deliveryCost, 2);
+    }
 
     return redirect()
-        ->route('customer.orders', $order->order_id)
-        ->with('success', 'Order placed successfully!' . ($discountAmount ? " 🎉 Loyalty discount applied: \${$discountAmount}" : ''));
+        ->route('customer.orders')
+        ->with('success', $message);
 }
-
-
 }

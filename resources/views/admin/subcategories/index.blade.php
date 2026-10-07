@@ -43,7 +43,7 @@
     <hr>
 
     <h4>All Subcategories</h4>
-    <table class="table table-bordered mt-3">
+    <table class="table mt-3">
         <thead>
             <tr>
                 <th>ID</th>
@@ -59,17 +59,21 @@
                 <td>{{ $sub->subcategory_name }}</td>
                 <td>{{ $sub->category->category_name }}</td>
                 <td>
-               <a href="{{ route('admin.subcategories.edit', $sub->subcategory_id) }}" class="btn-edit">Edit</a>
+                    <div class="action-buttons">
+                        <!-- Edit -->
+                        <a href="{{ route('admin.subcategories.edit', $sub->subcategory_id) }}" class="icon-btn edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </a>
 
-<form action="{{ route('admin.subcategories.destroy', $sub->subcategory_id) }}" method="POST" style="display:inline-block;">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this subcategory?')">
-        Delete
-    </button>
-</form>
-
-
+                        <!-- Delete -->
+                        <form action="{{ route('admin.subcategories.destroy', $sub->subcategory_id) }}" method="POST" style="margin:0;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="icon-btn delete-btn" onclick="return confirm('Are you sure you want to delete this subcategory?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             @endforeach
@@ -84,141 +88,240 @@
 
 <style>
 :root {
-    --primary: #7b2fae;
-    --bg-light: #f4f6fa;
-    --card: #fff;
-    --text: #2c3e50;
-    --muted: #7f8c8d;
-    --shadow: 0 6px 18px rgba(124,77,255,0.08);
-    --shadow-hover: 0 10px 25px rgba(124,77,255,0.15);
+    --purple: #7b2fae;
+    --purple-dark: #4b136e;
+    --pink: #5c0c75;
+    --blue: #1e90ff;
+    --red: #ff4757;
+    --bg: #f7f8fc;
+    --text: #2c2f4a;
+    --muted: #8a8fa3;
 }
 
+/* ====== BODY ====== */
+body {
+    background: var(--bg);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ====== HEADERS ====== */
 h2 {
-    color: var(--primary);
-    font-weight: 700;
+    font-size: 38px;
+    font-weight: 800;
+    text-align: center;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 25px;
+}
+
+h4 {
     font-size: 28px;
+    font-weight: 700;
+    color: var(--purple-dark);
     margin-bottom: 20px;
-    position: relative;
-}
-h2::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 4px;
-    background: var(--primary);
-    border-radius: 2px;
-    margin-top: 6px;
 }
 
+/* ====== CONTAINER ====== */
 .container {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 0 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 30px;
+    background: transparent;
+    border-radius: 24px;
 }
 
+/* ====== FORM ====== */
 form {
-    background: var(--card);
-    padding: 20px 25px;
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
+    padding: 30px;
+    margin-bottom: 40px;
 }
-form:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
-form .mb-3 label { font-weight: 600; color: var(--primary); margin-bottom: 5px; }
-form .mb-3 input, form .mb-3 select {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    width: 100%;
-    font-size: 14px;
+
+form label {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--purple-dark);
+    margin-bottom: 8px;
+    display: block;
 }
-.add-btn {
-    background: linear-gradient(135deg, #a080bc, #5b93c7);
-    color: #fff;
-    font-weight: 600;
-    border: none;
-    padding: 10px 25px;
+
+form input,
+form select {
     border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    padding: 12px;
+    font-size: 15px;
+    border: 2px solid #e1d9f3;
+    transition: 0.3s;
+    width: 100%;
 }
-.add-btn:hover { background: #6311ac; transform: translateY(-2px); }
+form input:focus,
+form select:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(123,47,174,0.2);
+    outline: none;
+}
 
-.alert { border-radius: 12px; box-shadow: var(--shadow); }
+/* ====== ADD BUTTON ====== */
+.add-btn {
+    margin-top: 10px;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    border: none;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 14px 40px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.add-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(123,47,174,0.4);
+}
 
+/* ====== TABLE ====== */
 table {
     width: 100%;
-    background: var(--card);
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    border-collapse: separate;
-    border-spacing: 0;
+    border-collapse: collapse;
 }
-table th, table td {
-    padding: 12px 15px;
-    text-align: left;
+
+thead th {
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
     font-size: 18px;
+}
+
+tbody tr {
+    background: transparent;
+    transition: 0.3s;
+}
+
+tbody td {
+    padding: 16px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
     color: var(--text);
+    border: none;
 }
-table th { background: var(--bg-light); font-weight: 600; }
-table tr:not(:last-child) { border-bottom: 1px solid #eee; }
 
-.
-.btn-warning { background: #f0ad4e; color: #fff; font-weight: 600; border: none; }
-.btn-warning:hover { background: #ec9f3f; }
-.btn-danger { background: #d9534f; color: #fff; }
-.btn-danger:hover { background: #c9302c; }
-
-@media(max-width:768px){
-    table th, table td { font-size: 18px; padding: 10px; }
-    form { padding: 15px; }
+/* ====== ACTION BUTTONS (SEM FUNDO) ====== */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
 }
-/* Edit Button */
-.btn-edit {
-    display: inline-block;
-    background: linear-gradient(135deg, #f1c40f, #f39c12);
-    color: #fff;
-    font-weight: 700;
-    font-size: 14px;
-    padding: 12px 28px;
-    border-radius: 12px;
+
+/* ÍCONES SEM FUNDO */
+.icon-btn {
+    background: none !important; /* Remove qualquer fundo */
+    border: none !important;
+    padding: 8px !important;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 18px rgba(241,196,15,0.3);
-}
-.btn-edit:hover {
-    background: linear-gradient(135deg, #f39c12, #e67e22);
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 10px 25px rgba(243,156,18,0.4);
 }
 
-/* Delete Button */
-/* Delete Button */
-.btn-delete {
-    display: inline-block;
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    color: #fff;
+/* Edit Icon - Apenas ícone azul */
+.edit-btn i {
+    color: var(--blue);
+    font-size: 20px;
+    transition: 0.3s;
+}
+
+.edit-btn:hover i {
+    color: #0056b3;
+    transform: scale(1.2);
+}
+
+.edit-btn:hover {
+    background: rgba(30, 144, 255, 0.1) !important;
+}
+
+/* Delete Icon - Apenas ícone vermelho */
+.delete-btn i {
+    color: var(--red);
+    font-size: 20px;
+    transition: 0.3s;
+}
+
+.delete-btn:hover i {
+    color: #c1121f;
+    transform: scale(1.2);
+}
+
+.delete-btn:hover {
+    background: rgba(255, 71, 87, 0.1) !important;
+}
+
+/* ====== ALERTS ====== */
+.alert-success {
+    background: linear-gradient(135deg, #00b894, #00a085);
+    color: white;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #ff7675, #d63031);
+    color: white;
+}
+
+/* ====== PAGINATION ====== */
+.pagination {
+    justify-content: center;
+}
+
+.pagination .page-link {
+    border-radius: 50%;
+    margin: 0 4px;
+    border: none;
+    color: var(--purple);
     font-weight: 700;
-    font-size: 30px;
-    padding: 12px 28px;
-    border-radius: 12px;
-    border: none; /* Important */
-    cursor: pointer; /* Important */
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 18px rgba(231,76,60,0.3);
-    text-align: center; /* ensures proper text positioning */
-     /* optional: makes it as big as Edit */
+    padding: 10px 16px;
+    transition: 0.3s;
 }
-.btn-delete:hover {
-    background: linear-gradient(135deg, #c0392b, #a93226);
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 10px 25px rgba(231,76,60,0.5);
+.pagination .page-link:hover {
+    background: var(--bg);
+}
+.pagination .active .page-link {
+    background: var(--purple);
+    color: #fff;
 }
 
+/* ====== HR ====== */
+hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+    margin: 40px 0;
+    opacity: 0.3;
+}
 
-
+/* ====== MOBILE ====== */
+@media(max-width:768px){
+    h2 { font-size: 28px; }
+    h4 { font-size: 22px; }
+    tbody td { font-size: 14px; }
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
 </style>
+
+{{-- Font Awesome Icons --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 @endsection

@@ -4,32 +4,44 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\DatabaseMessage;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class LoyaltyUnlockedNotification extends Notification
 {
     use Queueable;
 
-    protected $discount;
+    private $percentage;
+    private $shopId;
 
-    public function __construct($discount)
+    public function __construct($percentage, $shopId)
     {
-        $this->discount = $discount;
+        $this->percentage = $percentage;
+        $this->shopId = $shopId;
     }
 
-    
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new MailMessage)
+            ->subject('🎉 Loyalty Reward Unlocked!')
+            ->line("Congratulations! You've unlocked a {$this->percentage}% discount on your next order!")
+            ->line('This discount will be automatically applied to your next purchase.')
+            ->action('Shop Now', url('/shop/' . $this->shopId))
+            ->line('Thank you for being a loyal customer!');
     }
 
     public function toDatabase($notifiable)
     {
         return [
-            'message' => "🎉 You unlocked a {$this->discount}% loyalty discount!",
-            'discount' => $this->discount,
-            'type' => 'loyalty'
+            'type' => 'loyalty',
+            'title' => '🎉 Loyalty Reward Unlocked!',
+            'message' => "You've earned a {$this->percentage}% discount on your next order!",
+            'shop_id' => $this->shopId,
+            'discount_percentage' => $this->percentage
         ];
     }
 }

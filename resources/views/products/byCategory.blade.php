@@ -474,7 +474,7 @@ a { text-decoration: none; color: inherit; }
   <!-- LEFT -->
   <div style="display:flex;align-items:center;gap:20px;">
     <a href="{{ url()->previous() }}" class="back-btn">
-      <i class="fa fa-arrow-left"></i> Back
+      <i class="fa fa-arrow-left"></i>
     </a>
 
     <div class="logo">
@@ -577,50 +577,66 @@ a { text-decoration: none; color: inherit; }
   </aside>
 
   <main class="products-grid">
-    @foreach($products as $product) <div class="product-card"> {{-- ❤️ Wishlist Button --}} <form action="{{ route('wishlist.toggle', $product) }}" method="POST" style="display:inline-block;"> @csrf <button type="submit" style="background:none; border:none; cursor:pointer;"> <i class="fa fa-heart"></i> </button> </form>
+    @foreach($products as $product)
+        @if($product->stock_quantity <= 0)
+            @continue
+        @endif
 
-     <div class="product-slider" data-index="0">
-    @php
-        $images = $product->images && $product->images->count()
-            ? $product->images
-            : collect([(object)['image_path' => $product->image_url]]);
-    @endphp
+        <div class="product-card">
+            {{-- Wishlist Button --}}
+            <form action="{{ route('wishlist.toggle', $product) }}" method="POST" style="display:inline-block;">
+                @csrf
+                <button type="submit" style="background:none; border:none; cursor:pointer;">
+                    <i class="fa fa-heart"></i>
+                </button>
+            </form>
 
-    @foreach($images as $img)
-        <a href="{{ route('product.show', $product->product_id) }}">
-            <img
-                src="{{ Str::startsWith($img->image_path, 'products/')
-                    ? asset('storage/' . $img->image_path)
-                    : asset($img->image_path) }}"
-                class="slider-img"
-            >
-        </a>
-    @endforeach
+            {{-- Product Images --}}
+            <div class="product-slider" data-index="0">
+                @php
+                    $images = $product->images && $product->images->count()
+                        ? $product->images
+                        : collect([(object)['image_path' => $product->image_url]]);
+                @endphp
 
-    @if($images->count() > 1)
-        <button class="slider-btn prev">‹</button>
-        <button class="slider-btn next">›</button>
-    @endif
-</div>
+                @foreach($images as $img)
+                    <a href="{{ route('product.show', $product->product_id) }}">
+                        <img
+                            src="{{ Str::startsWith($img->image_path, 'products/') 
+                                ? asset('storage/' . $img->image_path) 
+                                : asset($img->image_path) }}"
+                            class="slider-img"
+                        >
+                    </a>
+                @endforeach
 
+                @if($images->count() > 1)
+                    <button class="slider-btn prev">‹</button>
+                    <button class="slider-btn next">›</button>
+                @endif
+            </div>
 
-      <div class="product-info">
-        <h4>{{ $product->product_name }}</h4>
-        <div class="price">
-            @if($product->is_on_sale)
-                <span style="color: #ef4444;">${{ number_format($product->discount_value, 2) }}</span>
-                <span class="old-price">${{ number_format($product->price, 2) }}</span>
-            @else
-                ${{ number_format($product->price, 2) }}
-            @endif
+            {{-- Product Info --}}
+            <div class="product-info">
+                <h4>{{ $product->product_name }}</h4>
+                <p>{{ $product->shop->shop_name }} Shop</p>
+                <div class="price">
+                    @if($product->is_on_sale)
+                        <span style="color: #ef4444;">${{ number_format($product->discount_value, 2) }}</span>
+                        <span class="old-price">${{ number_format($product->price, 2) }}</span>
+
+                    @else
+                        ${{ number_format($product->price, 2) }}
+                    @endif
+                </div>
+                <div style="font-size: 12px; color: #94a3b8; margin-top: 5px;">
+                    ⭐ {{ number_format($product->reviews->avg('rating') ?? 0, 1) }} | Stock: {{ $product->stock_quantity }}
+                </div>
+            </div>
         </div>
-        <div style="font-size: 12px; color: #94a3b8; margin-top: 5px;">
-            ⭐ {{ number_format($product->reviews->avg('rating') ?? 0, 1) }} | Stock: {{ $product->stock_quantity }}
-        </div>
-      </div>
-    </div>
     @endforeach
-  </main>
+</main>
+
 </div>
 
 <div id="cart-notification" class="cart-notification">Item added to your bag!</div>

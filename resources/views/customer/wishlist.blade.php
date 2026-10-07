@@ -17,12 +17,24 @@
       @foreach($wishlist->items as $item)
         <div class="wishlist-card">
 
-          <a href="{{ route('product.show', $item->product->product_id) }}">
-            <img src="{{ Str::startsWith($item->product->image_url, 'products/')
-              ? asset('storage/' . $item->product->image_url)
-              : asset($item->product->image_url) }}"
-              alt="{{ $item->product->product_name }}" class="wishlist-img">
-          </a>
+         @php
+                    $images = $item->product->images && $item->product->images->count()
+                        ? $item->product->images
+                        : collect([(object)['image_path' => $item->product->image_url]]);
+                @endphp
+
+                @foreach($images as $img)
+                    <a href="{{ route('product.show', $item->product_id) }}">
+                        <img
+                            src="{{ Str::startsWith($img->image_path, 'products/') 
+                                ? asset('storage/' . $img->image_path) 
+                                : asset($img->image_path) }}"
+                            class="slider-img"
+                        >
+                    </a>
+                @endforeach
+
+                
 
           <h4>{{ $item->product->product_name }}</h4>
 
@@ -56,6 +68,13 @@
 </section>
 
 <style>
+  .slider-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
 /* ===== PAGE CARD ===== */
 .wishlist-page {
   background: linear-gradient(135deg, #fdfcff, #f6f0ff);

@@ -70,16 +70,16 @@ return view('customer.profile', compact('ordersCount', 'deliveredCount', 'pendin
         return view('customer.profile', compact('user'));
     }
 
-public function updateProfile(Request $request)
+ public function updateProfile(Request $request)
 {
     $user = auth()->user();
-    $customer = $user->customer ?? $user->customer()->create([]);
+    $customer = $user->customer; // get related customer
 
     // 1️⃣ Validate input
     $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-        'phone_number' => 'nullable|string|max:20',
+        'phone' => 'nullable|string|max:20',
         'address' => 'nullable|string|max:255',
         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
@@ -87,10 +87,12 @@ public function updateProfile(Request $request)
     // 2️⃣ Update user info
     $user->update($request->only(['name', 'email']));
 
-    // 3️⃣ Update customer info
-    $customer->phone_number = $request->phone_number;
-    $customer->address = $request->address;
-    $customer->save();
+    // 3️⃣ Update customer info if exists
+    if ($customer) {
+        $customer->phone_number = $request->phone_number;
+        $customer->address = $request->address;
+        $customer->save();
+    }
 
     // 4️⃣ Handle profile image
     if ($request->hasFile('image')) {
@@ -106,7 +108,6 @@ public function updateProfile(Request $request)
 
 
     // Orders
-// Orders
   public function orders(Request $request)
 {
     $user = Auth::user();
@@ -132,9 +133,11 @@ public function updateProfile(Request $request)
 
     // List of possible statuses
     $statuses = ['pending', 'processing', 'delivered', 'cancelled'];
+    $loyaltyDiscount = $customer->loyalty_discount ?? 0;
 
-    return view('customer.orders', compact('orders', 'shops', 'statuses'));
+    return view('customer.orders', compact('orders', 'shops', 'statuses', 'loyaltyDiscount'));
 }
+
     // Cart
 public function cart(Request $request)
 {
@@ -232,18 +235,26 @@ public function updatePassword(Request $request)
     //    $notifications = Notification::where('customer_id', Auth::id())->latest()->get();
     //    return view('customer.notifications', compact('notifications'));
     //}
-    public function notifications()
-    {
-        // Fetch notifications (replace with your logic)
+   public function notifications()
+{
+    $customer = auth()->user()->customer;
     
-    $notifications = auth()->user()
-        ->customer
-        ->notifications()
+    if (!$customer) {
+        return redirect('/')->with('error', 'Customer not found');
+    }
+    
+    // UNIVERSAL FIX
+    $notifications = \Illuminate\Notifications\DatabaseNotification::where('notifiable_id', $customer->customer_id)
+        ->where(function($query) {
+            $query->where('notifiable_type', 'customer')
+                  ->orWhere('notifiable_type', 'App\Models\Customer')
+                  ->orWhere('notifiable_type', 'App\Customer')
+                  ->orWhere('notifiable_type', 'Customer');
+        })
         ->latest()
         ->get();
-
+    
     return view('customer.notifications', compact('notifications'));
-
-    }
+}
 
 }

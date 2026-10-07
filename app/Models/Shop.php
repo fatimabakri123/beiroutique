@@ -17,4 +17,9 @@ public function loyalty()
 {
 return $this->hasOne(LoyaltySetting::class, 'shop_id', 'shop_id');
 }
+public function customerLoyalties()
+{
+    return $this->hasMany(CustomerLoyalty::class, 'shop_id');
+}
+
 }

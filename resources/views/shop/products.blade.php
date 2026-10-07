@@ -15,6 +15,10 @@
 
 <div class="container">
     <section class="hero-section reveal">
+        <button class="back-btn" onclick="history.back()">
+    ← 
+</button>
+
         <div class="hero-content">
             
             <h1 class="shop-title">Welcome to <span>{{ $shop->shop_name }}</span>  Shop</h1>
@@ -49,7 +53,7 @@
         </div>
 
         <div class="products-grid">
-            @forelse($products as $product)
+            @forelse($products->where('stock_quantity', '>', 0) as $product)
                 <div class="product-card reveal">
              <div class="image-box">
 
@@ -111,6 +115,33 @@
 </div>
 
 <style>
+ .back-btn {
+    position: absolute;
+    top: 25px;
+   
+    background: rgba(255,255,255,0.9);
+    border: none;
+    width: 60px;  
+    height: 60px;  
+    border-radius: 50%;
+    font-size: 28px; 
+    font-weight: 700;
+    color: var(--brand);
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.back-btn:hover {
+    background: linear-gradient(135deg, #a080bc, #5b93c7);
+    color: #fff;
+    transform: translateX(-6px) scale(1.1);
+}
+
 :root {
     --brand: #5b2a86; /* Modern Gold */
     --text-dark:#1f7bb8eb;

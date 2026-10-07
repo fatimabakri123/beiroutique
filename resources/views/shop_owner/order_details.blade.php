@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Order Details #{{ $order->order_id }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <style>
@@ -36,6 +37,78 @@ body {
     padding: 0 20px;
 }
 
+/* ===== BACK BUTTON STYLES ===== */
+.back-btn-wrapper {
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--purple-dark), var(--purple-soft));
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(91, 42, 134, 0.25);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.back-btn i {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.back-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(91, 42, 134, 0.35);
+    background: linear-gradient(135deg, var(--purple-soft), var(--purple-dark));
+    color: var(--white);
+}
+
+.back-btn:hover i {
+    transform: translateX(-5px);
+}
+
+.back-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 5px 15px rgba(91, 42, 134, 0.25);
+}
+
+/* Alternative Simple Back Button */
+.back-btn-simple {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--purple-dark);
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    background: var(--white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.back-btn-simple:hover {
+    background: rgba(91, 42, 134, 0.08);
+    color: var(--purple-dark);
+    transform: translateX(-5px);
+}
+
+.back-btn-simple i {
+    font-size: 16px;
+}
+
+/* Table */
 .table-container {
     background: var(--white);
     padding: 25px;
@@ -116,12 +189,90 @@ table th {
 .add-btn:hover {
     background-color: var(--purple-soft);
 }
+
+/* Header with Back Button */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.page-header h2 {
+    margin: 0;
+    color: var(--purple-dark);
+}
+
+/* Animation */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.back-btn, .back-btn-simple {
+    animation: slideInLeft 0.5s ease;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 0 15px;
+    }
+    
+    .back-btn-wrapper {
+        margin-bottom: 20px;
+    }
+    
+    .back-btn, .back-btn-simple {
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
 </style>
 
 <div class="order-details-page">
     <div class="dashboard-container">
 
-        <h2>Order #{{ $order->order_id }}</h2>
+        {{-- OPTION 1: Back Button at the very top (Choose ONE of these options) --}}
+        
+        {{-- Option A: Gradient Back Button --}}
+        <div class="back-btn-wrapper">
+            <a href="{{ route('shop.dashboard') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        {{-- Option B: Simple Back Button (Comment out Option A and uncomment this if you prefer) --}}
+        {{--
+        <div class="back-btn-wrapper">
+            <a href="{{ route('shop.dashboard') }}" class="back-btn-simple">
+                <i class="fas fa-arrow-left"></i> ← Back to Dashboard
+            </a>
+        </div>
+        --}}
+
+        {{-- OR Option C: Header with integrated back button --}}
+        {{--
+        <div class="page-header">
+            <h2>Order #{{ $order->order_id }}</h2>
+            <a href="{{ route('shop.dashboard') }}" class="back-btn-simple">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        --}}
 
         {{-- Customer Info --}}
         <div class="table-container">
@@ -214,17 +365,19 @@ table th {
     </tbody>
 </table>
 
-
             <h3 style="text-align:right;margin-top:20px;">
                 Total: ${{ number_format($total, 2) }}
             </h3>
         </div>
 
-        {{-- Back Button --}}
-        <div class="back-btn-wrapper">
-           <a href="{{ route('shop.dashboard') }}" class="add-btn">⬅ Back</a>
-
+        {{-- Bottom Back Button (Optional - remove if you already have top button) --}}
+        {{--
+        <div class="back-btn-wrapper" style="margin-top: 20px;">
+            <a href="{{ route('shop.dashboard') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
         </div>
+        --}}
 
     </div>
 </div>
@@ -239,6 +392,5 @@ table th {
 
     statusSelect.addEventListener('change', updateStatusClass);
     updateStatusClass();
-</script>
-</body>
-</html>
+</script>  
+</body> </html>

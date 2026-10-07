@@ -672,7 +672,7 @@ a { text-decoration: none; color: inherit; }
     </form>
 
     <div class="nav-icons">
-        <a href="/register"><i class="fa-regular fa-user"></i></a>
+        <a href="/login"><i class="fa-regular fa-user"></i></a>
         <a href="{{ auth()->check() ? route('customer.wishlist') : route('login') }}">
             <i class="fa-regular fa-heart"></i>
         </a>
