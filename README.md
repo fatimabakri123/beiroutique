@@ -1,61 +1,111 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Beiroutique 🛍️
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**All You Need, In One Place.**
 
-## About Laravel
+Beiroutique is an online fashion marketplace developed as a Computer Science graduation project. The platform aims to connect local Lebanese shops with customers, providing a convenient shopping experience through one marketplace.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Multi-role authentication:** Separate experiences for customers, shop owners, and administrators.
+- **Product Marketplace:** Browse products offered by different local shops.
+- **Shop Management:** Tools for shop owners to manage their products and store information.
+- **Admin Dashboard:** Manage and oversee marketplace activities.
+- **Customer Loyalty Program:** Reward eligible customers with discounts based on order history and revenue.
+- **Product Search:** Search functionality to help customers discover products.
+- **Responsive Interface:** Designed to provide a user-friendly shopping experience.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🛠️ Tech Stack
 
-## Learning Laravel
+- **Backend:** Laravel, PHP
+- **Database:** MySQL
+- **Frontend:** HTML, CSS, JavaScript, and Laravel Blade
+- **Authentication & Authorization:** Role-based access control
+- **Additional Tools:** Python-based image search and product similarity features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 👥 User Roles
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **Customer:** Browse products and shop through the marketplace.
+- **Shop Owner:** Manage shop products and information.
+- **Administrator:** Oversee users, shops, and marketplace operations.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ⚙️ Installation
 
-## Laravel Sponsors
+### Prerequisites
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- PHP 8.2 or compatible version
+- Composer
+- MySQL
+- Node.js and npm
 
-### Premium Partners
+### Setup
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1. Clone the repository:
 
-## Contributing
+   ```bash
+   git clone https://github.com/fatimabakri123/beiroutique.git
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. Navigate to the project directory:
 
-## Code of Conduct
+   ```bash
+   cd beiroutique
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. Install PHP dependencies:
 
-## Security Vulnerabilities
+   ```bash
+   composer install
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. Create your environment file:
 
-## License
+   ```bash
+   cp .env.example .env
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+5. Generate the application key:
+
+   ```bash
+   php artisan key:generate
+   ```
+
+6. Configure your database credentials in `.env`.
+
+7. Run database migrations:
+
+   ```bash
+   php artisan migrate
+   ```
+
+8. Install frontend dependencies:
+
+   ```bash
+   npm install
+   npm run build
+   ```
+
+9. Start the development server:
+
+   ```bash
+   php artisan serve
+   ```
+
+## 🔐 Environment Configuration
+
+Configure your local `.env` file with your database settings and any required API credentials.
+
+**Never commit your `.env` file or expose passwords, API keys, or other secrets.**
+
+## 🎓 Project Purpose
+
+Beiroutique was developed as a graduation project to explore e-commerce development, marketplace management, database design, authentication, and product discovery.
+
+## 👩‍💻 Author
+
+**Fatima Ali Bakri**
+
+- GitHub: [@fatimabakri123](https://github.com/fatimabakri123)
+
+---
+
+*Built with Laravel and MySQL.*
